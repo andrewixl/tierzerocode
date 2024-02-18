@@ -1,6 +1,9 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
-# from .models import Contact
+from .pulldevices.intune import *
+
+# Import Integrations
+from .models import IntuneIntegration
 
 # Create your views here.
 def genErrors(request, Emessages):
@@ -11,7 +14,14 @@ def index(request):
 	return render( request, 'main/index.html')
 
 def pullIntuneDevices(request):
-	return null
+	for integration in IntuneIntegration.objects.all():
+		data = IntuneIntegration.objects.get(id = integration.id)
+		client_id = data.client_id
+		client_secret = data.client_secret
+		tenant_id = data.tenant_id
+		tenant_domain = data.tenant_domain
+		print(updateIntuneDeviceDatabase(getIntuneDevices(getAccessToken(client_id, client_secret, tenant_id))))
+	return redirect('/')
 
 # def contactcreation(request):
 # 	results = Contact.objects.registerVal(request.POST)

@@ -7,5 +7,5 @@ from django.urls import path
 
 urlpatterns = [
     re_path(r'^$', views.index),
-    # re_path(r'^contactcreation$', views.contactcreation),
+    re_path(r'^pull-intune-devices$', views.pullIntuneDevices),
 ] 

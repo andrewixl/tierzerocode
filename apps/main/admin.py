@@ -1,3 +1,6 @@
 from django.contrib import admin
+from .models import IntuneIntegration, IntuneDevice
 
-# Register your models here.
+# Microsoft Intune Models
+admin.site.register(IntuneIntegration)
+admin.site.register(IntuneDevice)
