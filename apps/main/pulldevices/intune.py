@@ -1,10 +1,9 @@
 from ..models import IntuneDevice
-
-# Define imports
 import msal
 import requests
+from datetime import datetime
 
-def getAccessToken(client_id, client_secret, tenant_id):
+def getIntuneAccessToken(client_id, client_secret, tenant_id):
     # Enter the details of your AAD app registration
     authority = 'https://login.microsoftonline.com/' + tenant_id
     scope = ['https://graph.microsoft.com/.default']
@@ -40,8 +39,6 @@ def getIntuneDevices(access_token):
 
     # Print the results in a JSON format
     return graph_result.json()    
-
-from datetime import datetime
 
 def updateIntuneDeviceDatabase(graph_result):
     data = graph_result

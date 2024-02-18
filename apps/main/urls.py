@@ -8,4 +8,5 @@ from django.urls import path
 urlpatterns = [
     re_path(r'^$', views.index),
     re_path(r'^pull-intune-devices$', views.pullIntuneDevices),
+    re_path(r'^pull-sophos-devices$', views.pullSophosDevices),
 ] 

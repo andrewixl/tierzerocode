@@ -7,7 +7,16 @@ class IntuneIntegration(models.Model):
     tenant_domain = models.CharField(max_length = 50, null=True)
 
     def __str__(self):
-        return self.tenant_domain
+        return 'Microsoft Intune (' + self.tenant_domain + ')'
+
+class SophosIntegration(models.Model):
+    client_id = models.CharField(max_length = 100, null=True)
+    client_secret = models.CharField(max_length = 200, null=True)
+    tenant_id = models.CharField(max_length = 100, null=True)
+    tenant_domain = models.CharField(max_length = 50, null=True)
+
+    def __str__(self):
+        return 'Sophos Central (' + self.tenant_domain + ')'
 
 # DeviceManagementManagedDevices.Read.All
 class IntuneDevice(models.Model):
