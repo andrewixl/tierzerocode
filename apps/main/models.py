@@ -62,7 +62,7 @@ class IntuneDevice(models.Model):
     deviceHealthAttestationState = models.CharField(max_length = 50, null=True)
     subscriberCarrier = models.CharField(max_length = 50, null=True)
     meid = models.CharField(max_length = 50, null=True)
-    totalStorageSpaceInBytes = models.IntegerField(null=True)
+    totalStorageSpaceInBytes = models.CharField(max_length = 100, null=True)
     freeStorageSpaceInBytes = models.IntegerField(null=True)
     managedDeviceName = models.CharField(max_length = 200, null=True)
     partnerReportedThreatState = models.CharField(max_length = 50, null=True)
@@ -79,3 +79,29 @@ class IntuneDevice(models.Model):
 
     def __str__(self):
         return self.deviceName
+    
+
+class SophosDevice(models.Model):
+    id = models.CharField(max_length = 100, primary_key=True)
+    type = models.CharField(max_length = 50, null=True)
+    hostname = models.CharField(max_length = 50, null=True)
+    tenant_id = models.CharField(max_length = 100, null=True)
+    os_isServer = models.BooleanField(null=True)
+    os_platform = models.CharField(max_length = 50, null=True)
+    os_name = models.CharField(max_length = 100, null=True)
+    os_majorVersion = models.CharField(max_length = 100, null=True)
+    os_minorVersion = models.CharField(max_length = 100, null=True)
+    os_build = models.CharField(max_length = 100, null=True)
+    ipv4Addresses = models.CharField(max_length = 50, null=True)
+    macAddresses = models.CharField(max_length = 50, null=True)
+    associatedPerson_viaLogin = models.CharField(max_length = 50, null=True)
+    tamperProtectionEnabled = models.BooleanField(null=True)
+    lastSeenAt = models.DateTimeField(null=True)
+    lockdown_status = models.CharField(max_length = 50, null=True)
+    lockdown_updateStatus = models.CharField(max_length = 50, null=True)
+    isolation_status = models.CharField(max_length = 50, null=True)
+    isolation_adminIsolated = models.BooleanField(null=True)
+    isolation_selfIsolated = models.BooleanField(null=True)
+    
+    def __str__(self):
+        return self.hostname

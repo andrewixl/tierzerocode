@@ -28,7 +28,6 @@ def getIntuneAccessToken(client_id, client_secret, tenant_id):
     return access_token
 
 def getIntuneDevices(access_token):
-    # Copy access_token and specify the MS Graph API endpoint you want to call, e.g. 'https://graph.microsoft.com/v1.0/groups' to get all groups in your organization
     url = 'https://graph.microsoft.com/v1.0/deviceManagement/managedDevices'
     headers = {
     'Authorization': access_token

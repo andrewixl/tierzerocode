@@ -32,14 +32,5 @@ def pullSophosDevices(request):
 		tenant_id = data.tenant_id
 		tenant_domain = data.tenant_domain
 		print(client_id + " " + client_secret + " " + tenant_id + " " + tenant_domain)
-		print(getSophosDevices(getSophosAccessToken(client_id, client_secret, tenant_id)))
+		print(updateSophosDeviceDatabase(getSophosDevices(getSophosAccessToken(client_id, client_secret, tenant_id))))
 	return redirect('/')
-
-# def contactcreation(request):
-# 	results = Contact.objects.registerVal(request.POST)
-# 	if results['status'] == True:
-# 		contact = Contact.objects.createContact(request.POST)
-# 		messages.success(request, 'Thank you! Your Message was Sent.')
-# 	else: 
-# 		genErrors(request, results['errors'])
-# 	return redirect('/#contact')
