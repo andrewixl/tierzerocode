@@ -10,6 +10,9 @@ def genErrors(request, Emessages):
 def index(request):
 	return render( request, 'main/index.html')
 
+def pullIntuneDevices(request):
+	return null
+
 # def contactcreation(request):
 # 	results = Contact.objects.registerVal(request.POST)
 # 	if results['status'] == True:
