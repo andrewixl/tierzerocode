@@ -1,0 +1,171 @@
+{% extends 'main/base.html' %}
+{% load static %}
+  {% block content %}
+			<main class="content">
+				<div class="container-fluid p-0">
+
+					<div class="row mb-2 mb-xl-3">
+						<div class="col-auto d-none d-sm-block">
+							<h3>User Management</h3>
+						</div>
+
+						<div class="col-auto ms-auto mt-n1">
+							<nav aria-label="breadcrumb">
+								<ol class="breadcrumb bg-transparent p-0 mt-1 mb-0">
+									<!-- <li class="breadcrumb-item"><a href="/delete/{{change.id}}"><button class="btn btn-danger">Delete</button></a></li> -->
+									<!-- Modal Start -->
+									<button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createUserModal" data-bs-backdrop="static" data-bs-keyboard="false" style="margin-right: 20px;">
+										Add User
+									</button>
+									<div class="modal fade" id="createUserModal" tabindex="-1" role="dialog" aria-hidden="true">
+										<div class="modal-dialog modal-md" role="document">
+											<div class="modal-content">
+												<div class="m-sm-4">
+													<div class="text-center">
+														<h3>Create New User</h3>
+													</div>
+													<form action='/accountcreation' method='post'>
+														{% csrf_token %}
+														<div class="mb-3">
+															<label class="form-label">First Name</label>
+															<input class="form-control form-control-lg" type="text" name="firstName" placeholder="Enter your First Name" />
+														</div>
+														<div class="mb-3">
+															<label class="form-label">Last Name</label>
+															<input class="form-control form-control-lg" type="text" name="lastName" placeholder="Enter your Last Name" />
+														</div>
+														<div class="mb-3">
+															<label class="form-label">Email</label>
+															<input class="form-control form-control-lg" type="email" name="email" placeholder="Enter your Email" />
+														</div>
+														<div class="mb-3">
+															<label class="form-label">Password</label>
+															<input class="form-control form-control-lg" type="password" name="password" placeholder="Enter your Password" />
+														</div>
+														<div class="mb-3">
+															<label class="form-label">Confirm Password</label>
+															<input class="form-control form-control-lg" type="password" name="c_password" placeholder="Enter your Password" />
+														</div>		
+												</div>
+												<div class="modal-footer">
+													<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+													<button type="submit" class="btn btn-success">Create</button>
+												</div>
+												</form>
+											</div>
+										</div>
+									</div>
+									<!-- Modal End -->
+								</ol>
+							</nav>
+						</div>
+					</div>
+
+					<div class="row">
+						<div class="col-12">
+							<div class="card">
+								<div class="card-body">
+									<table id="table" class="table table-striped" style="width:100%">
+										<thead>
+											<tr>
+												<th>Name</th>
+												<th>Email</th>
+												<th>Permission</th>
+												<th>Last Login</th>
+												<th>Manage User</th>
+											</tr>
+										</thead>
+										<tbody>
+											{% for user in users %}
+											<tr>
+												<td>{{user.firstName}} {{user.lastName}}</td>
+												<td>{{user.email}}</td>
+												{% if user.active == False %}
+												<td>Suspended</td>
+												{% else %}
+												<td>{{user.permission|capfirst}}</td>
+												{% endif %}
+												<td>NULL</td>
+												<td>
+
+												{% if user.active == False %}
+													<!-- Modal Start -->
+													<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-backdrop="static" data-bs-keyboard="false" data-bs-target="#sizedModalActivate">
+														Activate 
+													</button>
+													<div class="modal fade" id="sizedModalActivate" tabindex="-1" role="dialog" aria-hidden="true">
+														<div class="modal-dialog modal-sm" role="document">
+															<div class="modal-content">
+																<div class="modal-header">
+																	<h5 class="modal-title">Confirm User Account Activation</h5>
+																	<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+																</div>
+																<div class="modal-body m-3">
+																	<h4 class="mb-0" style="text-align: center;">You are about to Activate <strong>{{user.firstName}} {{user.lastName}}'s</strong> Account</h4>
+																</div>
+																<div class="modal-footer">
+																	<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+																	<a href="/activateuser/{{user.id}}"><button type="button" class="btn btn-success">Activate</button></a>
+																</div>
+															</div>
+														</div>
+													</div>
+													<!-- Modal End -->
+												{% else %}
+													<!-- Modal Start -->
+													<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-backdrop="static" data-bs-keyboard="false" data-bs-target="#sizedModalSuspend">
+														Suspend
+													</button>
+													<div class="modal fade" id="sizedModalSuspend" tabindex="-1" role="dialog" aria-hidden="true">
+														<div class="modal-dialog modal-sm" role="document">
+															<div class="modal-content">
+																<div class="modal-header">
+																	<h5 class="modal-title">Confirm User Account Suspension</h5>
+																	<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+																</div>
+																<div class="modal-body m-3">
+																	<h4 class="mb-0" style="text-align: center;">You are about to Suspend <strong>{{user.firstName}} {{user.lastName}}'s</strong> Account</h4>
+																</div>
+																<div class="modal-footer">
+																	<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+																	<a href="/suspenduser/{{user.id}}"><button type="button" class="btn btn-danger">Suspend</button></a>
+																</div>
+															</div>
+														</div>
+													</div>
+													<!-- Modal End -->
+												{% endif %}
+													<!-- Modal Start -->
+													<button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-backdrop="static" data-bs-keyboard="false" data-bs-target="#sizedModalDelete">
+														Delete
+													</button>
+													<div class="modal fade" id="sizedModalDelete" tabindex="-1" role="dialog" aria-hidden="true">
+														<div class="modal-dialog modal-sm" role="document">
+															<div class="modal-content">
+																<div class="modal-header">
+																	<h5 class="modal-title">Confirm User Account Deletion</h5>
+																	<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+																</div>
+																<div class="modal-body m-3">
+																	<h4 class="mb-0" style="text-align: center;">You are about to Delete <strong>{{user.firstName}} {{user.lastName}}'s</strong> Account</h4>
+																</div>
+																<div class="modal-footer">
+																	<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+																	<a href="/deleteuser/{{user.id}}"><button type="button" class="btn btn-danger">Delete</button></a>
+																</div>
+															</div>
+														</div>
+													</div>
+													<!-- Modal End -->
+												</td>
+											</tr>
+											{% endfor %}
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</main>
+			{% endblock %}
