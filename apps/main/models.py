@@ -1,5 +1,11 @@
 from django.db import models
 
+class Device(models.Model):
+    hostname = models.CharField(max_length = 50, null=True)
+
+    def __str__(self):
+        return self.hostname
+
 class IntuneIntegration(models.Model):
     client_id = models.CharField(max_length = 50, null=True)
     client_secret = models.CharField(max_length = 50, null=True)
@@ -74,6 +80,7 @@ class IntuneDevice(models.Model):
     ethernetMacAddress = models.CharField(max_length = 50, null=True)
     physicalMemoryInBytes = models.IntegerField(null=True)
     # deviceActionResults = models.CharField(max_length = 50)
+    parentDevice = models.ForeignKey("Device", on_delete=models.CASCADE, null=True, related_name='integrationIntune')
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
 
@@ -102,6 +109,9 @@ class SophosDevice(models.Model):
     isolation_status = models.CharField(max_length = 50, null=True)
     isolation_adminIsolated = models.BooleanField(null=True)
     isolation_selfIsolated = models.BooleanField(null=True)
+    parentDevice = models.ForeignKey("Device", on_delete=models.CASCADE, null=True, related_name='integrationSophos')
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
     
     def __str__(self):
         return self.hostname

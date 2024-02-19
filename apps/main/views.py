@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
+from .pulldevices.masterlist import *
 from .pulldevices.intune import *
 from .pulldevices.sophos import *
 
@@ -14,23 +15,24 @@ def genErrors(request, Emessages):
 def index(request):
 	return render( request, 'main/index.html')
 
-def pullIntuneDevices(request):
-	for integration in IntuneIntegration.objects.all():
-		data = IntuneIntegration.objects.get(id = integration.id)
-		client_id = data.client_id
-		client_secret = data.client_secret
-		tenant_id = data.tenant_id
-		tenant_domain = data.tenant_domain
-		print(updateIntuneDeviceDatabase(getIntuneDevices(getIntuneAccessToken(client_id, client_secret, tenant_id))))
+# def generateMasterList(request):
+# 	devices = SophosDevice.objects.all()
+# 	updateMasterList(devices)
+# 	devices = IntuneDevice.objects.all()
+# 	updateMasterList(devices)
+
+	# device = Device.objects.get(id=36)
+	# integrations = device.integrationIntune.get(deviceName = device.hostname)
+	# print(integrations)
+	# integrations = device.integrationSophos.get(hostname = device.hostname)
+	# print(integrations)
+
+	# return redirect('/')
+
+def syncIntuneDevices(request):
+	syncIntune()
 	return redirect('/')
 
-def pullSophosDevices(request):
-	for integration in SophosIntegration.objects.all():
-		data = SophosIntegration.objects.get(id = integration.id)
-		client_id = data.client_id
-		client_secret = data.client_secret
-		tenant_id = data.tenant_id
-		tenant_domain = data.tenant_domain
-		print(client_id + " " + client_secret + " " + tenant_id + " " + tenant_domain)
-		print(updateSophosDeviceDatabase(getSophosDevices(getSophosAccessToken(client_id, client_secret, tenant_id))))
+def syncSophosDevices(request):
+	syncSophos()
 	return redirect('/')

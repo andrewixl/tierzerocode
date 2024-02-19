@@ -1,7 +1,8 @@
-from ..models import IntuneDevice
+from ..models import IntuneDevice, IntuneIntegration
 import msal
 import requests
 from datetime import datetime
+from .masterlist import *
 
 def getIntuneAccessToken(client_id, client_secret, tenant_id):
     # Enter the details of your AAD app registration
@@ -116,3 +117,15 @@ def updateIntuneDeviceDatabase(graph_result):
             device.save()
         else:
             IntuneDevice.objects.create(id=device_id, **device_fields)
+
+def syncIntune():
+    for integration in IntuneIntegration.objects.all():
+        data = IntuneIntegration.objects.get(id = integration.id)
+        client_id = data.client_id
+        client_secret = data.client_secret
+        tenant_id = data.tenant_id
+        tenant_domain = data.tenant_domain
+        updateIntuneDeviceDatabase(getIntuneDevices(getIntuneAccessToken(client_id, client_secret, tenant_id)))
+        devices = IntuneDevice.objects.all()
+        updateMasterList(devices)
+    return True
