@@ -7,6 +7,7 @@ class Device(models.Model):
         return self.hostname
 
 class IntuneIntegration(models.Model):
+    enabled = models.BooleanField(null=True, default=False)
     client_id = models.CharField(max_length = 50, null=True)
     client_secret = models.CharField(max_length = 50, null=True)
     tenant_id = models.CharField(max_length = 50, null=True)
@@ -16,6 +17,7 @@ class IntuneIntegration(models.Model):
         return 'Microsoft Intune (' + self.tenant_domain + ')'
 
 class SophosIntegration(models.Model):
+    enabled = models.BooleanField(null=True, default=False)
     client_id = models.CharField(max_length = 100, null=True)
     client_secret = models.CharField(max_length = 200, null=True)
     tenant_id = models.CharField(max_length = 100, null=True)
@@ -25,6 +27,7 @@ class SophosIntegration(models.Model):
         return 'Sophos Central (' + self.tenant_domain + ')'
 
 class DefenderIntegration(models.Model):
+    enabled = models.BooleanField(null=True, default=False)
     client_id = models.CharField(max_length = 50, null=True)
     client_secret = models.CharField(max_length = 50, null=True)
     tenant_id = models.CharField(max_length = 50, null=True)
@@ -33,7 +36,6 @@ class DefenderIntegration(models.Model):
     def __str__(self):
         return 'Microsoft Defender for Endpoint (' + self.tenant_domain + ')'
 
-# DeviceManagementManagedDevices.Read.All
 class IntuneDevice(models.Model):
     id = models.CharField(max_length = 100, primary_key=True)
     userId = models.CharField(max_length = 50, null=True)

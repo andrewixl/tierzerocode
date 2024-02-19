@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Device, IntuneIntegration, IntuneDevice, SophosIntegration, SophosDevice, DefenderIntegration
+from .models import Device, IntuneIntegration, IntuneDevice, SophosIntegration, SophosDevice, DefenderIntegration, DefenderDevice
 
 admin.site.register(Device)
 
@@ -13,4 +13,4 @@ admin.site.register(SophosDevice)
 
 # Defender for Endpoint Models
 admin.site.register(DefenderIntegration)
-# admin.site.register(DefenderDevice)
+admin.site.register(DefenderDevice)
