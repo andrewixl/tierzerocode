@@ -7,6 +7,7 @@ from django.urls import path
 
 urlpatterns = [
     re_path(r'^$', views.index),
+    re_path(r'^integrations$', views.integrations),
     # re_path(r'^generate-master-list$', views.generateMasterList),
     re_path(r'^sync-intune-devices$', views.syncIntuneDevices),
     re_path(r'^sync-sophos-devices$', views.syncSophosDevices),

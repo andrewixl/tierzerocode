@@ -36,6 +36,26 @@ class DefenderIntegration(models.Model):
     def __str__(self):
         return 'Microsoft Defender for Endpoint (' + self.tenant_domain + ')'
 
+class SCCMIntegration(models.Model):
+    enabled = models.BooleanField(null=True, default=False)
+    client_id = models.CharField(max_length = 50, null=True)
+    client_secret = models.CharField(max_length = 50, null=True)
+    tenant_id = models.CharField(max_length = 50, null=True)
+    tenant_domain = models.CharField(max_length = 50, null=True)
+
+    def __str__(self):
+        return 'SCCM (' + self.tenant_domain + ')'
+
+class QualysIntegration(models.Model):
+    enabled = models.BooleanField(null=True, default=False)
+    client_id = models.CharField(max_length = 50, null=True)
+    client_secret = models.CharField(max_length = 50, null=True)
+    tenant_id = models.CharField(max_length = 50, null=True)
+    tenant_domain = models.CharField(max_length = 50, null=True)
+
+    def __str__(self):
+        return 'Qualys (' + self.tenant_domain + ')'
+
 class IntuneDevice(models.Model):
     id = models.CharField(max_length = 100, primary_key=True)
     userId = models.CharField(max_length = 50, null=True)
@@ -134,8 +154,8 @@ class DefenderDevice(models.Model):
     isExcluded = models.BooleanField(null=True)
     exclusionReason = models.CharField(max_length = 50, null=True)
     computerDnsName = models.CharField(max_length = 100, null=True)
-    firstSeen = models.DateTimeField(null=True)
-    lastSeen = models.DateTimeField(null=True)
+    firstSeen = models.CharField(max_length = 50, null=True)
+    lastSeen = models.CharField(max_length = 50, null=True)
     osPlatform = models.CharField(max_length = 50, null=True)
     osVersion = models.CharField(max_length = 50, null=True)
     osProcessor = models.CharField(max_length = 50, null=True)

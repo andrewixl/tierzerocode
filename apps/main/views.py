@@ -16,6 +16,9 @@ def genErrors(request, Emessages):
 def index(request):
 	return render( request, 'main/index.html')
 
+def integrations(request):
+	return render( request, 'main/integrations.html')
+
 # def generateMasterList(request):
 # 	devices = SophosDevice.objects.all()
 # 	updateMasterList(devices)

@@ -1,4 +1,4 @@
-from ..models import DefenderIntegration
+from ..models import DefenderDevice, DefenderIntegration
 # from ..models import IntuneDevice, IntuneIntegration
 import msal
 import requests
@@ -41,6 +41,45 @@ def getDefenderDevices(access_token):
     # Print the results in a JSON format
     return graph_result.json()
 
+# from datetime import timezone
+
+def updateDefenderDeviceDatabase(json_data):
+    for device_data in json_data['value']:
+        if device_data.get('onboardingStatus') == 'Onboarded':
+            device_id = device_data['id']
+            defaults = {
+                'mergedIntoMachineId': device_data['mergedIntoMachineId'],
+                'isPotentialDuplication': device_data['isPotentialDuplication'],
+                'isExcluded': device_data['isExcluded'],
+                'exclusionReason': device_data['exclusionReason'],
+                'computerDnsName': device_data['computerDnsName'],
+                'firstSeen': device_data['firstSeen'],
+                'lastSeen': device_data['lastSeen'],
+                'osPlatform': device_data['osPlatform'],
+                'osVersion': device_data['osVersion'],
+                'osProcessor': device_data['osProcessor'],
+                'version': device_data['version'],
+                'lastIpAddress': device_data['lastIpAddress'],
+                'lastExternalIpAddress': device_data['lastExternalIpAddress'],
+                'agentVersion': device_data['agentVersion'],
+                'osBuild': device_data['osBuild'],
+                'healthStatus': device_data['healthStatus'],
+                'deviceValue': device_data['deviceValue'],
+                'rbacGroupId': device_data['rbacGroupId'],
+                'rbacGroupName': device_data['rbacGroupName'],
+                'riskScore': device_data['riskScore'],
+                'exposureLevel': device_data['exposureLevel'],
+                'isAadJoined': device_data['isAadJoined'],
+                'aadDeviceId': device_data['aadDeviceId'],
+                'defenderAvStatus': device_data['defenderAvStatus'],
+                'onboardingStatus': device_data['onboardingStatus'],
+                'osArchitecture': device_data['osArchitecture'],
+                'managedBy': device_data['managedBy'],
+                'managedByStatus': device_data['managedByStatus'],
+                'vmMetadata': device_data['vmMetadata'],
+            }
+            obj, created = DefenderDevice.objects.update_or_create(id=device_id, defaults=defaults)
+
 def syncDefender():
     for integration in DefenderIntegration.objects.all():
         data = DefenderIntegration.objects.get(id = integration.id)
@@ -48,4 +87,7 @@ def syncDefender():
         client_secret = data.client_secret
         tenant_id = data.tenant_id
         tenant_domain = data.tenant_domain
-        print(getDefenderDevices(getDefenderAccessToken(client_id, client_secret, tenant_id)))
+        updateDefenderDeviceDatabase(getDefenderDevices(getDefenderAccessToken(client_id, client_secret, tenant_id)))
+        devices = DefenderDevice.objects.all()
+        updateMasterList(devices, tenant_domain)
+    return True

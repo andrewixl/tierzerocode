@@ -1,0 +1,190 @@
+{% extends 'main/base.html' %}
+{% load static %}
+  {% block content %}
+			<main class="content">
+				<div class="container-fluid p-0">
+
+					<a href="#" class="btn btn-primary float-end mt-n1"><i class="fas fa-plus"></i> Submit Integration Request</a>
+					<div class="mb-3">
+						<h1 class="h3 d-inline align-middle">Integrations</h1><a class="badge bg-primary ms-2" href="https://documentation.tierzerocode.com/integratons/"
+							target="_blank">Documentation<i class="fas fa-fw fa-external-link-alt"></i></a>
+					</div>
+
+					<div class="row">
+						<!-- ---------------------------- START INTUNE CARD ---------------------------- -->
+						<div class="col-12 col-md-6 col-lg-3">
+							<div class="card">
+								<img class="card-img-top" src="{% static 'main/img/integration_logos/Microsoft_Intune_Logo.png' %}" alt="Intune">
+								<div class="card-header px-4 pt-4">
+									<div class="card-actions float-end">
+										<div class="dropdown position-relative">
+											<a href="#" data-bs-toggle="dropdown" data-bs-display="static">
+												<i class="align-middle" data-feather="more-horizontal"></i>
+											</a>
+
+											<div class="dropdown-menu dropdown-menu-end">
+												<a class="dropdown-item" href="#">Enable Integration</a>
+												<a class="dropdown-item" href="#">Disable Integration</a>
+												<a class="dropdown-item" href="#">Configure Integration</a>
+											</div>
+										</div>
+									</div>
+									<h5 class="card-title mb-0">Microsoft Intune</h5>
+									<div class="badge bg-success my-2">Enabled</div>
+									<div class="badge bg-success my-2">Configured</div>
+								</div>
+								<!-- <div class="card-body px-4 pt-2">
+									<p>Nam pretium turpis et arcu. Duis arcu tortor, suscipit eget, imperdiet nec, imperdiet iaculis, ipsum. Sed aliquam
+										ultrices mauris.</p>
+								</div> -->
+							</div>
+						</div>
+						<!-- ---------------------------- END INTUNE CARD ---------------------------- -->
+						<!-- ---------------------------- START SOPHOS CARD ---------------------------- -->
+						<div class="col-12 col-md-6 col-lg-3">
+							<div class="card">
+								<img class="card-img-top" src="{% static 'main/img/integration_logos/sophos-logo-blue-rgb.png' %}" alt="Sophos">
+								<div class="card-header px-4 pt-4">
+									<div class="card-actions float-end">
+										<div class="dropdown position-relative">
+											<a href="#" data-bs-toggle="dropdown" data-bs-display="static">
+												<i class="align-middle" data-feather="more-horizontal"></i>
+											</a>
+
+											<div class="dropdown-menu dropdown-menu-end">
+												<a class="dropdown-item" href="#">Enable Integration</a>
+												<a class="dropdown-item" href="#">Disable Integration</a>
+												<a class="dropdown-item" href="#">Configure Integration</a>
+											</div>
+										</div>
+									</div>
+									<h5 class="card-title mb-0">Sophos Central</h5>
+									<div class="badge bg-success my-2">Enabled</div>
+									<div class="badge bg-success my-2">Configured</div>
+								</div>
+								<!-- <div class="card-body px-4 pt-2">
+									<p>Nam pretium turpis et arcu. Duis arcu tortor, suscipit eget, imperdiet nec, imperdiet iaculis, ipsum. Sed aliquam
+										ultrices mauris.</p>
+								</div> -->
+							</div>
+						</div>
+						<!-- ---------------------------- END SOPHOS CARD ---------------------------- -->
+						<!-- ---------------------------- START DEFENDER CARD ---------------------------- -->
+						<div class="col-12 col-md-6 col-lg-3">
+							<div class="card">
+								<img class="card-img-top" src="{% static 'main/img/integration_logos/Windows_Defender_logo.png' %}" alt="Defender">
+								<div class="card-header px-4 pt-4">
+									<div class="card-actions float-end">
+										<div class="dropdown position-relative">
+											<a href="#" data-bs-toggle="dropdown" data-bs-display="static">
+												<i class="align-middle" data-feather="more-horizontal"></i>
+											</a>
+
+											<div class="dropdown-menu dropdown-menu-end">
+												<a class="dropdown-item" href="#">Enable Integration</a>
+												<a class="dropdown-item" href="#">Disable Integration</a>
+												<a class="dropdown-item" href="#">Configure Integration</a>
+											</div>
+										</div>
+									</div>
+									<h5 class="card-title mb-0">Microsoft Defender for Endpoint</h5>
+									<div class="badge bg-success my-2">Enabled</div>
+									<div class="badge bg-success my-2">Configured</div>
+								</div>
+								<!-- <div class="card-body px-4 pt-2">
+									<p>Nam pretium turpis et arcu. Duis arcu tortor, suscipit eget, imperdiet nec, imperdiet iaculis, ipsum. Sed aliquam
+										ultrices mauris.</p>
+								</div> -->
+							</div>
+						</div>
+						<!-- ---------------------------- END DEFENDER CARD ---------------------------- -->
+						<!-- ---------------------------- START CROWDSTRIKE CARD ---------------------------- -->
+						<div class="col-12 col-md-6 col-lg-3">
+							<div class="card">
+								<img class="card-img-top" src="{% static 'main/img/integration_logos/CrowdStrike_Logo_2023_Primary_Black.png' %}" alt="CrowdStrike">
+								<div class="card-header px-4 pt-4">
+									<div class="card-actions float-end">
+										<div class="dropdown position-relative">
+											<a href="#" data-bs-toggle="dropdown" data-bs-display="static">
+												<i class="align-middle" data-feather="more-horizontal"></i>
+											</a>
+
+											<div class="dropdown-menu dropdown-menu-end">
+												<a class="dropdown-item" href="#">Enable Integration</a>
+												<a class="dropdown-item" href="#">Disable Integration</a>
+												<a class="dropdown-item" href="#">Configure Integration</a>
+											</div>
+										</div>
+									</div>
+									<h5 class="card-title mb-0">CrowdStrike Falcon</h5>
+									<div class="badge bg-info my-2">Under Development</div>
+								</div>
+								<!-- <div class="card-body px-4 pt-2">
+									<p>Nam pretium turpis et arcu. Duis arcu tortor, suscipit eget, imperdiet nec, imperdiet iaculis, ipsum. Sed aliquam
+										ultrices mauris.</p>
+								</div> -->
+							</div>
+						</div>
+						<!-- ---------------------------- END CROWDSTRIKE CARD ---------------------------- -->
+						<!-- ---------------------------- START QUALYS CARD ---------------------------- -->
+						<div class="col-12 col-md-6 col-lg-3">
+							<div class="card">
+								<img class="card-img-top" src="{% static 'main/img/integration_logos/qualys-logo-rgb_2x-Large.png' %}" alt="Qualys">
+								<div class="card-header px-4 pt-4">
+									<div class="card-actions float-end">
+										<div class="dropdown position-relative">
+											<a href="#" data-bs-toggle="dropdown" data-bs-display="static">
+												<i class="align-middle" data-feather="more-horizontal"></i>
+											</a>
+
+											<div class="dropdown-menu dropdown-menu-end">
+												<a class="dropdown-item" href="#">Enable Integration</a>
+												<a class="dropdown-item" href="#">Disable Integration</a>
+												<a class="dropdown-item" href="#">Configure Integration</a>
+											</div>
+										</div>
+									</div>
+									<h5 class="card-title mb-0">Qualys Vulnerability Management</h5>
+									<div class="badge bg-info my-2">Under Development</div>
+								</div>
+								<!-- <div class="card-body px-4 pt-2">
+									<p>Nam pretium turpis et arcu. Duis arcu tortor, suscipit eget, imperdiet nec, imperdiet iaculis, ipsum. Sed aliquam
+										ultrices mauris.</p>
+								</div> -->
+							</div>
+						</div>
+						<!-- ---------------------------- END QUALYS CARD ---------------------------- -->
+						<!-- ---------------------------- START SCCM CARD ---------------------------- -->
+						<div class="col-12 col-md-6 col-lg-3">
+							<div class="card">
+								<img class="card-img-top" src="{% static 'main/img/integration_logos/Microsoft-System-Center-Configuration-Manager-logo.png' %}" alt="SCCM">
+								<div class="card-header px-4 pt-4">
+									<div class="card-actions float-end">
+										<div class="dropdown position-relative">
+											<a href="#" data-bs-toggle="dropdown" data-bs-display="static">
+												<i class="align-middle" data-feather="more-horizontal"></i>
+											</a>
+
+											<div class="dropdown-menu dropdown-menu-end">
+												<a class="dropdown-item" href="#">Enable Integration</a>
+												<a class="dropdown-item" href="#">Disable Integration</a>
+												<a class="dropdown-item" href="#">Configure Integration</a>
+											</div>
+										</div>
+									</div>
+									<h5 class="card-title mb-0">System Center Configuration Manager</h5>
+									<div class="badge bg-info my-2">Under Development</div>
+								</div>
+								<!-- <div class="card-body px-4 pt-2">
+									<p>Nam pretium turpis et arcu. Duis arcu tortor, suscipit eget, imperdiet nec, imperdiet iaculis, ipsum. Sed aliquam
+										ultrices mauris.</p>
+								</div> -->
+							</div>
+						</div>
+						<!-- ---------------------------- END SCCM CARD ---------------------------- -->
+					</div>
+				</div>
+			</main>
+
+{% endblock %}
+

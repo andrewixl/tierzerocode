@@ -108,6 +108,6 @@ def syncSophos():
         tenant_domain = data.tenant_domain
         updateSophosDeviceDatabase(getSophosDevices(getSophosAccessToken(client_id, client_secret, tenant_id)))
         devices = SophosDevice.objects.all()
-        updateMasterList(devices)
+        updateMasterList(devices, tenant_domain)
     return True
 
