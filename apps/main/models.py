@@ -24,6 +24,15 @@ class SophosIntegration(models.Model):
     def __str__(self):
         return 'Sophos Central (' + self.tenant_domain + ')'
 
+class DefenderIntegration(models.Model):
+    client_id = models.CharField(max_length = 50, null=True)
+    client_secret = models.CharField(max_length = 50, null=True)
+    tenant_id = models.CharField(max_length = 50, null=True)
+    tenant_domain = models.CharField(max_length = 50, null=True)
+
+    def __str__(self):
+        return 'Microsoft Defender for Endpoint (' + self.tenant_domain + ')'
+
 # DeviceManagementManagedDevices.Read.All
 class IntuneDevice(models.Model):
     id = models.CharField(max_length = 100, primary_key=True)
@@ -115,3 +124,41 @@ class SophosDevice(models.Model):
     
     def __str__(self):
         return self.hostname
+
+class DefenderDevice(models.Model):
+    id = models.CharField(max_length = 100, primary_key=True)
+    mergedIntoMachineId = models.CharField(max_length = 50, null=True)
+    isPotentialDuplication = models.BooleanField(null=True)
+    isExcluded = models.BooleanField(null=True)
+    exclusionReason = models.CharField(max_length = 50, null=True)
+    computerDnsName = models.CharField(max_length = 100, null=True)
+    firstSeen = models.DateTimeField(null=True)
+    lastSeen = models.DateTimeField(null=True)
+    osPlatform = models.CharField(max_length = 50, null=True)
+    osVersion = models.CharField(max_length = 50, null=True)
+    osProcessor = models.CharField(max_length = 50, null=True)
+    version = models.CharField(max_length = 50, null=True)
+    lastIpAddress = models.CharField(max_length = 50, null=True)
+    lastExternalIpAddress = models.CharField(max_length = 50, null=True)
+    agentVersion = models.CharField(max_length = 50, null=True)
+    osBuild = models.IntegerField(null=True)
+    healthStatus = models.CharField(max_length = 50, null=True)
+    deviceValue = models.CharField(max_length = 50, null=True)
+    rbacGroupId = models.IntegerField(null=True)
+    rbacGroupName = models.CharField(max_length = 50, null=True)
+    riskScore = models.CharField(max_length = 50, null=True)
+    exposureLevel = models.CharField(max_length = 50, null=True)
+    isAadJoined = models.BooleanField(null=True)
+    aadDeviceId = models.CharField(max_length = 50, null=True)
+    defenderAvStatus = models.CharField(max_length = 50, null=True)
+    onboardingStatus = models.CharField(max_length = 50, null=True)
+    osArchitecture = models.CharField(max_length = 50, null=True)
+    managedBy = models.CharField(max_length = 50, null=True)
+    managedByStatus = models.CharField(max_length = 50, null=True)
+    vmMetadata = models.CharField(max_length = 50, null=True)
+    parentDevice = models.ForeignKey("Device", on_delete=models.CASCADE, null=True, related_name='integrationDefender')
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
+
+    def __str__(self):
+        return self.computerDnsName

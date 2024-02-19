@@ -3,6 +3,7 @@ from django.contrib import messages
 from .pulldevices.masterlist import *
 from .pulldevices.intune import *
 from .pulldevices.sophos import *
+from .pulldevices.defender import *
 
 # Import Integrations
 from .models import IntuneIntegration, SophosIntegration
@@ -36,3 +37,10 @@ def syncIntuneDevices(request):
 def syncSophosDevices(request):
 	syncSophos()
 	return redirect('/')
+
+def syncDefenderDevices(request):
+	syncDefender()
+	return redirect('/')
+
+# Machine.Read.All
+# DeviceManagementManagedDevices.Read.All
