@@ -24,10 +24,11 @@
 
 											<div class="dropdown-menu dropdown-menu-end">
 												{% if True == intuneStatus.0 %}
-												<a class="dropdown-item" href="#">Disable Integration</a>
+												<a class="dropdown-item" href="/disable-integration/intune/{{intuneStatus.2}}">Disable Integration</a>
 												<a class="dropdown-item" href="#">Configure Integration</a>
+												<a class="dropdown-item" href="/sync-intune-devices">Sync Integration</a>
 												{% elif False == intuneStatus.0 %}
-												<a class="dropdown-item" href="#">Enable Integration</a>
+												<a class="dropdown-item" href="/enable-integration/intune/{{intuneStatus.2}}">Enable Integration</a>
 												{% endif %}
 											</div>
 										</div>
@@ -64,10 +65,11 @@
 
 											<div class="dropdown-menu dropdown-menu-end">
 												{% if True == sophosStatus.0 %}
-												<a class="dropdown-item" href="#">Disable Integration</a>
+												<a class="dropdown-item" href="/disable-integration/sophos/{{sophosStatus.2}}">Disable Integration</a>
 												<a class="dropdown-item" href="#">Configure Integration</a>
+												<a class="dropdown-item" href="/sync-sophos-devices">Sync Integration</a>
 												{% elif False == sophosStatus.0 %}
-												<a class="dropdown-item" href="#">Enable Integration</a>
+												<a class="dropdown-item" href="/enable-integration/sophos/{{sophosStatus.2}}">Enable Integration</a>
 												{% endif %}
 											</div>
 										</div>
@@ -104,10 +106,11 @@
 
 											<div class="dropdown-menu dropdown-menu-end">
 												{% if True == defenderStatus.0 %}
-												<a class="dropdown-item" href="#">Disable Integration</a>
+												<a class="dropdown-item" href="/disable-integration/defender/{{defenderStatus.2}}">Disable Integration</a>
 												<a class="dropdown-item" href="#">Configure Integration</a>
+												<a class="dropdown-item" href="/sync-defender-devices">Sync Integration</a>
 												{% elif False == defenderStatus.0 %}
-												<a class="dropdown-item" href="#">Enable Integration</a>
+												<a class="dropdown-item" href="/enable-integration/defender/{{defenderStatus.2}}">Enable Integration</a>
 												{% endif %}
 											</div>
 										</div>

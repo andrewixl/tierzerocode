@@ -27,7 +27,7 @@ class IntuneIntegration(models.Model):
     tenant_domain = models.CharField(max_length = 50, null=True)
 
     def __str__(self):
-        return 'Microsoft Intune (' + self.tenant_domain + ')'
+        return 'Microsoft Intune'
 
 class SophosIntegration(models.Model):
     enabled = models.BooleanField(null=True, default=False)
@@ -37,7 +37,7 @@ class SophosIntegration(models.Model):
     tenant_domain = models.CharField(max_length = 50, null=True)
 
     def __str__(self):
-        return 'Sophos Central (' + self.tenant_domain + ')'
+        return 'Sophos Central'
 
 class DefenderIntegration(models.Model):
     enabled = models.BooleanField(null=True, default=False)
@@ -47,7 +47,7 @@ class DefenderIntegration(models.Model):
     tenant_domain = models.CharField(max_length = 50, null=True)
 
     def __str__(self):
-        return 'Microsoft Defender for Endpoint (' + self.tenant_domain + ')'
+        return 'Microsoft Defender for Endpoint'
 
 class SCCMIntegration(models.Model):
     enabled = models.BooleanField(null=True, default=False)
@@ -57,7 +57,7 @@ class SCCMIntegration(models.Model):
     tenant_domain = models.CharField(max_length = 50, null=True)
 
     def __str__(self):
-        return 'SCCM (' + self.tenant_domain + ')'
+        return 'SCCM'
 
 class QualysIntegration(models.Model):
     enabled = models.BooleanField(null=True, default=False)
@@ -67,7 +67,7 @@ class QualysIntegration(models.Model):
     tenant_domain = models.CharField(max_length = 50, null=True)
 
     def __str__(self):
-        return 'Qualys (' + self.tenant_domain + ')'
+        return 'Qualys'
 
 class IntuneDevice(models.Model):
     id = models.CharField(max_length = 100, primary_key=True)

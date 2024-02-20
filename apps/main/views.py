@@ -6,7 +6,7 @@ from .pulldevices.sophos import *
 from .pulldevices.defender import *
 
 # Import Integrations
-from .models import IntuneIntegration, SophosIntegration
+from .models import IntuneIntegration, SophosIntegration, DefenderIntegration
 from .models import Device, IntuneDevice, SophosDevice, DefenderDevice
 from ..login_app.models import User
 
@@ -106,34 +106,34 @@ def integrations(request):
 	defenderStatus = []
 
 	if len(IntuneIntegration.objects.all()) == 0:
-		intuneStatus = [False, False]
+		intuneStatus = [False, False, null]
 	else:
 		for integration in IntuneIntegration.objects.all():
 			data = IntuneIntegration.objects.get(id = integration.id)
 			if data.tenant_domain:
-				intuneStatus = [data.enabled, True]
+				intuneStatus = [data.enabled, True, integration.id]
 			else:
-				intuneStatus = [data.enabled, False]
+				intuneStatus = [data.enabled, False, integration.id]
 	
 	if len(SophosIntegration.objects.all()) == 0:
-		sophosStatus = [False, False]
+		sophosStatus = [False, False, null]
 	else:
 		for integration in SophosIntegration.objects.all():
 			data = SophosIntegration.objects.get(id = integration.id)
 			if data.tenant_domain:
-				sophosStatus = [data.enabled, True]
+				sophosStatus = [data.enabled, True, integration.id]
 			else:
-				sophosStatus = [data.enabled, False]
+				sophosStatus = [data.enabled, False, integration.id]
 
 	if len(DefenderIntegration.objects.all()) == 0:
-		defenderStatus = [False, False]
+		defenderStatus = [False, False, null]
 	else:
 		for integration in DefenderIntegration.objects.all():
 			data = DefenderIntegration.objects.get(id = integration.id)
 			if data.tenant_domain:
-				defenderStatus = [data.enabled, True]
+				defenderStatus = [data.enabled, True, integration.id]
 			else:
-				defenderStatus = [data.enabled, False]
+				defenderStatus = [data.enabled, False, integration.id]
 	
 	context = {
 		'intuneStatus':intuneStatus,
@@ -141,6 +141,54 @@ def integrations(request):
 		'defenderStatus':defenderStatus,
 	}
 	return render( request, 'main/integrations.html', context)
+
+def enableIntegration(request, integration, id):
+	match integration:
+		case 'intune':
+			try:
+				if IntuneIntegration.objects.get(id=id):
+					integration_update = IntuneIntegration.objects.get(id=id)
+					integration_update.enabled = True
+					integration_update.save()
+			except:
+				IntuneIntegration.objects.create(enabled = True)
+		case 'sophos':
+			try:
+				if SophosIntegration.objects.get(id=id):
+					integration_update = SophosIntegration.objects.get(id=id)
+					integration_update.enabled = True
+					integration_update.save()
+			except:
+				SophosIntegration.objects.create(enabled = True)
+		case 'defender':
+			try:
+				if DefenderIntegration.objects.get(id=id):
+					integration_update = DefenderIntegration.objects.get(id=id)
+					integration_update.enabled = True
+					integration_update.save()
+			except:
+				DefenderIntegration.objects.create(enabled = True)
+	return redirect ('/integrations')
+
+def disableIntegration(request, integration, id):
+	match integration:
+		case 'intune':
+			if IntuneIntegration.objects.get(id=id):
+				integration_update = IntuneIntegration.objects.get(id=id)
+				integration_update.enabled = False
+				integration_update.save()
+		case 'sophos':
+			if SophosIntegration.objects.get(id=id):
+				integration_update = SophosIntegration.objects.get(id=id)
+				integration_update.enabled = False
+				integration_update.save()
+		case 'defender':
+			if DefenderIntegration.objects.get(id=id):
+				integration_update = DefenderIntegration.objects.get(id=id)
+				integration_update.enabled = False
+				integration_update.save()
+	return redirect ('/integrations')
+
 
 def error500(request):
 	# Checks User Permissions
@@ -170,15 +218,15 @@ def error500(request):
 
 def syncIntuneDevices(request):
 	syncIntune()
-	return redirect('/test')
+	return redirect('/integrations')
 
 def syncSophosDevices(request):
 	syncSophos()
-	return redirect('/test')
+	return redirect('/integrations')
 
 def syncDefenderDevices(request):
 	syncDefender()
-	return redirect('/test')
+	return redirect('/integrations')
 
 # Machine.Read.All
 # DeviceManagementManagedDevices.Read.All
