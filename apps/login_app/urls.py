@@ -9,6 +9,7 @@ urlpatterns = [
     re_path(r'^unclaimed$', views.unclaimed),
     re_path(r'^login$', views.login),
     re_path(r'^accountcreation$', views.accountcreation),
+    re_path(r'^accountsuspended$', views.accountsuspended),
     re_path(r'^checklogin$', views.checklogin),
     re_path(r'^logout$', views.logout),
 

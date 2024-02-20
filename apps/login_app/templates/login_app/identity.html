@@ -24,7 +24,7 @@
 													<div class="text-center">
 														<h3>Create New User</h3>
 													</div>
-													<form action='/accountcreation' method='post'>
+													<form action='/identity/accountcreation' method='post'>
 														{% csrf_token %}
 														<div class="mb-3">
 															<label class="form-label">First Name</label>
@@ -105,7 +105,7 @@
 																</div>
 																<div class="modal-footer">
 																	<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-																	<a href="/activateuser/{{user.id}}"><button type="button" class="btn btn-success">Activate</button></a>
+																	<a href="/identity/activateuser/{{user.id}}"><button type="button" class="btn btn-success">Activate</button></a>
 																</div>
 															</div>
 														</div>
@@ -128,7 +128,7 @@
 																</div>
 																<div class="modal-footer">
 																	<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-																	<a href="/suspenduser/{{user.id}}"><button type="button" class="btn btn-danger">Suspend</button></a>
+																	<a href="/identity/suspenduser/{{user.id}}"><button type="button" class="btn btn-danger">Suspend</button></a>
 																</div>
 															</div>
 														</div>
@@ -151,7 +151,7 @@
 																</div>
 																<div class="modal-footer">
 																	<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-																	<a href="/deleteuser/{{user.id}}"><button type="button" class="btn btn-danger">Delete</button></a>
+																	<a href="/identity/deleteuser/{{user.id}}"><button type="button" class="btn btn-danger">Delete</button></a>
 																</div>
 															</div>
 														</div>

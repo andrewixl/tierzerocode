@@ -7,17 +7,70 @@ from .pulldevices.defender import *
 
 # Import Integrations
 from .models import IntuneIntegration, SophosIntegration
+from ..login_app.models import User
 
-# Create your views here.
+############################################################################################
+
 def genErrors(request, Emessages):
 	for message in Emessages:
-		messages.error(request, message)
+		messages.warning(request, message)
+
+def checkLogin(request):
+	try:
+		if request.session['email']:
+			return True
+		else:
+			return False
+	except:
+		return False
+def checkActive(request):
+	try:
+		if request.session['active']:
+			return True
+		else:
+			return False
+	except:
+		return False
+	
+
+
+############################################################################################
 
 def index(request):
+	# Checks User Permissions
+	results = []
+	results.append(checkLogin(request))
+	results.append(checkActive(request))
+	if results[0] == False:
+		return redirect('/identity/login')
+	if results[1] == False:
+		return redirect('/identity/accountsuspended')
+	
 	return render( request, 'main/index.html')
 
 def integrations(request):
+	# Checks User Permissions
+	results = []
+	results.append(checkLogin(request))
+	results.append(checkActive(request))
+	if results[0] == False:
+		return redirect('/identity/login')
+	if results[1] == False:
+		return redirect('/identity/accountsuspended')
+	
 	return render( request, 'main/integrations.html')
+
+def error500(request):
+	# Checks User Permissions
+	results = []
+	results.append(checkLogin(request))
+	results.append(checkActive(request))
+	if results[0] == False:
+		return redirect('/identity/login')
+	if results[1] == False:
+		return redirect('/identity/accountsuspended')
+	
+	return render( request, 'main/pages-500.html')
 
 # def generateMasterList(request):
 # 	devices = SophosDevice.objects.all()

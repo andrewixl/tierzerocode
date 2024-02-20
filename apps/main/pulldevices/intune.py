@@ -60,7 +60,7 @@ def updateIntuneDeviceDatabase(graph_result):
             'managedDeviceOwnerType': device_data['managedDeviceOwnerType'],
             'enrolledDateTime': datetime.fromisoformat(device_data['enrolledDateTime']),
             'lastSyncDateTime': datetime.fromisoformat(device_data['lastSyncDateTime']),
-            'operatingSystem': device_data['operatingSystem'],
+            'osPlatform': device_data['operatingSystem'],
             'complianceState': device_data['complianceState'],
             'jailBroken': device_data['jailBroken'],
             'managementAgent': device_data['managementAgent'],

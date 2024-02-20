@@ -2,6 +2,13 @@ from django.db import models
 
 class Device(models.Model):
     hostname = models.CharField(max_length = 50, null=True)
+    osPlatform = models.CharField(max_length = 20, null=True)
+    ENDPOINT_TYPE_CHOICES = (
+        ("MOBILE", "Mobile"),
+        ("CLIENT", "Client"),
+        ("SERVER", "Server"),
+    )
+    endpointType = models.CharField(max_length=9, choices=ENDPOINT_TYPE_CHOICES, null=True)
 
     def __str__(self):
         return self.hostname
@@ -63,7 +70,7 @@ class IntuneDevice(models.Model):
     managedDeviceOwnerType = models.CharField(max_length = 25, null=True)
     enrolledDateTime = models.DateTimeField(null=True)
     lastSyncDateTime = models.DateTimeField(null=True)
-    operatingSystem = models.CharField(max_length = 25, null=True)
+    osPlatform = models.CharField(max_length = 25, null=True)
     complianceState = models.CharField(max_length = 25, null=True)
     jailBroken = models.CharField(max_length = 25, null=True)
     managementAgent = models.CharField(max_length = 20, null=True)
@@ -125,7 +132,7 @@ class SophosDevice(models.Model):
     hostname = models.CharField(max_length = 50, null=True)
     tenant_id = models.CharField(max_length = 100, null=True)
     os_isServer = models.BooleanField(null=True)
-    os_platform = models.CharField(max_length = 50, null=True)
+    osPlatform = models.CharField(max_length = 50, null=True)
     os_name = models.CharField(max_length = 100, null=True)
     os_majorVersion = models.CharField(max_length = 100, null=True)
     os_minorVersion = models.CharField(max_length = 100, null=True)

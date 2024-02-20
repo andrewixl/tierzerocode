@@ -37,6 +37,11 @@ def unclaimed(request):
 		return render(request, 'login_app/unclaimed.html')
 	
 
+def accountsuspended(request):
+	request.session.flush()
+	messages.warning(request, 'Account Suspended.')
+	return redirect('/identity/login')
+
 def login(request):
 	results = checkUser(request)
 	if results == True:

@@ -61,11 +61,11 @@
 				<div class="sidebar-user">
 					<div class="d-flex justify-content-center">
 						<div class="flex-shrink-0">
-							<img src="{% static 'main/img/avatars/avatar.jpg' %}" class="avatar img-fluid rounded me-1" alt="Charles Hall" />
+							<img src="{% static 'main/img/avatars/avatar-blank.jpg' %}" class="avatar img-fluid rounded me-1" alt="Charles Hall" />
 						</div>
 						<div class="flex-grow-1 ps-2">
 							<a class="sidebar-user-title dropdown-toggle" href="#" data-bs-toggle="dropdown">
-								Charles Hall
+								{{request.session.firstName}} {{request.session.lastName}}
 							</a>
 							<div class="dropdown-menu dropdown-menu-start">
 								<a class="dropdown-item" href="pages-profile.html"><i class="align-middle me-1" data-feather="user"></i> Profile</a>
@@ -78,37 +78,42 @@
 								<a class="dropdown-item" href="#">Log out</a>
 							</div>
 
-							<div class="sidebar-user-subtitle">Designer</div>
+							<div class="sidebar-user-subtitle">CEO | Founder</div>
 						</div>
 					</div>
 				</div>
 
 				<ul class="sidebar-nav">
+					<li class="sidebar-item">
+						<a class="sidebar-link" href="/">
+							<i class="align-middle" data-feather="sliders"></i> <span class="align-middle">Dashboard</span>
+						</a>
+					</li>
 					<li class="sidebar-header">
 						Endpoints
 					</li>
 					<li class="sidebar-item">
-						<a class="sidebar-link" href="pages-profile.html">
+						<a class="sidebar-link" href="/error500">
 							<i class="align-middle" data-feather="user"></i> <span class="align-middle">Master List</span>
 						</a>
 					</li>
 					<li class="sidebar-item">
-						<a class="sidebar-link" href="pages-profile.html">
+						<a class="sidebar-link" href="/error500">
 							<i class="align-middle" data-feather="user"></i> <span class="align-middle">CrowdStrike Falcon</span>
 						</a>
 					</li>
 					<li class="sidebar-item">
-						<a class="sidebar-link" href="pages-profile.html">
+						<a class="sidebar-link" href="/error500">
 							<i class="align-middle" data-feather="user"></i> <span class="align-middle">Defender for Endpoint</span>
 						</a>
 					</li>
 					<li class="sidebar-item">
-						<a class="sidebar-link" href="pages-profile.html">
+						<a class="sidebar-link" href="/error500">
 							<i class="align-middle" data-feather="user"></i> <span class="align-middle">Microsoft Intune</span>
 						</a>
 					</li>
 					<li class="sidebar-item">
-						<a class="sidebar-link" href="pages-profile.html">
+						<a class="sidebar-link" href="/error500">
 							<i class="align-middle" data-feather="user"></i> <span class="align-middle">Sophos Central</span>
 						</a>
 					</li>
@@ -616,7 +621,7 @@
 						</li>
 						<li class="nav-item dropdown">
 							<a class="nav-icon pe-md-0 dropdown-toggle" href="#" data-bs-toggle="dropdown">
-								<img src="{% static 'main/img/avatars/avatar.jpg' %}" class="avatar img-fluid rounded" alt="Charles Hall" />
+								<img src="{% static 'main/img/avatars/avatar-blank.jpg' %}" class="avatar img-fluid rounded" alt="Charles Hall" />
 							</a>
 							<div class="dropdown-menu dropdown-menu-end">
 								<a class="dropdown-item" href="pages-profile.html"><i class="align-middle me-1" data-feather="user"></i> Profile</a>
@@ -626,7 +631,7 @@
 									Privacy</a>
 								<a class="dropdown-item" href="#"><i class="align-middle me-1" data-feather="help-circle"></i> Help Center</a>
 								<div class="dropdown-divider"></div>
-								<a class="dropdown-item" href="#">Log out</a>
+								<a class="dropdown-item" href="/identity/logout">Log out</a>
 							</div>
 						</li>
 					</ul>
