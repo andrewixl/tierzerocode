@@ -91,17 +91,6 @@ def index(request):
 	}
 	return render( request, 'main/index.html', context)
 
-def test(request):
-	# Checks User Permissions
-	results = []
-	results.append(checkLogin(request))
-	results.append(checkActive(request))
-	if results[0] == False:
-		return redirect('/identity/login')
-	if results[1] == False:
-		return redirect('/identity/accountsuspended')
-	return render( request, 'main/index_test.html')
-
 def integrations(request):
 	# Checks User Permissions
 	results = []
@@ -112,7 +101,46 @@ def integrations(request):
 	if results[1] == False:
 		return redirect('/identity/accountsuspended')
 	
-	return render( request, 'main/integrations.html')
+	intuneStatus = []
+	sophosStatus = []
+	defenderStatus = []
+
+	if len(IntuneIntegration.objects.all()) == 0:
+		intuneStatus = [False, False]
+	else:
+		for integration in IntuneIntegration.objects.all():
+			data = IntuneIntegration.objects.get(id = integration.id)
+			if data.tenant_domain:
+				intuneStatus = [data.enabled, True]
+			else:
+				intuneStatus = [data.enabled, False]
+	
+	if len(SophosIntegration.objects.all()) == 0:
+		sophosStatus = [False, False]
+	else:
+		for integration in SophosIntegration.objects.all():
+			data = SophosIntegration.objects.get(id = integration.id)
+			if data.tenant_domain:
+				sophosStatus = [data.enabled, True]
+			else:
+				sophosStatus = [data.enabled, False]
+
+	if len(DefenderIntegration.objects.all()) == 0:
+		defenderStatus = [False, False]
+	else:
+		for integration in DefenderIntegration.objects.all():
+			data = DefenderIntegration.objects.get(id = integration.id)
+			if data.tenant_domain:
+				defenderStatus = [data.enabled, True]
+			else:
+				defenderStatus = [data.enabled, False]
+	
+	context = {
+		'intuneStatus':intuneStatus,
+		'sophosStatus':sophosStatus,
+		'defenderStatus':defenderStatus,
+	}
+	return render( request, 'main/integrations.html', context)
 
 def error500(request):
 	# Checks User Permissions
@@ -154,3 +182,14 @@ def syncDefenderDevices(request):
 
 # Machine.Read.All
 # DeviceManagementManagedDevices.Read.All
+
+def test(request):
+	# Checks User Permissions
+	results = []
+	results.append(checkLogin(request))
+	results.append(checkActive(request))
+	if results[0] == False:
+		return redirect('/identity/login')
+	if results[1] == False:
+		return redirect('/identity/accountsuspended')
+	return render( request, 'main/index_test.html')

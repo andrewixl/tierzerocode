@@ -25,6 +25,8 @@ def updateMasterList(devices, tenant_domain):
                 elif 'android' in os_platform_lower:
                     endpointType = 'Mobile'
                     osPlatform = 'Android'
+                else:
+                    print (device.osPlatform)
                 newDevice = Device.objects.create(hostname=hostname_without_suffix, osPlatform=osPlatform, endpointType=endpointType)
                 device.parentDevice = newDevice
             else:

@@ -23,19 +23,30 @@
 											</a>
 
 											<div class="dropdown-menu dropdown-menu-end">
-												<a class="dropdown-item" href="#">Enable Integration</a>
+												{% if True == intuneStatus.0 %}
 												<a class="dropdown-item" href="#">Disable Integration</a>
 												<a class="dropdown-item" href="#">Configure Integration</a>
+												{% elif False == intuneStatus.0 %}
+												<a class="dropdown-item" href="#">Enable Integration</a>
+												{% endif %}
 											</div>
 										</div>
 									</div>
 									<h5 class="card-title mb-0">Microsoft Intune</h5>
+									{% if True == intuneStatus.0 %}
 									<div class="badge bg-success my-2">Enabled</div>
+									{% elif False == intuneStatus.0 %}
+									<div class="badge bg-danger my-2">Disabled</div>
+									{% endif %}
+									{% if True == intuneStatus.1 %}
 									<div class="badge bg-success my-2">Configured</div>
+									{% elif False == intuneStatus.1 %}
+									<div class="badge bg-danger my-2">Not Configured</div>
+									{% endif %}
 								</div>
 								<!-- <div class="card-body px-4 pt-2">
-									<p>Nam pretium turpis et arcu. Duis arcu tortor, suscipit eget, imperdiet nec, imperdiet iaculis, ipsum. Sed aliquam
-										ultrices mauris.</p>
+									<p>Last Synced: NULL</p>
+									<p>Last Sync Status: SUCCESS</p>
 								</div> -->
 							</div>
 						</div>
@@ -52,15 +63,26 @@
 											</a>
 
 											<div class="dropdown-menu dropdown-menu-end">
-												<a class="dropdown-item" href="#">Enable Integration</a>
+												{% if True == sophosStatus.0 %}
 												<a class="dropdown-item" href="#">Disable Integration</a>
 												<a class="dropdown-item" href="#">Configure Integration</a>
+												{% elif False == sophosStatus.0 %}
+												<a class="dropdown-item" href="#">Enable Integration</a>
+												{% endif %}
 											</div>
 										</div>
 									</div>
 									<h5 class="card-title mb-0">Sophos Central</h5>
+									{% if True == sophosStatus.0 %}
 									<div class="badge bg-success my-2">Enabled</div>
+									{% elif False == sophosStatus.0 %}
+									<div class="badge bg-danger my-2">Disabled</div>
+									{% endif %}
+									{% if True == sophosStatus.1 %}
 									<div class="badge bg-success my-2">Configured</div>
+									{% elif False == sophosStatus.1 %}
+									<div class="badge bg-danger my-2">Not Configured</div>
+									{% endif %}
 								</div>
 								<!-- <div class="card-body px-4 pt-2">
 									<p>Nam pretium turpis et arcu. Duis arcu tortor, suscipit eget, imperdiet nec, imperdiet iaculis, ipsum. Sed aliquam
@@ -81,15 +103,26 @@
 											</a>
 
 											<div class="dropdown-menu dropdown-menu-end">
-												<a class="dropdown-item" href="#">Enable Integration</a>
+												{% if True == defenderStatus.0 %}
 												<a class="dropdown-item" href="#">Disable Integration</a>
 												<a class="dropdown-item" href="#">Configure Integration</a>
+												{% elif False == defenderStatus.0 %}
+												<a class="dropdown-item" href="#">Enable Integration</a>
+												{% endif %}
 											</div>
 										</div>
 									</div>
 									<h5 class="card-title mb-0">Microsoft Defender for Endpoint</h5>
+									{% if True == defenderStatus.0 %}
 									<div class="badge bg-success my-2">Enabled</div>
+									{% elif False == defenderStatus.0 %}
+									<div class="badge bg-danger my-2">Disabled</div>
+									{% endif %}
+									{% if True == defenderStatus.1 %}
 									<div class="badge bg-success my-2">Configured</div>
+									{% elif False == defenderStatus.1 %}
+									<div class="badge bg-danger my-2">Not Configured</div>
+									{% endif %}
 								</div>
 								<!-- <div class="card-body px-4 pt-2">
 									<p>Nam pretium turpis et arcu. Duis arcu tortor, suscipit eget, imperdiet nec, imperdiet iaculis, ipsum. Sed aliquam
@@ -109,11 +142,11 @@
 												<i class="align-middle" data-feather="more-horizontal"></i>
 											</a>
 
-											<div class="dropdown-menu dropdown-menu-end">
+											<!-- <div class="dropdown-menu dropdown-menu-end">
 												<a class="dropdown-item" href="#">Enable Integration</a>
 												<a class="dropdown-item" href="#">Disable Integration</a>
 												<a class="dropdown-item" href="#">Configure Integration</a>
-											</div>
+											</div> -->
 										</div>
 									</div>
 									<h5 class="card-title mb-0">CrowdStrike Falcon</h5>
@@ -137,11 +170,11 @@
 												<i class="align-middle" data-feather="more-horizontal"></i>
 											</a>
 
-											<div class="dropdown-menu dropdown-menu-end">
+											<!-- <div class="dropdown-menu dropdown-menu-end">
 												<a class="dropdown-item" href="#">Enable Integration</a>
 												<a class="dropdown-item" href="#">Disable Integration</a>
 												<a class="dropdown-item" href="#">Configure Integration</a>
-											</div>
+											</div> -->
 										</div>
 									</div>
 									<h5 class="card-title mb-0">Qualys Vulnerability Management</h5>
@@ -165,11 +198,11 @@
 												<i class="align-middle" data-feather="more-horizontal"></i>
 											</a>
 
-											<div class="dropdown-menu dropdown-menu-end">
+											<!-- <div class="dropdown-menu dropdown-menu-end">
 												<a class="dropdown-item" href="#">Enable Integration</a>
 												<a class="dropdown-item" href="#">Disable Integration</a>
 												<a class="dropdown-item" href="#">Configure Integration</a>
-											</div>
+											</div> -->
 										</div>
 									</div>
 									<h5 class="card-title mb-0">System Center Configuration Manager</h5>
@@ -182,6 +215,62 @@
 							</div>
 						</div>
 						<!-- ---------------------------- END SCCM CARD ---------------------------- -->
+						<!-- ---------------------------- START ENTRA ID CARD ---------------------------- -->
+						<div class="col-12 col-md-6 col-lg-3">
+							<div class="card">
+								<img class="card-img-top" src="{% static 'main/img/integration_logos/entra-id-logo.png' %}" alt="SCCM">
+								<div class="card-header px-4 pt-4">
+									<div class="card-actions float-end">
+										<div class="dropdown position-relative">
+											<a href="#" data-bs-toggle="dropdown" data-bs-display="static">
+												<i class="align-middle" data-feather="more-horizontal"></i>
+											</a>
+
+											<!-- <div class="dropdown-menu dropdown-menu-end">
+												<a class="dropdown-item" href="#">Enable Integration</a>
+												<a class="dropdown-item" href="#">Disable Integration</a>
+												<a class="dropdown-item" href="#">Configure Integration</a>
+											</div> -->
+										</div>
+									</div>
+									<h5 class="card-title mb-0">Microsoft Entra ID</h5>
+									<div class="badge bg-info my-2">Under Development</div>
+								</div>
+								<!-- <div class="card-body px-4 pt-2">
+									<p>Nam pretium turpis et arcu. Duis arcu tortor, suscipit eget, imperdiet nec, imperdiet iaculis, ipsum. Sed aliquam
+										ultrices mauris.</p>
+								</div> -->
+							</div>
+						</div>
+						<!-- ---------------------------- END ENTRA ID CARD ---------------------------- -->
+						<!-- ---------------------------- START TENABLE CARD ---------------------------- -->
+						<div class="col-12 col-md-6 col-lg-3">
+							<div class="card">
+								<img class="card-img-top" src="{% static 'main/img/integration_logos/logo_Nessus_FullColor_RGB-01.png' %}" alt="SCCM">
+								<div class="card-header px-4 pt-4">
+									<div class="card-actions float-end">
+										<div class="dropdown position-relative">
+											<a href="#" data-bs-toggle="dropdown" data-bs-display="static">
+												<i class="align-middle" data-feather="more-horizontal"></i>
+											</a>
+
+											<!-- <div class="dropdown-menu dropdown-menu-end">
+												<a class="dropdown-item" href="#">Enable Integration</a>
+												<a class="dropdown-item" href="#">Disable Integration</a>
+												<a class="dropdown-item" href="#">Configure Integration</a>
+											</div> -->
+										</div>
+									</div>
+									<h5 class="card-title mb-0">Tenable Nessus Vulnerability Scanner</h5>
+									<div class="badge bg-info my-2">Under Development</div>
+								</div>
+								<!-- <div class="card-body px-4 pt-2">
+									<p>Nam pretium turpis et arcu. Duis arcu tortor, suscipit eget, imperdiet nec, imperdiet iaculis, ipsum. Sed aliquam
+										ultrices mauris.</p>
+								</div> -->
+							</div>
+						</div>
+						<!-- ---------------------------- END TENABLE CARD ---------------------------- -->
 					</div>
 				</div>
 			</main>
