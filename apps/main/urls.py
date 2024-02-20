@@ -7,6 +7,7 @@ from django.urls import path
 
 urlpatterns = [
     re_path(r'^$', views.index),
+    re_path(r'^test$', views.test),
     re_path(r'^integrations$', views.integrations),
     re_path(r'^error500$', views.error500),
     # re_path(r'^generate-master-list$', views.generateMasterList),

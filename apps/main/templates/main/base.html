@@ -366,7 +366,7 @@
 					</li> -->
 				</ul> 
 
-				<div class="sidebar-cta">
+				<!-- <div class="sidebar-cta">
 					<div class="sidebar-cta-content">
 						<strong class="d-inline-block mb-2">Weekly Sales Report</strong>
 						<div class="mb-3 text-sm">
@@ -377,7 +377,7 @@
 							<a href="https://adminkit.io/" class="btn btn-outline-primary" target="_blank">Download</a>
 						</div>
 					</div>
-				</div>
+				</div> -->
 			</div>
 		</nav>
 
@@ -387,16 +387,16 @@
 					<i class="hamburger align-self-center"></i>
 				</a>
 
-				<form class="d-none d-sm-inline-block">
+				<!-- <form class="d-none d-sm-inline-block">
 					<div class="input-group input-group-navbar">
 						<input type="text" class="form-control" placeholder="Search…" aria-label="Search">
 						<button class="btn" type="button">
 							<i class="align-middle" data-feather="search"></i>
 						</button>
 					</div>
-				</form>
+				</form> -->
 
-				<ul class="navbar-nav d-none d-lg-flex">
+				<!-- <ul class="navbar-nav d-none d-lg-flex">
 					<li class="nav-item px-2 dropdown">
 						<a class="nav-link dropdown-toggle" href="#" id="megaDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true"
 							aria-expanded="false">
@@ -453,7 +453,7 @@
 									data-feather="edit"></i> Changelog</a>
 						</div>
 					</li>
-				</ul>
+				</ul> -->
 
 				<div class="navbar-collapse collapse">
 					<ul class="navbar-nav navbar-align">
@@ -461,15 +461,27 @@
 							<a class="nav-icon dropdown-toggle" href="#" id="alertsDropdown" data-bs-toggle="dropdown">
 								<div class="position-relative">
 									<i class="align-middle" data-feather="bell"></i>
-									<span class="indicator">4</span>
+									<!-- <span class="indicator">4</span> -->
 								</div>
 							</a>
 							<div class="dropdown-menu dropdown-menu-lg dropdown-menu-end py-0" aria-labelledby="alertsDropdown">
 								<div class="dropdown-menu-header">
-									4 New Notifications
+									0 New Notifications
 								</div>
 								<div class="list-group">
-									<a href="#" class="list-group-item">
+									<a href="" class="list-group-item">
+										<div class="row g-0 align-items-center">
+											<div class="col-2">
+												<i class="text-info" data-feather="mail"></i>
+											</div>
+											<div class="col-10">
+												<div class="text-dark">No New Notifications</div>
+												<!-- <div class="text-muted small mt-1">Restart server 12 to complete the update.</div> -->
+												<div class="text-muted small mt-1">Now</div>
+											</div>
+										</div>
+									</a>
+									<!-- <a href="#" class="list-group-item">
 										<div class="row g-0 align-items-center">
 											<div class="col-2">
 												<i class="text-danger" data-feather="alert-circle"></i>
@@ -515,14 +527,14 @@
 												<div class="text-muted small mt-1">14h ago</div>
 											</div>
 										</div>
-									</a>
+									</a> -->
 								</div>
 								<div class="dropdown-menu-footer">
-									<a href="#" class="text-muted">Show all notifications</a>
+									<a href="/error500" class="text-muted">Show all notifications</a>
 								</div>
 							</div>
 						</li>
-						<li class="nav-item dropdown">
+						<!-- <li class="nav-item dropdown">
 							<a class="nav-icon dropdown-toggle" href="#" id="messagesDropdown" data-bs-toggle="dropdown">
 								<div class="position-relative">
 									<i class="align-middle" data-feather="message-square"></i>
@@ -588,17 +600,17 @@
 									<a href="#" class="text-muted">Show all messages</a>
 								</div>
 							</div>
-						</li>
+						</li> -->
 						<li class="nav-item dropdown">
 							<a class="nav-flag dropdown-toggle" href="#" id="languageDropdown" data-bs-toggle="dropdown">
 								<img src="{% static 'main/img/flags/us.png' %}" alt="English" />
 							</a>
 							<div class="dropdown-menu dropdown-menu-end" aria-labelledby="languageDropdown">
-								<a class="dropdown-item" href="#">
+								<a class="dropdown-item" href="">
 									<img src="{% static 'main/img/flags/us.png' %}" alt="English" width="20" class="align-middle me-1" />
 									<span class="align-middle">English</span>
 								</a>
-								<a class="dropdown-item" href="#">
+								<!-- <a class="dropdown-item" href="#">
 									<img src="{% static 'main/img/flags/es.png' %}" alt="Spanish" width="20" class="align-middle me-1" />
 									<span class="align-middle">Spanish</span>
 								</a>
@@ -609,7 +621,7 @@
 								<a class="dropdown-item" href="#">
 									<img src="{% static 'main/img/flags/de.png' %}" alt="German" width="20" class="align-middle me-1" />
 									<span class="align-middle">German</span>
-								</a>
+								</a> -->
 							</div>
 						</li>
 						<li class="nav-item">
@@ -624,13 +636,13 @@
 								<img src="{% static 'main/img/avatars/avatar-blank.jpg' %}" class="avatar img-fluid rounded" alt="Charles Hall" />
 							</a>
 							<div class="dropdown-menu dropdown-menu-end">
-								<a class="dropdown-item" href="pages-profile.html"><i class="align-middle me-1" data-feather="user"></i> Profile</a>
-								<a class="dropdown-item" href="#"><i class="align-middle me-1" data-feather="pie-chart"></i> Analytics</a>
+								<!-- <a class="dropdown-item" href="pages-profile.html"><i class="align-middle me-1" data-feather="user"></i> Profile</a> -->
+								<a class="dropdown-item" href="/"><i class="align-middle me-1" data-feather="pie-chart"></i> Analytics</a>
 								<div class="dropdown-divider"></div>
-								<a class="dropdown-item" href="pages-settings.html"><i class="align-middle me-1" data-feather="settings"></i> Settings &
+								<!-- <a class="dropdown-item" href="pages-settings.html"><i class="align-middle me-1" data-feather="settings"></i> Settings &
 									Privacy</a>
 								<a class="dropdown-item" href="#"><i class="align-middle me-1" data-feather="help-circle"></i> Help Center</a>
-								<div class="dropdown-divider"></div>
+								<div class="dropdown-divider"></div> -->
 								<a class="dropdown-item" href="/identity/logout">Log out</a>
 							</div>
 						</li>
@@ -747,7 +759,7 @@
 			});
 		});
 	</script>
-	<script>
+	<!-- <script>
 		document.addEventListener("DOMContentLoaded", function() {
 			// Pie chart
 			new Chart(document.getElementById("chartjs-dashboard-pie"), {
@@ -776,7 +788,98 @@
 				}
 			});
 		});
-	</script>
+	</script> -->
+	<script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Pie chart
+            new Chart(document.getElementById("dashboard-os-platform-pie"), {
+                type: "pie",
+                data: {
+                    labels: {{ osPlatformLabels|safe }},
+                    datasets: [{
+                        data: {{ osPlatformData|safe }},
+                        backgroundColor: [
+                            window.theme.primary,
+                            window.theme.warning,
+                            window.theme.danger,
+							window.theme.success,
+                            "#E8EAED"
+                        ],
+                        borderWidth: 5,
+                        borderColor: window.theme.white
+                    }]
+                },
+                options: {
+                    responsive: !window.MSInputMethodContext,
+                    maintainAspectRatio: false,
+                    legend: {
+                        display: false
+                    },
+                    cutoutPercentage: 70
+                }
+            });
+        });
+    </script>
+	<!-- <script>
+		document.addEventListener("DOMContentLoaded", function() {
+			// Pie chart
+			new Chart(document.getElementById("dashboard-endpoint-type-pie"), {
+				type: "pie",
+				data: {
+					labels: ["Chrome", "Firefox", "IE"],
+					datasets: [{
+						data: [4306, 3801, 1689],
+						backgroundColor: [
+							window.theme.primary,
+							window.theme.warning,
+							window.theme.danger,
+							"#E8EAED"
+						],
+						borderWidth: 5,
+						borderColor: window.theme.white
+					}]
+				},
+				options: {
+					responsive: !window.MSInputMethodContext,
+					maintainAspectRatio: false,
+					legend: {
+						display: false
+					},
+					cutoutPercentage: 70
+				}
+			});
+		});
+	</script> -->
+	<script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Pie chart
+            new Chart(document.getElementById("dashboard-endpoint-type-pie"), {
+                type: "pie",
+                data: {
+                    labels: {{ endpointTypeLabels|safe }},
+                    datasets: [{
+                        data: {{ endpointTypeData|safe }},
+                        backgroundColor: [
+                            window.theme.primary,
+                            window.theme.warning,
+                            window.theme.danger,
+                            "#E8EAED"
+                        ],
+                        borderWidth: 5,
+                        borderColor: window.theme.white
+                    }]
+                },
+                options: {
+                    responsive: !window.MSInputMethodContext,
+                    maintainAspectRatio: false,
+                    legend: {
+                        display: false
+                    },
+                    cutoutPercentage: 70
+                }
+            });
+        });
+    </script>
 	<script>
 		document.addEventListener("DOMContentLoaded", function() {
 			// Bar chart

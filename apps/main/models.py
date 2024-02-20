@@ -2,11 +2,17 @@ from django.db import models
 
 class Device(models.Model):
     hostname = models.CharField(max_length = 50, null=True)
-    osPlatform = models.CharField(max_length = 20, null=True)
+    OS_PLATFORM_CHOICES = (
+        ("Android", "Android"),
+        ("Ubuntu", "Ubuntu"),
+        ("Windows", "Windows"),
+        ("Windows Server", "Windows Server"),
+    )
+    osPlatform = models.CharField(max_length = 20, choices=OS_PLATFORM_CHOICES, null=True)
     ENDPOINT_TYPE_CHOICES = (
-        ("MOBILE", "Mobile"),
-        ("CLIENT", "Client"),
-        ("SERVER", "Server"),
+        ("Client", "Client"),
+        ("Server", "Server"),
+        ("Mobile", "Mobile"),   
     )
     endpointType = models.CharField(max_length=9, choices=ENDPOINT_TYPE_CHOICES, null=True)
 
