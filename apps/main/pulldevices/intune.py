@@ -56,7 +56,7 @@ def updateIntuneDeviceDatabase(graph_result):
         # Prepare data for updating/creating device
         device_fields = {
             'userId': device_data['userId'],
-            'deviceName': device_name,
+            'hostname': device_name.lower(),
             'managedDeviceOwnerType': device_data['managedDeviceOwnerType'],
             'enrolledDateTime': datetime.fromisoformat(device_data['enrolledDateTime']),
             'lastSyncDateTime': datetime.fromisoformat(device_data['lastSyncDateTime']),

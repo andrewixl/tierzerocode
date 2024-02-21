@@ -82,7 +82,7 @@ class QualysIntegration(models.Model):
 class IntuneDevice(models.Model):
     id = models.CharField(max_length = 100, primary_key=True)
     userId = models.CharField(max_length = 50, null=True)
-    deviceName = models.CharField(max_length = 100, null=True)
+    hostname = models.CharField(max_length = 100, null=True)
     managedDeviceOwnerType = models.CharField(max_length = 25, null=True)
     enrolledDateTime = models.DateTimeField(null=True)
     lastSyncDateTime = models.DateTimeField(null=True)
@@ -139,7 +139,7 @@ class IntuneDevice(models.Model):
     updated_at = models.DateTimeField(auto_now=True, null=True)
 
     def __str__(self):
-        return self.deviceName
+        return self.hostname
     
 
 class SophosDevice(models.Model):
@@ -176,7 +176,7 @@ class DefenderDevice(models.Model):
     isPotentialDuplication = models.BooleanField(null=True)
     isExcluded = models.BooleanField(null=True)
     exclusionReason = models.CharField(max_length = 50, null=True)
-    computerDnsName = models.CharField(max_length = 100, null=True)
+    hostname = models.CharField(max_length = 100, null=True)
     firstSeen = models.CharField(max_length = 50, null=True)
     lastSeen = models.CharField(max_length = 50, null=True)
     osPlatform = models.CharField(max_length = 50, null=True)
@@ -206,4 +206,4 @@ class DefenderDevice(models.Model):
     updated_at = models.DateTimeField(auto_now=True, null=True)
 
     def __str__(self):
-        return self.computerDnsName
+        return self.hostname

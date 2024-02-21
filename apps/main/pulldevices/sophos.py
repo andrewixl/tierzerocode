@@ -78,7 +78,7 @@ def updateSophosDeviceDatabase(json_data):
             id=device_id,
             defaults={
                 'type': device_type,
-                'hostname': hostname,
+                'hostname': hostname.lower(),
                 'tenant_id': tenant_id,
                 'os_isServer': os_data.get('isServer'),
                 'osPlatform': os_data.get('name'),

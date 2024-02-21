@@ -93,7 +93,7 @@
 						Endpoints
 					</li>
 					<li class="sidebar-item">
-						<a class="sidebar-link" href="/error500">
+						<a class="sidebar-link" href="/master-list">
 							<i class="align-middle" data-feather="user"></i> <span class="align-middle">Master List</span>
 						</a>
 					</li>
@@ -684,6 +684,16 @@
 	</div>
 
 	<script src="{% static 'main/js/app.js' %}"></script>
+	<script src="{% static 'main/js/datatables.js' %}"></script>
+
+	<script>
+		document.addEventListener("DOMContentLoaded", function() {
+			// Datatables Responsive
+			$("#datatables-reponsive").DataTable({
+				responsive: true
+			});
+		});
+	</script>
 
 	<script>
 		document.addEventListener("DOMContentLoaded", function() {

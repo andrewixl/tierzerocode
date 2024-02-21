@@ -52,7 +52,7 @@ def updateDefenderDeviceDatabase(json_data):
                 'isPotentialDuplication': device_data['isPotentialDuplication'],
                 'isExcluded': device_data['isExcluded'],
                 'exclusionReason': device_data['exclusionReason'],
-                'computerDnsName': device_data['computerDnsName'],
+                'hostname': (device_data['computerDnsName'].split('.', 1)[0]).lower(),
                 'firstSeen': device_data['firstSeen'],
                 'lastSeen': device_data['lastSeen'],
                 'osPlatform': device_data['osPlatform'],
