@@ -145,15 +145,28 @@
 												<i class="align-middle" data-feather="more-horizontal"></i>
 											</a>
 
-											<!-- <div class="dropdown-menu dropdown-menu-end">
-												<a class="dropdown-item" href="#">Enable Integration</a>
-												<a class="dropdown-item" href="#">Disable Integration</a>
+											<div class="dropdown-menu dropdown-menu-end">
+												{% if True == crowdstrikeStatus.0 %}
+												<a class="dropdown-item" href="/disable-integration/crowdstrike/{{crowdstrikeStatus.2}}">Disable Integration</a>
 												<a class="dropdown-item" href="#">Configure Integration</a>
-											</div> -->
+												<a class="dropdown-item" href="/sync-crowdstrike-devices">Sync Integration</a>
+												{% elif False == crowdstrikeStatus.0 %}
+												<a class="dropdown-item" href="/enable-integration/crowdstrike/{{crowdstrikeStatus.2}}">Enable Integration</a>
+												{% endif %}
+											</div>
 										</div>
 									</div>
 									<h5 class="card-title mb-0">CrowdStrike Falcon</h5>
-									<div class="badge bg-info my-2">Under Development</div>
+									{% if True == crowdstrikeStatus.0 %}
+									<div class="badge bg-success my-2">Enabled</div>
+									{% elif False == crowdstrikeStatus.0 %}
+									<div class="badge bg-danger my-2">Disabled</div>
+									{% endif %}
+									{% if True == crowdstrikeStatus.1 %}
+									<div class="badge bg-success my-2">Configured</div>
+									{% elif False == crowdstrikeStatus.1 %}
+									<div class="badge bg-danger my-2">Not Configured</div>
+									{% endif %}
 								</div>
 								<!-- <div class="card-body px-4 pt-2">
 									<p>Nam pretium turpis et arcu. Duis arcu tortor, suscipit eget, imperdiet nec, imperdiet iaculis, ipsum. Sed aliquam

@@ -49,6 +49,16 @@ class DefenderIntegration(models.Model):
     def __str__(self):
         return 'Microsoft Defender for Endpoint'
 
+class CrowdStrikeIntegration(models.Model):
+    enabled = models.BooleanField(null=True, default=False)
+    client_id = models.CharField(max_length = 50, null=True)
+    client_secret = models.CharField(max_length = 50, null=True)
+    tenant_id = models.CharField(max_length = 50, null=True)
+    tenant_domain = models.CharField(max_length = 50, null=True)
+
+    def __str__(self):
+        return 'CrowdStrike Falcon'
+
 class SCCMIntegration(models.Model):
     enabled = models.BooleanField(null=True, default=False)
     client_id = models.CharField(max_length = 50, null=True)

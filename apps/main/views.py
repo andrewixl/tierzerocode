@@ -4,9 +4,10 @@ from .pulldevices.masterlist import *
 from .pulldevices.intune import *
 from .pulldevices.sophos import *
 from .pulldevices.defender import *
+from .pulldevices.crowdstrike import *
 
 # Import Integrations
-from .models import IntuneIntegration, SophosIntegration, DefenderIntegration
+from .models import IntuneIntegration, SophosIntegration, DefenderIntegration, CrowdStrikeIntegration
 from .models import Device, IntuneDevice, SophosDevice, DefenderDevice
 from ..login_app.models import User
 
@@ -104,6 +105,7 @@ def integrations(request):
 	intuneStatus = []
 	sophosStatus = []
 	defenderStatus = []
+	crowdStrikeStatus = []
 
 	if len(IntuneIntegration.objects.all()) == 0:
 		intuneStatus = [False, False, null]
@@ -135,10 +137,21 @@ def integrations(request):
 			else:
 				defenderStatus = [data.enabled, False, integration.id]
 	
+	if len(CrowdStrikeIntegration.objects.all()) == 0:
+		crowdstrikeStatus = [False, False, null]
+	else:
+		for integration in CrowdStrikeIntegration.objects.all():
+			data = CrowdStrikeIntegration.objects.get(id = integration.id)
+			if data.tenant_domain:
+				crowdstrikeStatus = [data.enabled, True, integration.id]
+			else:
+				crowdstrikeStatus = [data.enabled, False, integration.id]
+	
 	context = {
 		'intuneStatus':intuneStatus,
 		'sophosStatus':sophosStatus,
 		'defenderStatus':defenderStatus,
+		'crowdstrikeStatus':crowdstrikeStatus,
 	}
 	return render( request, 'main/integrations.html', context)
 
@@ -168,6 +181,14 @@ def enableIntegration(request, integration, id):
 					integration_update.save()
 			except:
 				DefenderIntegration.objects.create(enabled = True)
+		case 'crowdstrike':
+			try:
+				if CrowdStrikeIntegration.objects.get(id=id):
+					integration_update = CrowdStrikeIntegration.objects.get(id=id)
+					integration_update.enabled = True
+					integration_update.save()
+			except:
+				CrowdStrikeIntegration.objects.create(enabled = True)
 	return redirect ('/integrations')
 
 def disableIntegration(request, integration, id):
@@ -185,6 +206,11 @@ def disableIntegration(request, integration, id):
 		case 'defender':
 			if DefenderIntegration.objects.get(id=id):
 				integration_update = DefenderIntegration.objects.get(id=id)
+				integration_update.enabled = False
+				integration_update.save()
+		case 'crowdstrike':
+			if CrowdStrikeIntegration.objects.get(id=id):
+				integration_update = CrowdStrikeIntegration.objects.get(id=id)
 				integration_update.enabled = False
 				integration_update.save()
 	return redirect ('/integrations')
@@ -226,6 +252,10 @@ def syncSophosDevices(request):
 
 def syncDefenderDevices(request):
 	syncDefender()
+	return redirect('/integrations')
+
+def syncCrowdStrikeDevices(request):
+	syncCrowdStrike()
 	return redirect('/integrations')
 
 # Machine.Read.All

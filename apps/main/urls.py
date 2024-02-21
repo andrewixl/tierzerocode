@@ -16,4 +16,5 @@ urlpatterns = [
     re_path(r'^sync-intune-devices$', views.syncIntuneDevices),
     re_path(r'^sync-sophos-devices$', views.syncSophosDevices),
     re_path(r'^sync-defender-devices$', views.syncDefenderDevices),
+    re_path(r'^sync-crowdstrike-devices$', views.syncCrowdStrikeDevices),
 ] 
