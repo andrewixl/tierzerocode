@@ -35,7 +35,7 @@ def getCrowdStrikeAccessToken(client_id, client_secret, tenant_id):
         print("An error occurred:", str(e))
 
 def getCrowdStrikeDevices(access_token):
-    url = 'https://api.crowdstrike.com/devices/queries/devices/v1'
+    url = 'https://api.crowdstrike.com/devices/queries/devices/v1?limit=14'
     # url = 'https://api.crowdstrike.com/devices/queries/devices-scroll/v1'
     headers = {
     'Authorization': access_token
