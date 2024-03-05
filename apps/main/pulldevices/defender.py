@@ -45,8 +45,26 @@ def getDefenderDevices(access_token):
 
 def updateDefenderDeviceDatabase(json_data):
     for device_data in json_data['value']:
-        if device_data.get('onboardingStatus') == 'Onboarded':
+        if device_data.get('onboardingStatus') == 'Onboarded' and not device_data.get('healthStatus') == 'Inactive':
             device_id = device_data['id']
+
+            os_platform_lower = (device_data['osPlatform']).lower()
+            if 'server' in os_platform_lower and 'windows' in os_platform_lower:
+                endpointType = 'Server'
+                osPlatform_clean = 'Windows Server'
+            elif 'ubuntu' in os_platform_lower:
+                endpointType = 'Server'
+                osPlatform_clean  = 'Ubuntu'
+            elif 'windows' in os_platform_lower:
+                endpointType = 'Client'
+                osPlatform_clean  = 'Windows'
+            elif 'android' in os_platform_lower:
+                endpointType = 'Mobile'
+                osPlatform_clean  = 'Android'
+            else:
+                endpointType = 'Other'
+                osPlatform_clean  = 'Other'
+
             defaults = {
                 'mergedIntoMachineId': device_data['mergedIntoMachineId'],
                 'isPotentialDuplication': device_data['isPotentialDuplication'],
@@ -55,7 +73,8 @@ def updateDefenderDeviceDatabase(json_data):
                 'hostname': (device_data['computerDnsName'].split('.', 1)[0]).lower(),
                 'firstSeen': device_data['firstSeen'],
                 'lastSeen': device_data['lastSeen'],
-                'osPlatform': device_data['osPlatform'],
+                'osPlatform': osPlatform_clean,
+                'endpointType': endpointType,
                 'osVersion': device_data['osVersion'],
                 'osProcessor': device_data['osProcessor'],
                 'version': device_data['version'],

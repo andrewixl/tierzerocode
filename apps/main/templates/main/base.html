@@ -84,7 +84,11 @@
 				</div>
 
 				<ul class="sidebar-nav">
+					{% if page == 'dashboard' %}
 					<li class="sidebar-item active">
+					{% else %}
+					<li class="sidebar-item">
+					{% endif %}
 						<a class="sidebar-link" href="/">
 							<i class="align-middle" data-feather="sliders"></i> <span class="align-middle">Dashboard</span>
 						</a>
@@ -92,7 +96,11 @@
 					<li class="sidebar-header">
 						Endpoints
 					</li>
+					{% if page == 'master-list' %}
+					<li class="sidebar-item active">
+					{% else %}
 					<li class="sidebar-item">
+					{% endif %}
 						<a class="sidebar-link" href="/endpoints/master-list">
 							<i class="align-middle" data-feather="user"></i> <span class="align-middle">Master List</span>
 						</a>
@@ -102,17 +110,29 @@
 							<i class="align-middle" data-feather="user"></i> <span class="align-middle">CrowdStrike Falcon</span>
 						</a>
 					</li> -->
+					{% if page == 'defender' %}
+					<li class="sidebar-item active">
+					{% else %}
 					<li class="sidebar-item">
+					{% endif %}
 						<a class="sidebar-link" href="/endpoints/defender">
 							<i class="align-middle" data-feather="user"></i> <span class="align-middle">Defender for Endpoint</span>
 						</a>
 					</li>
+					{% if page == 'intune' %}
+					<li class="sidebar-item active">
+					{% else %}
 					<li class="sidebar-item">
+					{% endif %}
 						<a class="sidebar-link" href="/endpoints/intune">
 							<i class="align-middle" data-feather="user"></i> <span class="align-middle">Microsoft Intune</span>
 						</a>
 					</li>
+					{% if page == 'sophos' %}
+					<li class="sidebar-item active">
+					{% else %}
 					<li class="sidebar-item">
+					{% endif %}
 						<a class="sidebar-link" href="/endpoints/sophos">
 							<i class="align-middle" data-feather="user"></i> <span class="align-middle">Sophos Central</span>
 						</a>
@@ -131,7 +151,11 @@
 					<li class="sidebar-header">
 						Configurations
 					</li>
+					{% if page == 'integrations' %}
+					<li class="sidebar-item active">
+					{% else %}
 					<li class="sidebar-item">
+					{% endif %}
 						<a class="sidebar-link" href="/integrations">
 							<i class="align-middle" data-feather="user"></i> <span class="align-middle">Integrations</span>
 						</a>
@@ -410,6 +434,8 @@
 							<div class="dropdown-menu dropdown-menu-end">
 								<!-- <a class="dropdown-item" href="pages-profile.html"><i class="align-middle me-1" data-feather="user"></i> Profile</a> -->
 								<a class="dropdown-item" href="/"><i class="align-middle me-1" data-feather="pie-chart"></i> Analytics</a>
+								<div class="dropdown-divider"></div>
+								<a class="dropdown-item" href="pages-settings.html"><i class="align-middle me-1" data-feather="settings"></i> Settings</a>
 								<div class="dropdown-divider"></div>
 								<!-- <a class="dropdown-item" href="pages-settings.html"><i class="align-middle me-1" data-feather="settings"></i> Settings &
 									Privacy</a>

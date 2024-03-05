@@ -75,27 +75,29 @@ def index(request):
 		defender = False
 		crowdstrike = False
 		try:
-			if endpoint.integrationIntune.get(hostname = endpoint.hostname):
+			if len(endpoint.integrationIntune.filter(hostname = endpoint.hostname)) == 1:
 				intune = True
 		except:
 			intune = False
 		try:
-			if endpoint.integrationSophos.get(hostname = endpoint.hostname):
+			if len(endpoint.integrationSophos.filter(hostname = endpoint.hostname)) == 1:
 				sophos = True
 		except:
 			sophos = False
 		try:
-			if endpoint.integrationDefender.get(hostname = endpoint.hostname):
+			if len(endpoint.integrationDefender.filter(hostname = endpoint.hostname)) == 1:
+				defender = True
+			elif len(endpoint.integrationDefender.filter(hostname = endpoint.hostname)) > 1:
 				defender = True
 		except:
 			defender = False
 		try:
-			if endpoint.integrationCrowdStrike.get(hostname = endpoint.hostname):
+			if len(endpoint.integrationCrowdStrike.filter(hostname = endpoint.hostname)) == 1:
 				crowdstrike = True
 		except:
 			crowdstrike = False
-		# endpoint_list.append([endpoint.hostname, intune, sophos, defender, crowdstrike, False])
 		endpoint_list.append([intune, sophos, defender])
+		
 	
 	count_all_true = 0
 	count_any_false = 0
@@ -106,6 +108,7 @@ def index(request):
 			count_any_false += 1
 
 	context = {
+		'page':'dashboard',
 		'totalDeviceEndpoints':len(Device.objects.all()),
 		'totalIntuneEndpoints':len(IntuneDevice.objects.all()),
 		'totalSophosEndpoints':len(SophosDevice.objects.all()),
@@ -159,7 +162,7 @@ def masterList(request):
 		crowdstrike = False
 
 		try:
-			if endpoint.integrationIntune.get(hostname = endpoint.hostname):
+			if len(endpoint.integrationIntune.filter(hostname = endpoint.hostname)) == 1:
 				intune = True
 		except:
 			intune = False
@@ -169,9 +172,12 @@ def masterList(request):
 		except:
 			sophos = False
 		try:
-			if endpoint.integrationDefender.get(hostname = endpoint.hostname):
+			if len(endpoint.integrationDefender.filter(hostname = endpoint.hostname)) == 1:
+				defender = True
+			elif len(endpoint.integrationDefender.filter(hostname = endpoint.hostname)) > 1:
 				defender = True
 		except:
+			print("entered exception for Defender")
 			defender = False
 		try:
 			if endpoint.integrationCrowdStrike.get(hostname = endpoint.hostname):
@@ -182,6 +188,7 @@ def masterList(request):
 		endpoint_list.append([endpoint.hostname, intune, sophos, defender])
 
 	context = {
+		'page':"master-list",
 		'endpoint_list':endpoint_list,
 	}
 	return render( request, 'main/master-list.html', context)
@@ -210,9 +217,11 @@ def endpointList(request, integration):
 	# 	endpoints = CrowdStrikeDevice.objects.all()
 
 	for endpoint in endpoints:
-		endpoint_list.append([endpoint.hostname, endpoint.osPlatform, endpoint.created_at, endpoint.id])
+		endpoint_list.append([endpoint.hostname, endpoint.osPlatform, endpoint.endpointType, endpoint.created_at])
 
 	context = {
+		'page':integration,
+		'integration':integration.title(),
 		'endpoint_list':endpoint_list,
 	}
 	return render( request, 'main/endpoint-list.html', context)
@@ -257,6 +266,7 @@ def integrations(request):
 	if len(DefenderIntegration.objects.all()) == 0:
 		defenderStatus = [False, False, null]
 	else:
+		print ("entered else")
 		for integration in DefenderIntegration.objects.all():
 			data = DefenderIntegration.objects.get(id = integration.id)
 			if data.tenant_domain:
@@ -275,6 +285,7 @@ def integrations(request):
 				crowdstrikeStatus = [data.enabled, False, integration.id]
 	
 	context = {
+		'page':'integrations',
 		'intuneStatus':intuneStatus,
 		'sophosStatus':sophosStatus,
 		'defenderStatus':defenderStatus,

@@ -73,6 +73,23 @@ def updateSophosDeviceDatabase(json_data):
         lockdown_data = device_data.get('lockdown', {})
         isolation_data = device_data.get('isolation', {})
 
+        os_platform_lower = (os_data.get('name')).lower()
+        if 'server' in os_platform_lower and 'windows' in os_platform_lower:
+            endpointType = 'Server'
+            osPlatform_clean = 'Windows Server'
+        elif 'ubuntu' in os_platform_lower:
+            endpointType = 'Server'
+            osPlatform_clean  = 'Ubuntu'
+        elif 'windows' in os_platform_lower:
+            endpointType = 'Client'
+            osPlatform_clean  = 'Windows'
+        elif 'android' in os_platform_lower:
+            endpointType = 'Mobile'
+            osPlatform_clean  = 'Android'
+        else:
+            endpointType = 'Other'
+            osPlatform_clean  = 'Other'
+
         # Create or update the SophosDevice instance
         sophos_device, created = SophosDevice.objects.update_or_create(
             id=device_id,
@@ -81,7 +98,8 @@ def updateSophosDeviceDatabase(json_data):
                 'hostname': hostname.lower(),
                 'tenant_id': tenant_id,
                 'os_isServer': os_data.get('isServer'),
-                'osPlatform': os_data.get('name'),
+                'osPlatform': osPlatform_clean,
+                'endpointType': endpointType,
                 'os_name': os_data.get('platform'),
                 'os_majorVersion': os_data.get('majorVersion'),
                 'os_minorVersion': os_data.get('minorVersion'),

@@ -52,6 +52,23 @@ def updateIntuneDeviceDatabase(graph_result):
             device = IntuneDevice.objects.get(id=device_id)
         except IntuneDevice.DoesNotExist:
             device = None
+        
+        os_platform_lower = (device_data['operatingSystem']).lower()
+        if 'server' in os_platform_lower and 'windows' in os_platform_lower:
+            endpointType = 'Server'
+            osPlatform_clean = 'Windows Server'
+        elif 'ubuntu' in os_platform_lower:
+            endpointType = 'Server'
+            osPlatform_clean  = 'Ubuntu'
+        elif 'windows' in os_platform_lower:
+            endpointType = 'Client'
+            osPlatform_clean  = 'Windows'
+        elif 'android' in os_platform_lower:
+            endpointType = 'Mobile'
+            osPlatform_clean  = 'Android'
+        else:
+            endpointType = 'Other'
+            osPlatform_clean  = 'Other'
 
         # Prepare data for updating/creating device
         device_fields = {
@@ -60,7 +77,8 @@ def updateIntuneDeviceDatabase(graph_result):
             'managedDeviceOwnerType': device_data['managedDeviceOwnerType'],
             'enrolledDateTime': datetime.fromisoformat(device_data['enrolledDateTime']),
             'lastSyncDateTime': datetime.fromisoformat(device_data['lastSyncDateTime']),
-            'osPlatform': device_data['operatingSystem'],
+            'osPlatform': osPlatform_clean,
+            'endpointType': endpointType,
             'complianceState': device_data['complianceState'],
             'jailBroken': device_data['jailBroken'],
             'managementAgent': device_data['managementAgent'],
