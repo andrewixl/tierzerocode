@@ -167,7 +167,9 @@ def masterList(request):
 		except:
 			intune = False
 		try:
-			if endpoint.integrationSophos.get(hostname = endpoint.hostname):
+			if len(endpoint.integrationSophos.get(hostname = endpoint.hostname)) == 1:
+				sophos = True
+			elif len(endpoint.integrationSophos.get(hostname = endpoint.hostname)) > 1:
 				sophos = True
 		except:
 			sophos = False
