@@ -1,30 +1,43 @@
+<a href="https://github.com/andrewixl/tierzerocode/blob/master/LICENSE.txt"><img alt="GitHub license" src="https://img.shields.io/github/license/andrewixl/tierzerocode"></a>
+<img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/andrewixl/tierzerocode">
+<a href="https://github.com/andrewixl/tierzerocode/issues"><img alt="GitHub issues" src="https://img.shields.io/github/issues/andrewixl/tierzerocode"></a>
+
 # Tier Zero C.O.D.E (Tier Zero Correlation of Distributed Endpoints)
 
-
+## Requirements
+- [ ] Ubuntu Server 18.04 (SSL Not Supported on Ubuntu Server 20.04)
+- [ ] 10 GB Storage Space
+- [ ] 1 GB RAM
 
 ## Getting started
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+```bash
+sudo -i
+apt-get update && apt-get upgrade -y
+apt-get install python3-pip python3-dev nginx fail2ban git python3-certbot-nginx -y
+apt-get update
+pip3 install virtualenv
+git clone https://github.com/andrewixl/reverseproxy.git
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
-
-## Add your files
-
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
-
-```
-cd existing_repo
-git remote add origin https://gitlab.awbtech.org/andrew.burger/tier-zero-code.git
-git branch -M main
-git push -uf origin main
+cd reverseproxy
+virtualenv venv
+source venv/bin/activate
+pip3 install -r requirements.txt
+sudo ufw allow 8000
+bash install.sh
 ```
 
 ## Integrate with your tools
 
-- [ ] [Set up project integrations](https://gitlab.awbtech.org/andrew.burger/tier-zero-code/-/settings/integrations)
+- [ ] Microsoft Intune
+- [ ] Microsoft Defender for Endpoint
+- [ ] Sophos Central
+- [ ] CrowdStrike Falcon (Under Development)
+- [ ] Qualys (Under Development)
+- [ ] Tenable (Under Development)
+- [ ] System Center Configuration Manager (Under Development)
 
-## Collaborate with your team
+<!-- ## Collaborate with your team
 
 - [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
 - [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
@@ -90,4 +103,4 @@ Show your appreciation to those who have contributed to the project.
 For open source projects, say how it is licensed.
 
 ## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers. -->
