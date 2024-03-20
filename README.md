@@ -4,9 +4,9 @@
 
 # Tier Zero C.O.D.E (Tier Zero Correlation of Distributed Endpoints)
 
-## Requirements
-- [ ] Ubuntu Server 18.04 (SSL Not Supported on Ubuntu Server 20.04)
-- [ ] 10 GB Storage Space
+## Minimum Requirements
+- [ ] Ubuntu Server 22.04
+- [ ] 64 GB Storage Space
 - [ ] 1 GB RAM
 
 ## Getting started
@@ -17,9 +17,9 @@ apt-get update && apt-get upgrade -y
 apt-get install python3-pip python3-dev nginx fail2ban git python3-certbot-nginx -y
 apt-get update
 pip3 install virtualenv
-git clone https://github.com/andrewixl/reverseproxy.git
+git clone https://github.com/andrewixl/tierzerocode.git
 
-cd reverseproxy
+cd tierzerocode
 virtualenv venv
 source venv/bin/activate
 pip3 install -r requirements.txt
