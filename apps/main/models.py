@@ -36,7 +36,7 @@ class Integration(models.Model):
     tenant_domain = models.CharField(max_length = 50, null=True)
 
     def __str__(self):
-        return self.IntegrationType
+        return self.integration_type
 
 class IntuneIntegration(models.Model):
     enabled = models.BooleanField(null=True, default=False)

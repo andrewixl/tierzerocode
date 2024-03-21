@@ -9,6 +9,7 @@ urlpatterns = [
     re_path(r'^$', views.index),
     re_path(r'^endpoints/master-list$', views.masterList),
     re_path(r'^endpoints/(?P<integration>[-\w]+)$', views.endpointList),
+    re_path(r'^initial-setup$', views.initialSetup),
     re_path(r'^test$', views.test),
     re_path(r'^integrations$', views.integrations),
     re_path(r'^enable-integration/(?P<integration>[-\w]+)/(?P<id>\d+)$', views.enableIntegration),

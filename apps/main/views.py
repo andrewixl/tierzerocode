@@ -13,6 +13,11 @@ from ..login_app.models import User
 
 ############################################################################################
 
+# Reused Data Sets
+integration_names = ['CrowdStrike Falcon', 'Microsoft Defender for Endpoint', 'Microsoft Intune', 'Sophos Central']
+
+############################################################################################
+
 def genErrors(request, Emessages):
 	for message in Emessages:
 		messages.warning(request, message)
@@ -38,42 +43,44 @@ def checkIntegrations(request):
 		return False
 	else:
 		return True
-	
+
+from django.http import HttpResponseRedirect
+
 def loginChecks(request):
 	results = []
 	results.append(checkLogin(request))
 	results.append(checkActive(request))
 	results.append(checkIntegrations(request))
+	print (results)
 	if results[0] == False:
-		return redirect('/identity/login')
-	if results[1] == False:
-		return redirect('/identity/accountsuspended')
-	if results[2] == False:
-		return redirect('/initialSetup')
+		return '/identity/login'
+	elif results[1] == False:
+		return '/identity/accountsuspended'
+	elif results[2] == False:
+		print("Entering Initial Setup")
+		return '/initial-setup'
+	else:
+		return None
 
 ############################################################################################	
 
 def initialSetup(request):
-	IntegrationTypes = ['Microsoft Intune', 'Sophos Central', 'Microsoft Defender', 'CrowdStrike', 'SCCM', 'Qualys']
-	for integration in IntegrationTypes:
-		if len(Integration.objects.filter(name = integration)) == 0:
+	for integration in integration_names:
+		if len(Integration.objects.filter(integration_type = integration)) == 0:
 			Integration.objects.create(enabled = False, integration_type = integration)
-	return redirect('/')
+	return redirect(request.META.get('HTTP_REFERER', '/'))
+	# return redirect('/')
+	# return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
 
 ############################################################################################
 
 from django.db.models import Count
 def index(request):
-	# Checks User Permissions
-	# results = []
-	# results.append(checkLogin(request))
-	# results.append(checkActive(request))
-	# if results[0] == False:
-	# 	return redirect('/identity/login')
-	# if results[1] == False:
-	# 	return redirect('/identity/accountsuspended')
+	# Checks User Permissions and Required Models
+	redirect_url = loginChecks(request)
+	if redirect_url:
+		return redirect(redirect_url)
 
-	loginChecks(request)
 
 	# Query to get the count of each os platform
 	os_platform_counts = Device.objects.values('osPlatform').annotate(count=Count('osPlatform'))
@@ -169,14 +176,8 @@ def index(request):
 ############################################################################################
 
 def masterList(request):
-	# Checks User Permissions
-	results = []
-	results.append(checkLogin(request))
-	results.append(checkActive(request))
-	if results[0] == False:
-		return redirect('/identity/login')
-	if results[1] == False:
-		return redirect('/identity/accountsuspended')
+	# Checks User Permissions and Models
+	loginChecks(request)
 	
 	endpoint_list = []
 
@@ -224,14 +225,8 @@ def masterList(request):
 ############################################################################################
 
 def endpointList(request, integration):
-	# Checks User Permissions
-	results = []
-	results.append(checkLogin(request))
-	results.append(checkActive(request))
-	if results[0] == False:
-		return redirect('/identity/login')
-	if results[1] == False:
-		return redirect('/identity/accountsuspended')
+	# Checks User Permissions and Models
+	loginChecks(request)
 	
 	endpoint_list = []
 
@@ -257,113 +252,73 @@ def endpointList(request, integration):
 ############################################################################################
 
 def integrations(request):
-	# Checks User Permissions
-	# results = []
-	# results.append(checkLogin(request))
-	# results.append(checkActive(request))
-	# if results[0] == False:
-	# 	return redirect('/identity/login')
-	# if results[1] == False:
-	# 	return redirect('/identity/accountsuspended')
+	# Checks User Permissions and Required Models
+	redirect_url = loginChecks(request)
+	if redirect_url:
+		return redirect(redirect_url)
 
-	loginChecks(request)
-	
-	intuneStatus = []
-	sophosStatus = []
-	defenderStatus = []
-	crowdStrikeStatus = []
+	integrationStatuses = []
 
-	if len(Integration.objects.filter(integration_type = "Microsoft Intune")) == 0:
-		intuneStatus = [False, False, None]
-	else:
-		for integration in Integration.objects.filter(integration_type = "Microsoft Intune"):
-			data = Integration.objects.get(id = integration.id)
-			if data.tenant_domain:
-				intuneStatus = [data.enabled, True, integration.id]
-			else:
-				intuneStatus = [data.enabled, False, integration.id]
-	
-	if len(Integration.objects.filter(integration_type = "Sophos Central")) == 0:
-		sophosStatus = [False, False, None]
-	else:
-		for integration in Integration.objects.filter(integration_type = "Sophos Central"):
-			data = Integration.objects.get(id = integration.id)
-			if data.tenant_domain:
-				sophosStatus = [data.enabled, True, integration.id]
-			else:
-				sophosStatus = [data.enabled, False, integration.id]
-
-	if len(Integration.objects.filter(integration_type = "Microsoft Defender for Endpoint")) == 0:
-		defenderStatus = [False, False, None]
-	else:
-		print ("entered else")
-		for integration in Integration.objects.filter(integration_type = "Microsoft Defender for Endpoint"):
-			data = Integration.objects.get(id = integration.id)
-			if data.tenant_domain:
-				defenderStatus = [data.enabled, True, integration.id]
-			else:
-				defenderStatus = [data.enabled, False, integration.id]
-	
-	if len(Integration.objects.filter(integration_type = "CrowdStrike Falcon")) == 0:
-		crowdstrikeStatus = [False, False, None]
-	else:
-		for integration in Integration.objects.filter(integration_type = "CrowdStrike Falcon"):
-			data = Integration.objects.get(id = integration.id)
-			if data.tenant_domain:
-				crowdstrikeStatus = [data.enabled, True, integration.id]
-			else:
-				crowdstrikeStatus = [data.enabled, False, integration.id]
+	for integration_name in integration_names:
+		integration = Integration.objects.get(integration_type = integration_name)
+		if integration.tenant_domain:
+			integrationStatuses.append([integration.enabled, True, integration.id])
+		else:
+			integrationStatuses.append([integration.enabled, False, integration.id])
 	
 	context = {
 		'page':'integrations',
-		'intuneStatus':intuneStatus,
-		'sophosStatus':sophosStatus,
-		'defenderStatus':defenderStatus,
-		'crowdstrikeStatus':crowdstrikeStatus,
+		'integrationStatuses':integrationStatuses,
 	}
 	return render( request, 'main/integrations.html', context)
 
 ############################################################################################
 
 def enableIntegration(request, integration, id):
+	# Checks User Permissions and Models
+	loginChecks(request)
+
 	match integration:
 		case 'intune':
 			try:
-				if IntuneIntegration.objects.get(id=id):
-					integration_update = IntuneIntegration.objects.get(id=id)
+				if Integration.objects.get(id=id):
+					integration_update = Integration.objects.get(id=id)
 					integration_update.enabled = True
 					integration_update.save()
 			except:
-				IntuneIntegration.objects.create(enabled = True)
+				Integration.objects.create(enabled = True)
 		case 'sophos':
 			try:
-				if SophosIntegration.objects.get(id=id):
-					integration_update = SophosIntegration.objects.get(id=id)
+				if Integration.objects.get(id=id):
+					integration_update = Integration.objects.get(id=id)
 					integration_update.enabled = True
 					integration_update.save()
 			except:
-				SophosIntegration.objects.create(enabled = True)
+				Integration.objects.create(enabled = True)
 		case 'defender':
 			try:
-				if DefenderIntegration.objects.get(id=id):
-					integration_update = DefenderIntegration.objects.get(id=id)
+				if Integration.objects.get(id=id):
+					integration_update = Integration.objects.get(id=id)
 					integration_update.enabled = True
 					integration_update.save()
 			except:
-				DefenderIntegration.objects.create(enabled = True)
+				Integration.objects.create(enabled = True)
 		case 'crowdstrike':
 			try:
-				if CrowdStrikeIntegration.objects.get(id=id):
-					integration_update = CrowdStrikeIntegration.objects.get(id=id)
+				if Integration.objects.get(id=id):
+					integration_update = Integration.objects.get(id=id)
 					integration_update.enabled = True
 					integration_update.save()
 			except:
-				CrowdStrikeIntegration.objects.create(enabled = True)
+				Integration.objects.create(enabled = True)
 	return redirect ('/integrations')
 
 ############################################################################################
 
 def disableIntegration(request, integration, id):
+	# Checks User Permissions and Models
+	loginChecks(request)
+
 	match integration:
 		case 'intune':
 			if IntuneIntegration.objects.get(id=id):
@@ -390,32 +345,38 @@ def disableIntegration(request, integration, id):
 ############################################################################################
 
 def error500(request):
-	# Checks User Permissions
-	results = []
-	results.append(checkLogin(request))
-	results.append(checkActive(request))
-	if results[0] == False:
-		return redirect('/identity/login')
-	if results[1] == False:
-		return redirect('/identity/accountsuspended')
+	# Checks User Permissions and Models
+	loginChecks(request)
 	
 	return render( request, 'main/pages-500.html')
 
 ############################################################################################
 
 def syncIntuneDevices(request):
+	# Checks User Permissions and Models
+	loginChecks(request)
+
 	syncIntune()
 	return redirect('/integrations')
 
 def syncSophosDevices(request):
+	# Checks User Permissions and Models
+	loginChecks(request)
+
 	syncSophos()
 	return redirect('/integrations')
 
 def syncDefenderDevices(request):
+	# Checks User Permissions and Models
+	loginChecks(request)
+
 	syncDefender()
 	return redirect('/integrations')
 
 def syncCrowdStrikeDevices(request):
+	# Checks User Permissions and Models
+	loginChecks(request)
+
 	syncCrowdStrike()
 	return redirect('/integrations')
 
@@ -425,12 +386,7 @@ def syncCrowdStrikeDevices(request):
 # DeviceManagementManagedDevices.Read.All
 
 def test(request):
-	# Checks User Permissions
-	results = []
-	results.append(checkLogin(request))
-	results.append(checkActive(request))
-	if results[0] == False:
-		return redirect('/identity/login')
-	if results[1] == False:
-		return redirect('/identity/accountsuspended')
+	# Checks User Permissions and Models
+	loginChecks(request)
+
 	return render( request, 'main/index_test.html')
