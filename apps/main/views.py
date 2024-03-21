@@ -73,8 +73,8 @@ def index(request):
 	# if results[1] == False:
 	# 	return redirect('/identity/accountsuspended')
 
-	loginChecks()
-	
+	loginChecks(request)
+
 	# Query to get the count of each os platform
 	os_platform_counts = Device.objects.values('osPlatform').annotate(count=Count('osPlatform'))
     # Prepare data for chart
