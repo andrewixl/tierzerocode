@@ -258,24 +258,26 @@ def endpointList(request, integration):
 
 def integrations(request):
 	# Checks User Permissions
-	results = []
-	results.append(checkLogin(request))
-	results.append(checkActive(request))
-	if results[0] == False:
-		return redirect('/identity/login')
-	if results[1] == False:
-		return redirect('/identity/accountsuspended')
+	# results = []
+	# results.append(checkLogin(request))
+	# results.append(checkActive(request))
+	# if results[0] == False:
+	# 	return redirect('/identity/login')
+	# if results[1] == False:
+	# 	return redirect('/identity/accountsuspended')
+
+	loginChecks(request)
 	
 	intuneStatus = []
 	sophosStatus = []
 	defenderStatus = []
 	crowdStrikeStatus = []
 
-	if len(IntuneIntegration.objects.all()) == 0:
+	if len(Integration.objects.filter(integration_type = "Microsoft Intune")) == 0:
 		intuneStatus = [False, False, None]
 	else:
-		for integration in IntuneIntegration.objects.all():
-			data = IntuneIntegration.objects.get(id = integration.id)
+		for integration in Integration.objects.filter(integration_type = "Microsoft Intune"):
+			data = Integration.objects.get(id = integration.id)
 			if data.tenant_domain:
 				intuneStatus = [data.enabled, True, integration.id]
 			else:
