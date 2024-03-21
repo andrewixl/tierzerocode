@@ -1,4 +1,4 @@
-<a href="https://github.com/andrewixl/tierzerocode/blob/master/LICENSE.txt"><img alt="GitHub license" src="https://img.shields.io/github/license/andrewixl/tierzerocode"></a>
+<a href="https://github.com/andrewixl/tierzerocode/blob/master/LICENSE"><img alt="GitHub license" src="https://img.shields.io/github/license/andrewixl/tierzerocode"></a>
 <img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/andrewixl/tierzerocode">
 <a href="https://github.com/andrewixl/tierzerocode/issues"><img alt="GitHub issues" src="https://img.shields.io/github/issues/andrewixl/tierzerocode"></a>
 

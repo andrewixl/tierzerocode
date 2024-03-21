@@ -246,7 +246,7 @@ def integrations(request):
 	crowdStrikeStatus = []
 
 	if len(IntuneIntegration.objects.all()) == 0:
-		intuneStatus = [False, False, null]
+		intuneStatus = [False, False, None]
 	else:
 		for integration in IntuneIntegration.objects.all():
 			data = IntuneIntegration.objects.get(id = integration.id)
@@ -256,7 +256,7 @@ def integrations(request):
 				intuneStatus = [data.enabled, False, integration.id]
 	
 	if len(SophosIntegration.objects.all()) == 0:
-		sophosStatus = [False, False, null]
+		sophosStatus = [False, False, None]
 	else:
 		for integration in SophosIntegration.objects.all():
 			data = SophosIntegration.objects.get(id = integration.id)
@@ -266,7 +266,7 @@ def integrations(request):
 				sophosStatus = [data.enabled, False, integration.id]
 
 	if len(DefenderIntegration.objects.all()) == 0:
-		defenderStatus = [False, False, null]
+		defenderStatus = [False, False, None]
 	else:
 		print ("entered else")
 		for integration in DefenderIntegration.objects.all():
@@ -277,7 +277,7 @@ def integrations(request):
 				defenderStatus = [data.enabled, False, integration.id]
 	
 	if len(CrowdStrikeIntegration.objects.all()) == 0:
-		crowdstrikeStatus = [False, False, null]
+		crowdstrikeStatus = [False, False, None]
 	else:
 		for integration in CrowdStrikeIntegration.objects.all():
 			data = CrowdStrikeIntegration.objects.get(id = integration.id)
