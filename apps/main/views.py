@@ -7,7 +7,7 @@ from .pulldevices.defender import *
 from .pulldevices.crowdstrike import *
 
 # Import Integrations
-from .models import IntuneIntegration, SophosIntegration, DefenderIntegration, CrowdStrikeIntegration
+from .models import Integration, IntuneIntegration, SophosIntegration, DefenderIntegration, CrowdStrikeIntegration
 from .models import Device, IntuneDevice, SophosDevice, DefenderDevice
 from ..login_app.models import User
 
@@ -33,21 +33,47 @@ def checkActive(request):
 			return False
 	except:
 		return False
+def checkIntegrations(request):
+	if len(Integration.objects.all()) == 0:
+		return False
+	else:
+		return True
 	
+def loginChecks(request):
+	results = []
+	results.append(checkLogin(request))
+	results.append(checkActive(request))
+	results.append(checkIntegrations(request))
+	if results[0] == False:
+		return redirect('/identity/login')
+	if results[1] == False:
+		return redirect('/identity/accountsuspended')
+	if results[2] == False:
+		return redirect('/initialSetup')
 
+############################################################################################	
+
+def initialSetup(request):
+	IntegrationTypes = ['Microsoft Intune', 'Sophos Central', 'Microsoft Defender', 'CrowdStrike', 'SCCM', 'Qualys']
+	for integration in IntegrationTypes:
+		if len(Integration.objects.filter(name = integration)) == 0:
+			Integration.objects.create(enabled = False, integration_type = integration)
+	return redirect('/')
 
 ############################################################################################
 
 from django.db.models import Count
 def index(request):
 	# Checks User Permissions
-	results = []
-	results.append(checkLogin(request))
-	results.append(checkActive(request))
-	if results[0] == False:
-		return redirect('/identity/login')
-	if results[1] == False:
-		return redirect('/identity/accountsuspended')
+	# results = []
+	# results.append(checkLogin(request))
+	# results.append(checkActive(request))
+	# if results[0] == False:
+	# 	return redirect('/identity/login')
+	# if results[1] == False:
+	# 	return redirect('/identity/accountsuspended')
+
+	loginChecks()
 	
 	# Query to get the count of each os platform
 	os_platform_counts = Device.objects.values('osPlatform').annotate(count=Count('osPlatform'))

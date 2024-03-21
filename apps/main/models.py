@@ -18,6 +18,25 @@ class Device(models.Model):
 
     def __str__(self):
         return self.hostname
+    
+class Integration(models.Model):
+    enabled = models.BooleanField(null=True, default=False)
+    INTEGRATION_CHOICES = (
+        ("Microsoft Intune", "Microsoft Intune"),
+        ("Sophos Central", "Sophos Central"),
+        ("Microsoft Defender for Endpoint", "Microsoft Defender for Endpoint"),
+        ("CrowdStrike Falcon", "CrowdStrike Falcon"),
+        ("SCCM", "SCCM"),
+        ("Qualys", "Qualys"),  
+    )
+    integration_type = models.CharField(max_length=31, choices=INTEGRATION_CHOICES, null=True)
+    client_id = models.CharField(max_length = 50, null=True)
+    client_secret = models.CharField(max_length = 50, null=True)
+    tenant_id = models.CharField(max_length = 50, null=True)
+    tenant_domain = models.CharField(max_length = 50, null=True)
+
+    def __str__(self):
+        return self.IntegrationType
 
 class IntuneIntegration(models.Model):
     enabled = models.BooleanField(null=True, default=False)
