@@ -283,32 +283,32 @@ def integrations(request):
 			else:
 				intuneStatus = [data.enabled, False, integration.id]
 	
-	if len(SophosIntegration.objects.all()) == 0:
+	if len(Integration.objects.filter(integration_type = "Sophos Central")) == 0:
 		sophosStatus = [False, False, None]
 	else:
-		for integration in SophosIntegration.objects.all():
-			data = SophosIntegration.objects.get(id = integration.id)
+		for integration in Integration.objects.filter(integration_type = "Sophos Central"):
+			data = Integration.objects.get(id = integration.id)
 			if data.tenant_domain:
 				sophosStatus = [data.enabled, True, integration.id]
 			else:
 				sophosStatus = [data.enabled, False, integration.id]
 
-	if len(DefenderIntegration.objects.all()) == 0:
+	if len(Integration.objects.filter(integration_type = "Microsoft Defender for Endpoint")) == 0:
 		defenderStatus = [False, False, None]
 	else:
 		print ("entered else")
-		for integration in DefenderIntegration.objects.all():
-			data = DefenderIntegration.objects.get(id = integration.id)
+		for integration in Integration.objects.filter(integration_type = "Microsoft Defender for Endpoint"):
+			data = Integration.objects.get(id = integration.id)
 			if data.tenant_domain:
 				defenderStatus = [data.enabled, True, integration.id]
 			else:
 				defenderStatus = [data.enabled, False, integration.id]
 	
-	if len(CrowdStrikeIntegration.objects.all()) == 0:
+	if len(Integration.objects.filter(integration_type = "CrowdStrike Falcon")) == 0:
 		crowdstrikeStatus = [False, False, None]
 	else:
-		for integration in CrowdStrikeIntegration.objects.all():
-			data = CrowdStrikeIntegration.objects.get(id = integration.id)
+		for integration in Integration.objects.filter(integration_type = "CrowdStrike Falcon"):
+			data = Integration.objects.get(id = integration.id)
 			if data.tenant_domain:
 				crowdstrikeStatus = [data.enabled, True, integration.id]
 			else:
