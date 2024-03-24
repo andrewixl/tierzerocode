@@ -1,5 +1,4 @@
-from ..models import DefenderDevice, DefenderIntegration
-# from ..models import IntuneDevice, IntuneIntegration
+from ..models import DefenderDevice, Integration
 import msal
 import requests
 from datetime import datetime
@@ -100,13 +99,12 @@ def updateDefenderDeviceDatabase(json_data):
             obj, created = DefenderDevice.objects.update_or_create(id=device_id, defaults=defaults)
 
 def syncDefender():
-    for integration in DefenderIntegration.objects.all():
-        data = DefenderIntegration.objects.get(id = integration.id)
-        client_id = data.client_id
-        client_secret = data.client_secret
-        tenant_id = data.tenant_id
-        tenant_domain = data.tenant_domain
-        updateDefenderDeviceDatabase(getDefenderDevices(getDefenderAccessToken(client_id, client_secret, tenant_id)))
-        devices = DefenderDevice.objects.all()
-        updateMasterList(devices, tenant_domain)
+    data = Integration.objects.get(integration_type = "Microsoft Defender for Endpoint")
+    client_id = data.client_id
+    client_secret = data.client_secret
+    tenant_id = data.tenant_id
+    tenant_domain = data.tenant_domain
+    updateDefenderDeviceDatabase(getDefenderDevices(getDefenderAccessToken(client_id, client_secret, tenant_id)))
+    devices = DefenderDevice.objects.all()
+    updateMasterList(devices, tenant_domain)
     return True

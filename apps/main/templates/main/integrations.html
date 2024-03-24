@@ -25,11 +25,11 @@
 
 											<div class="dropdown-menu dropdown-menu-end">
 												{% if True == integrationStatuses.2.0 %}
-												<a class="dropdown-item" href="/disable-integration/intune/{{integrationStatuses.2.2}}">Disable Integration</a>
+												<a class="dropdown-item" href="/disable-integration/{{integrationStatuses.2.2}}">Disable Integration</a>
 												<a class="dropdown-item" href="#">Configure Integration</a>
 												<a class="dropdown-item" href="/sync-intune-devices">Sync Integration</a>
 												{% elif False == integrationStatuses.2.0 %}
-												<a class="dropdown-item" href="/enable-integration/intune/{{integrationStatuses.2.2}}">Enable Integration</a>
+												<a class="dropdown-item" href="/enable-integration/{{integrationStatuses.2.2}}">Enable Integration</a>
 												{% endif %}
 											</div>
 										</div>
@@ -66,11 +66,11 @@
 
 											<div class="dropdown-menu dropdown-menu-end">
 												{% if True == integrationStatuses.3.0 %}
-												<a class="dropdown-item" href="/disable-integration/sophos/{{integrationStatuses.3.2}}">Disable Integration</a>
+												<a class="dropdown-item" href="/disable-integration/{{integrationStatuses.3.2}}">Disable Integration</a>
 												<a class="dropdown-item" href="#">Configure Integration</a>
 												<a class="dropdown-item" href="/sync-sophos-devices">Sync Integration</a>
 												{% elif False == integrationStatuses.3.0 %}
-												<a class="dropdown-item" href="/enable-integration/sophos/{{integrationStatuses.3.2}}">Enable Integration</a>
+												<a class="dropdown-item" href="/enable-integration/{{integrationStatuses.3.2}}">Enable Integration</a>
 												{% endif %}
 											</div>
 										</div>
@@ -107,11 +107,11 @@
 
 											<div class="dropdown-menu dropdown-menu-end">
 												{% if True == integrationStatuses.1.0 %}
-												<a class="dropdown-item" href="/disable-integration/defender/{{integrationStatuses.1.2}}">Disable Integration</a>
+												<a class="dropdown-item" href="/disable-integration/{{integrationStatuses.1.2}}">Disable Integration</a>
 												<a class="dropdown-item" href="#">Configure Integration</a>
 												<a class="dropdown-item" href="/sync-defender-devices">Sync Integration</a>
 												{% elif False == integrationStatuses.1.0 %}
-												<a class="dropdown-item" href="/enable-integration/defender/{{integrationStatuses.1.2}}">Enable Integration</a>
+												<a class="dropdown-item" href="/enable-integration/{{integrationStatuses.1.2}}">Enable Integration</a>
 												{% endif %}
 											</div>
 										</div>
@@ -148,11 +148,11 @@
 
 											<div class="dropdown-menu dropdown-menu-end">
 												{% if True == integrationStatuses.0.0 %}
-												<a class="dropdown-item" href="/disable-integration/crowdstrike/{{integrationStatuses.0.2}}">Disable Integration</a>
+												<a class="dropdown-item" href="/disable-integration/{{integrationStatuses.0.2}}">Disable Integration</a>
 												<a class="dropdown-item" href="#">Configure Integration</a>
 												<a class="dropdown-item" href="/sync-crowdstrike-devices">Sync Integration</a>
 												{% elif False == integrationStatuses.0.0 %}
-												<a class="dropdown-item" href="/enable-integration/crowdstrike/{{integrationStatuses.0.2}}">Enable Integration</a>
+												<a class="dropdown-item" href="/enable-integration/{{integrationStatuses.0.2}}">Enable Integration</a>
 												{% endif %}
 											</div>
 										</div>

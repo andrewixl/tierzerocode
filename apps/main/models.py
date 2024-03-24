@@ -30,73 +30,13 @@ class Integration(models.Model):
         ("Qualys", "Qualys"),  
     )
     integration_type = models.CharField(max_length=31, choices=INTEGRATION_CHOICES, null=True)
-    client_id = models.CharField(max_length = 50, null=True)
-    client_secret = models.CharField(max_length = 50, null=True)
-    tenant_id = models.CharField(max_length = 50, null=True)
-    tenant_domain = models.CharField(max_length = 50, null=True)
-
-    def __str__(self):
-        return self.integration_type
-
-class IntuneIntegration(models.Model):
-    enabled = models.BooleanField(null=True, default=False)
-    client_id = models.CharField(max_length = 50, null=True)
-    client_secret = models.CharField(max_length = 50, null=True)
-    tenant_id = models.CharField(max_length = 50, null=True)
-    tenant_domain = models.CharField(max_length = 50, null=True)
-
-    def __str__(self):
-        return 'Microsoft Intune'
-
-class SophosIntegration(models.Model):
-    enabled = models.BooleanField(null=True, default=False)
     client_id = models.CharField(max_length = 100, null=True)
     client_secret = models.CharField(max_length = 200, null=True)
     tenant_id = models.CharField(max_length = 100, null=True)
     tenant_domain = models.CharField(max_length = 50, null=True)
 
     def __str__(self):
-        return 'Sophos Central'
-
-class DefenderIntegration(models.Model):
-    enabled = models.BooleanField(null=True, default=False)
-    client_id = models.CharField(max_length = 50, null=True)
-    client_secret = models.CharField(max_length = 50, null=True)
-    tenant_id = models.CharField(max_length = 50, null=True)
-    tenant_domain = models.CharField(max_length = 50, null=True)
-
-    def __str__(self):
-        return 'Microsoft Defender for Endpoint'
-
-class CrowdStrikeIntegration(models.Model):
-    enabled = models.BooleanField(null=True, default=False)
-    client_id = models.CharField(max_length = 50, null=True)
-    client_secret = models.CharField(max_length = 50, null=True)
-    tenant_id = models.CharField(max_length = 50, null=True)
-    tenant_domain = models.CharField(max_length = 50, null=True)
-
-    def __str__(self):
-        return 'CrowdStrike Falcon'
-
-class SCCMIntegration(models.Model):
-    enabled = models.BooleanField(null=True, default=False)
-    client_id = models.CharField(max_length = 50, null=True)
-    client_secret = models.CharField(max_length = 50, null=True)
-    tenant_id = models.CharField(max_length = 50, null=True)
-    tenant_domain = models.CharField(max_length = 50, null=True)
-
-    def __str__(self):
-        return 'SCCM'
-
-class QualysIntegration(models.Model):
-    enabled = models.BooleanField(null=True, default=False)
-    client_id = models.CharField(max_length = 50, null=True)
-    client_secret = models.CharField(max_length = 50, null=True)
-    tenant_id = models.CharField(max_length = 50, null=True)
-    tenant_domain = models.CharField(max_length = 50, null=True)
-
-    def __str__(self):
-        return 'Qualys'
+        return self.integration_type
 
 class IntuneDevice(models.Model):
     id = models.CharField(max_length = 100, primary_key=True)

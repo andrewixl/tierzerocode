@@ -7,7 +7,7 @@ from .pulldevices.defender import *
 from .pulldevices.crowdstrike import *
 
 # Import Integrations
-from .models import Integration, IntuneIntegration, SophosIntegration, DefenderIntegration, CrowdStrikeIntegration
+from .models import Integration
 from .models import Device, IntuneDevice, SophosDevice, DefenderDevice
 from ..login_app.models import User
 
@@ -64,13 +64,17 @@ def loginChecks(request):
 
 ############################################################################################	
 
+# Creates blank integration templates if they do not exist
 def initialSetup(request):
+	# Checks User Permissions and Required Models
+	redirect_url = loginChecks(request)
+	if redirect_url:
+		return redirect(redirect_url)
+	
 	for integration in integration_names:
 		if len(Integration.objects.filter(integration_type = integration)) == 0:
 			Integration.objects.create(enabled = False, integration_type = integration)
 	return redirect(request.META.get('HTTP_REFERER', '/'))
-	# return redirect('/')
-	# return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
 
 ############################################################################################
 
@@ -176,8 +180,10 @@ def index(request):
 ############################################################################################
 
 def masterList(request):
-	# Checks User Permissions and Models
-	loginChecks(request)
+	# Checks User Permissions and Required Models
+	redirect_url = loginChecks(request)
+	if redirect_url:
+		return redirect(redirect_url)
 	
 	endpoint_list = []
 
@@ -225,8 +231,10 @@ def masterList(request):
 ############################################################################################
 
 def endpointList(request, integration):
-	# Checks User Permissions and Models
-	loginChecks(request)
+	# Checks User Permissions and Required Models
+	redirect_url = loginChecks(request)
+	if redirect_url:
+		return redirect(redirect_url)
 	
 	endpoint_list = []
 
@@ -274,72 +282,30 @@ def integrations(request):
 
 ############################################################################################
 
-def enableIntegration(request, integration, id):
-	# Checks User Permissions and Models
-	loginChecks(request)
+def enableIntegration(request, id):
+	# Checks User Permissions and Required Models
+	redirect_url = loginChecks(request)
+	if redirect_url:
+		return redirect(redirect_url)
+	
+	integration_update = Integration.objects.get(id=id)
+	integration_update.enabled = True
+	integration_update.save()
 
-	match integration:
-		case 'intune':
-			try:
-				if Integration.objects.get(id=id):
-					integration_update = Integration.objects.get(id=id)
-					integration_update.enabled = True
-					integration_update.save()
-			except:
-				Integration.objects.create(enabled = True)
-		case 'sophos':
-			try:
-				if Integration.objects.get(id=id):
-					integration_update = Integration.objects.get(id=id)
-					integration_update.enabled = True
-					integration_update.save()
-			except:
-				Integration.objects.create(enabled = True)
-		case 'defender':
-			try:
-				if Integration.objects.get(id=id):
-					integration_update = Integration.objects.get(id=id)
-					integration_update.enabled = True
-					integration_update.save()
-			except:
-				Integration.objects.create(enabled = True)
-		case 'crowdstrike':
-			try:
-				if Integration.objects.get(id=id):
-					integration_update = Integration.objects.get(id=id)
-					integration_update.enabled = True
-					integration_update.save()
-			except:
-				Integration.objects.create(enabled = True)
 	return redirect ('/integrations')
 
 ############################################################################################
 
-def disableIntegration(request, integration, id):
-	# Checks User Permissions and Models
-	loginChecks(request)
+def disableIntegration(request, id):
+	# Checks User Permissions and Required Models
+	redirect_url = loginChecks(request)
+	if redirect_url:
+		return redirect(redirect_url)
+	
+	integration_update = Integration.objects.get(id=id)
+	integration_update.enabled = False
+	integration_update.save()
 
-	match integration:
-		case 'intune':
-			if IntuneIntegration.objects.get(id=id):
-				integration_update = IntuneIntegration.objects.get(id=id)
-				integration_update.enabled = False
-				integration_update.save()
-		case 'sophos':
-			if SophosIntegration.objects.get(id=id):
-				integration_update = SophosIntegration.objects.get(id=id)
-				integration_update.enabled = False
-				integration_update.save()
-		case 'defender':
-			if DefenderIntegration.objects.get(id=id):
-				integration_update = DefenderIntegration.objects.get(id=id)
-				integration_update.enabled = False
-				integration_update.save()
-		case 'crowdstrike':
-			if CrowdStrikeIntegration.objects.get(id=id):
-				integration_update = CrowdStrikeIntegration.objects.get(id=id)
-				integration_update.enabled = False
-				integration_update.save()
 	return redirect ('/integrations')
 
 ############################################################################################
@@ -353,29 +319,37 @@ def error500(request):
 ############################################################################################
 
 def syncIntuneDevices(request):
-	# Checks User Permissions and Models
-	loginChecks(request)
+	# Checks User Permissions and Required Models
+	redirect_url = loginChecks(request)
+	if redirect_url:
+		return redirect(redirect_url)
 
 	syncIntune()
 	return redirect('/integrations')
 
 def syncSophosDevices(request):
-	# Checks User Permissions and Models
-	loginChecks(request)
+	# Checks User Permissions and Required Models
+	redirect_url = loginChecks(request)
+	if redirect_url:
+		return redirect(redirect_url)
 
 	syncSophos()
 	return redirect('/integrations')
 
 def syncDefenderDevices(request):
-	# Checks User Permissions and Models
-	loginChecks(request)
+	# Checks User Permissions and Required Models
+	redirect_url = loginChecks(request)
+	if redirect_url:
+		return redirect(redirect_url)
 
 	syncDefender()
 	return redirect('/integrations')
 
 def syncCrowdStrikeDevices(request):
-	# Checks User Permissions and Models
-	loginChecks(request)
+	# Checks User Permissions and Required Models
+	redirect_url = loginChecks(request)
+	if redirect_url:
+		return redirect(redirect_url)
 
 	syncCrowdStrike()
 	return redirect('/integrations')

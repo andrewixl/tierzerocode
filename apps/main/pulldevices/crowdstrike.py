@@ -1,5 +1,5 @@
 # from ..models import CrowdStrikeDevice, CrowdStrikeIntegration
-from ..models import CrowdStrikeIntegration
+from ..models import Integration
 import msal
 import requests
 from datetime import datetime
@@ -64,13 +64,12 @@ def getCrowdStrikeDevices(access_token):
     return crowdstrike_result.json()
 
 def syncCrowdStrike():
-    for integration in CrowdStrikeIntegration.objects.all():
-        data = CrowdStrikeIntegration.objects.get(id = integration.id)
-        client_id = data.client_id
-        client_secret = data.client_secret
-        tenant_id = data.tenant_id
-        tenant_domain = data.tenant_domain
-        getCrowdStrikeDevices(getCrowdStrikeAccessToken(client_id, client_secret, tenant_id))
+    data = Integration.objects.get(integration_type = "CrowdStrike Falcon")
+    client_id = data.client_id
+    client_secret = data.client_secret
+    tenant_id = data.tenant_id
+    tenant_domain = data.tenant_domain
+    getCrowdStrikeDevices(getCrowdStrikeAccessToken(client_id, client_secret, tenant_id))
     #     updateIntuneDeviceDatabase(getIntuneDevices(getIntuneAccessToken(client_id, client_secret, tenant_id)))
     #     devices = IntuneDevice.objects.all()
     #     updateMasterList(devices, tenant_domain)

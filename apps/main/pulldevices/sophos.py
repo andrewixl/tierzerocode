@@ -1,6 +1,6 @@
 import requests
 from datetime import datetime
-from ..models import SophosDevice, SophosIntegration
+from ..models import Integration, SophosDevice
 from .masterlist import *
 
 def getSophosAccessToken(client_id, client_secret, tenant_id):
@@ -118,14 +118,14 @@ def updateSophosDeviceDatabase(json_data):
         )
     
 def syncSophos():
-    for integration in SophosIntegration.objects.all():
-        data = SophosIntegration.objects.get(id = integration.id)
-        client_id = data.client_id
-        client_secret = data.client_secret
-        tenant_id = data.tenant_id
-        tenant_domain = data.tenant_domain
-        updateSophosDeviceDatabase(getSophosDevices(getSophosAccessToken(client_id, client_secret, tenant_id)))
-        devices = SophosDevice.objects.all()
-        updateMasterList(devices, tenant_domain)
+    data = Integration.objects.get(integration_type = "Sophos Central")
+    client_id = data.client_id
+    client_secret = data.client_secret
+    tenant_id = data.tenant_id
+    tenant_domain = data.tenant_domain
+    print(client_id)
+    updateSophosDeviceDatabase(getSophosDevices(getSophosAccessToken(client_id, client_secret, tenant_id)))
+    devices = SophosDevice.objects.all()
+    updateMasterList(devices, tenant_domain)
     return True
 

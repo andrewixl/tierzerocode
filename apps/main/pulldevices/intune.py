@@ -1,4 +1,4 @@
-from ..models import IntuneDevice, IntuneIntegration
+from ..models import IntuneDevice, Integration
 import msal
 import requests
 from datetime import datetime
@@ -137,13 +137,12 @@ def updateIntuneDeviceDatabase(graph_result):
             IntuneDevice.objects.create(id=device_id, **device_fields)
 
 def syncIntune():
-    for integration in IntuneIntegration.objects.all():
-        data = IntuneIntegration.objects.get(id = integration.id)
-        client_id = data.client_id
-        client_secret = data.client_secret
-        tenant_id = data.tenant_id
-        tenant_domain = data.tenant_domain
-        updateIntuneDeviceDatabase(getIntuneDevices(getIntuneAccessToken(client_id, client_secret, tenant_id)))
-        devices = IntuneDevice.objects.all()
-        updateMasterList(devices, tenant_domain)
+    data = Integration.objects.get(integration_type = "Microsoft Intune")
+    client_id = data.client_id
+    client_secret = data.client_secret
+    tenant_id = data.tenant_id
+    tenant_domain = data.tenant_domain
+    updateIntuneDeviceDatabase(getIntuneDevices(getIntuneAccessToken(client_id, client_secret, tenant_id)))
+    devices = IntuneDevice.objects.all()
+    updateMasterList(devices, tenant_domain)
     return True
