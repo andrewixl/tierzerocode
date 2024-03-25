@@ -7,7 +7,7 @@
 ## Minimum Requirements
 - [ ] Ubuntu Server 22.04
 - [ ] 64 GB Storage Space
-- [ ] 1 GB RAM
+- [ ] 4 GB RAM
 
 ## Getting started
 
@@ -32,8 +32,10 @@ bash install.sh
 - [ ] Microsoft Intune
 - [ ] Microsoft Defender for Endpoint
 - [ ] Sophos Central
+- [ ] Qualys Vulnerability Management
+
+## Roadmap
 - [ ] CrowdStrike Falcon (Under Development)
-- [ ] Qualys (Under Development)
 - [ ] Tenable (Under Development)
 - [ ] System Center Configuration Manager (Under Development)
 

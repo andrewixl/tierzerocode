@@ -10,7 +10,7 @@ urlpatterns = [
     re_path(r'^endpoints/master-list$', views.masterList),
     re_path(r'^endpoints/(?P<integration>[-\w]+)$', views.endpointList),
     re_path(r'^initial-setup$', views.initialSetup),
-    re_path(r'^test$', views.test),
+    # re_path(r'^test$', views.test),
     re_path(r'^integrations$', views.integrations),
     re_path(r'^enable-integration/(?P<id>\d+)$', views.enableIntegration),
     re_path(r'^disable-integration/(?P<id>\d+)$', views.disableIntegration),
