@@ -85,7 +85,6 @@ def index(request):
 	if redirect_url:
 		return redirect(redirect_url)
 
-
 	# Query to get the count of each os platform
 	os_platform_counts = Device.objects.values('osPlatform').annotate(count=Count('osPlatform'))
     # Prepare data for chart
