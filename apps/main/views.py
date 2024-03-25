@@ -69,7 +69,9 @@ def loginChecks(request):
 def initialSetup(request):
 	for integration in integration_names:
 		if len(Integration.objects.filter(integration_type = integration)) == 0:
-			Integration.objects.create(enabled = False, integration_type = integration)
+			image_navbar_path = 'main/img/navbar_icons/webp/' + (integration.replace(" ", "_")).lower() + '_logo_nav.webp'
+			image_integration_path = 'main/img/integration_images/webp/' + (integration.replace(" ", "_")).lower() + '_logo.webp'
+			Integration.objects.create(enabled = False, integration_type = integration, image_navbar_path=image_navbar_path, image_integration_path=image_integration_path)
 	return redirect(request.META.get('HTTP_REFERER', '/'))
 
 ############################################################################################
@@ -268,9 +270,9 @@ def integrations(request):
 	for integration_name in integration_names:
 		integration = Integration.objects.get(integration_type = integration_name)
 		if integration.tenant_domain:
-			integrationStatuses.append([integration.enabled, True, integration.id])
+			integrationStatuses.append([integration.integration_type, integration.image_integration_path, integration.enabled, True, integration.id])
 		else:
-			integrationStatuses.append([integration.enabled, False, integration.id])
+			integrationStatuses.append([integration.integration_type, integration.image_integration_path, integration.enabled, False, integration.id])
 	
 	context = {
 		'page':'integrations',
