@@ -110,58 +110,22 @@
 							<i class="align-middle" data-feather="user"></i> <span class="align-middle">CrowdStrike Falcon</span>
 						</a>
 					</li> -->
-					{% if page == 'defender' %}
+
+					{% for enabled_integration in enabled_integrations %}
+
+					{% if page == enabled_integration.integration_type %}
 					<li class="sidebar-item active">
 					{% else %}
 					<li class="sidebar-item">
 					{% endif %}
-						<a class="sidebar-link" href="/endpoints/defender">
+
+						<a class="sidebar-link" href="/endpoints/{{enabled_integration.integration_type}}">
 							<!-- <i class="align-middle" data-feather="user"></i> <span class="align-middle">Defender for Endpoint</span> -->
-							<img src="{% static 'main/img/integration_logos/defender_for_endpoint_logo_nav.png' %}" class="align-middle" width="24" height="24" style="margin-right: 5px;" alt="User Image"> <span class="align-middle">Defender for Endpoint</span>
-						</a>
-					</li>
-					{% if page == 'intune' %}
-					<li class="sidebar-item active">
-					{% else %}
-					<li class="sidebar-item">
-					{% endif %}
-						<a class="sidebar-link" href="/endpoints/intune">
-							<!-- <i class="align-middle" data-feather="user"></i> <span class="align-middle">Microsoft Intune</span> -->
-							<img src="{% static 'main/img/integration_logos/microsoft_intune_logo_nav.png' %}" class="align-middle" width="24" height="24" style="margin-right: 5px;" alt="User Image"> <span class="align-middle">Microsoft Intune</span>
+							<img src="{% static enabled_integration.image_navbar_path %}" class="align-middle" width="24" height="24" style="margin-right: 5px;" alt="{{enabled_integration.integration_type}}"> <span class="align-middle">{{enabled_integration.integration_type}}</span>
 						</a>
 					</li>
 
-					{% if page == 'sophos' %}
-					<li class="sidebar-item active">
-					{% else %}
-					<li class="sidebar-item">
-					{% endif %}
-						<a class="sidebar-link" href="/endpoints/sophos">
-							<!-- <i class="align-middle" data-feather="user"></i> <span class="align-middle">Sophos Central</span> -->
-							<img src="{% static 'main/img/integration_logos/sophos_central_logo_nav.png' %}" class="align-middle" width="24" height="24" style="margin-right: 5px;" alt="User Image"> <span class="align-middle">Sophos Central</span>
-						</a>
-					</li>
-
-					{% if page == 'qualys' %}
-					<li class="sidebar-item active">
-					{% else %}
-					<li class="sidebar-item">
-					{% endif %}
-						<a class="sidebar-link" href="/endpoints/qualys">
-							<!-- <i class="align-middle" data-feather="user"></i> <span class="align-middle">Qualys VM</span> -->
-							<img src="{% static 'main/img/integration_logos/qualys_logo_nav.png' %}" class="align-middle" width="24" height="24" style="margin-right: 5px;" alt="User Image"> <span class="align-middle">Qualys</span>
-						</a>
-					</li>
-					<!-- <li class="sidebar-item">
-						<a class="sidebar-link" href="pages-profile.html">
-							<i class="align-middle" data-feather="user"></i> <span class="align-middle">SCCM</span>
-						</a>
-					</li> -->
-					<!-- <li class="sidebar-item">
-						<a class="sidebar-link" href="pages-profile.html">
-							<i class="align-middle" data-feather="user"></i> <span class="align-middle">Qualys</span>
-						</a>
-					</li> -->
+					{% endfor %}
 
 					<li class="sidebar-header">
 						Configurations

@@ -8,8 +8,7 @@ from .pulldevices.crowdstrike import *
 from .pulldevices.qualys import *
 
 # Import Integrations
-from .models import Integration
-from .models import Device, IntuneDevice, SophosDevice, DefenderDevice
+from .models import Integration, Device, IntuneDevice, SophosDevice, DefenderDevice
 from ..login_app.models import User
 
 ############################################################################################
@@ -45,9 +44,6 @@ def checkIntegrations(request):
 			return False
 	else:
 		return True
-
-from django.http import HttpResponseRedirect
-
 def loginChecks(request):
 	results = []
 	results.append(checkLogin(request))
@@ -62,6 +58,12 @@ def loginChecks(request):
 		return '/initial-setup'
 	else:
 		return None
+def getEnabledIntegrations():
+	enabledIntegrations = []
+	for integration in Integration.objects.all():
+		if integration.enabled == True:
+			enabledIntegrations.append(integration)
+	return enabledIntegrations
 
 ############################################################################################	
 
@@ -144,6 +146,8 @@ def index(request):
 
 	context = {
 		'page':'dashboard',
+		'enabled_integrations': getEnabledIntegrations(),
+
 		'totalDeviceEndpoints':len(Device.objects.all()),
 		'totalIntuneEndpoints':len(IntuneDevice.objects.all()),
 		'totalSophosEndpoints':len(SophosDevice.objects.all()),
@@ -222,6 +226,7 @@ def masterList(request):
 
 	context = {
 		'page':"master-list",
+		'enabled_integrations': getEnabledIntegrations(),
 		'endpoint_list':endpoint_list,
 	}
 	return render( request, 'main/master-list.html', context)
@@ -252,6 +257,7 @@ def endpointList(request, integration):
 
 	context = {
 		'page':integration,
+		'enabled_integrations': getEnabledIntegrations(),
 		'integration':integration.title(),
 		'endpoint_list':endpoint_list,
 	}
@@ -276,6 +282,7 @@ def integrations(request):
 	
 	context = {
 		'page':'integrations',
+		'enabled_integrations': getEnabledIntegrations(),
 		'integrationStatuses':integrationStatuses,
 	}
 	return render( request, 'main/integrations.html', context)
