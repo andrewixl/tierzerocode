@@ -5,6 +5,7 @@ from .pulldevices.intune import *
 from .pulldevices.sophos import *
 from .pulldevices.defender import *
 from .pulldevices.crowdstrike import *
+from .pulldevices.qualys import *
 
 # Import Integrations
 from .models import Integration
@@ -14,7 +15,7 @@ from ..login_app.models import User
 ############################################################################################
 
 # Reused Data Sets
-integration_names = ['CrowdStrike Falcon', 'Microsoft Defender for Endpoint', 'Microsoft Intune', 'Sophos Central']
+integration_names = ['CrowdStrike Falcon', 'Microsoft Defender for Endpoint', 'Microsoft Intune', 'Sophos Central', 'Qualys']
 
 ############################################################################################
 
@@ -39,8 +40,9 @@ def checkActive(request):
 	except:
 		return False
 def checkIntegrations(request):
-	if len(Integration.objects.all()) == 0:
-		return False
+	for integration in integration_names:
+		if len(Integration.objects.filter(integration_type = integration)) == 0:
+			return False
 	else:
 		return True
 
@@ -51,7 +53,6 @@ def loginChecks(request):
 	results.append(checkLogin(request))
 	results.append(checkActive(request))
 	results.append(checkIntegrations(request))
-	print (results)
 	if results[0] == False:
 		return '/identity/login'
 	elif results[1] == False:
@@ -66,11 +67,6 @@ def loginChecks(request):
 
 # Creates blank integration templates if they do not exist
 def initialSetup(request):
-	# Checks User Permissions and Required Models
-	redirect_url = loginChecks(request)
-	if redirect_url:
-		return redirect(redirect_url)
-	
 	for integration in integration_names:
 		if len(Integration.objects.filter(integration_type = integration)) == 0:
 			Integration.objects.create(enabled = False, integration_type = integration)
@@ -352,6 +348,15 @@ def syncCrowdStrikeDevices(request):
 		return redirect(redirect_url)
 
 	syncCrowdStrike()
+	return redirect('/integrations')
+
+def syncQualysDevices(request):
+	# Checks User Permissions and Required Models
+	redirect_url = loginChecks(request)
+	if redirect_url:
+		return redirect(redirect_url)
+
+	syncQualys()
 	return redirect('/integrations')
 
 ############################################################################################

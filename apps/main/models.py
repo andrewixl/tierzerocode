@@ -7,12 +7,14 @@ class Device(models.Model):
         ("Ubuntu", "Ubuntu"),
         ("Windows", "Windows"),
         ("Windows Server", "Windows Server"),
+        ("Other", "Other"),
     )
     osPlatform = models.CharField(max_length = 20, choices=OS_PLATFORM_CHOICES, null=True)
     ENDPOINT_TYPE_CHOICES = (
         ("Client", "Client"),
         ("Server", "Server"),
-        ("Mobile", "Mobile"),   
+        ("Mobile", "Mobile"),
+        ("Other", "Other"),
     )
     endpointType = models.CharField(max_length=9, choices=ENDPOINT_TYPE_CHOICES, null=True)
 
@@ -26,10 +28,10 @@ class Integration(models.Model):
         ("Sophos Central", "Sophos Central"),
         ("Microsoft Defender for Endpoint", "Microsoft Defender for Endpoint"),
         ("CrowdStrike Falcon", "CrowdStrike Falcon"),
-        ("SCCM", "SCCM"),
+        ("System Center Configuration Manager", "System Center Configuration Manager"),
         ("Qualys", "Qualys"),  
     )
-    integration_type = models.CharField(max_length=31, choices=INTEGRATION_CHOICES, null=True)
+    integration_type = models.CharField(max_length=35, choices=INTEGRATION_CHOICES, null=True)
     client_id = models.CharField(max_length = 100, null=True)
     client_secret = models.CharField(max_length = 200, null=True)
     tenant_id = models.CharField(max_length = 100, null=True)
@@ -164,6 +166,20 @@ class DefenderDevice(models.Model):
     managedByStatus = models.CharField(max_length = 50, null=True)
     vmMetadata = models.CharField(max_length = 50, null=True)
     parentDevice = models.ForeignKey("Device", on_delete=models.CASCADE, null=True, related_name='integrationDefender')
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
+
+    def __str__(self):
+        return self.hostname
+
+class QualysDevice(models.Model):
+    id = models.CharField(max_length = 100, primary_key=True)
+    hostname = models.CharField(max_length = 100, null=True)
+    osPlatform = models.CharField(max_length = 50, null=True)
+    endpointType = models.CharField(max_length = 25, null=True)
+    firstFoundDate = models.CharField(max_length = 50, null=True)
+    ipAddress = models.CharField(max_length = 50, null=True)
+    parentDevice = models.ForeignKey("Device", on_delete=models.CASCADE, null=True, related_name='integrationQualys')
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
 

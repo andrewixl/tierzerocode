@@ -62,7 +62,7 @@ def updateSophosDeviceDatabase(json_data):
         # Extract relevant data from the JSON
         device_id = device_data.get('id')
         device_type = device_data.get('type')
-        hostname = device_data.get('hostname')
+        hostname = device_data.get('hostname').lower()
         tenant_id = device_data.get('tenant', {}).get('id')
         os_data = device_data.get('os', {})
         ipv4_addresses = ', '.join(device_data.get('ipv4Addresses', []))
