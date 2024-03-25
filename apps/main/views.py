@@ -242,6 +242,8 @@ def endpointList(request, integration):
 		endpoints = DefenderDevice.objects.all()
 	# elif integration == 'crowdstrike':
 	# 	endpoints = CrowdStrikeDevice.objects.all()
+	elif integration == 'qualys':
+		endpoints = QualysDevice.objects.all()
 
 	for endpoint in endpoints:
 		endpoint_list.append([endpoint.hostname, endpoint.osPlatform, endpoint.endpointType, endpoint.created_at])

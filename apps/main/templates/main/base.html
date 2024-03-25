@@ -128,6 +128,7 @@
 							<i class="align-middle" data-feather="user"></i> <span class="align-middle">Microsoft Intune</span>
 						</a>
 					</li>
+
 					{% if page == 'sophos' %}
 					<li class="sidebar-item active">
 					{% else %}
@@ -135,6 +136,16 @@
 					{% endif %}
 						<a class="sidebar-link" href="/endpoints/sophos">
 							<i class="align-middle" data-feather="user"></i> <span class="align-middle">Sophos Central</span>
+						</a>
+					</li>
+
+					{% if page == 'qualys' %}
+					<li class="sidebar-item active">
+					{% else %}
+					<li class="sidebar-item">
+					{% endif %}
+						<a class="sidebar-link" href="/endpoints/qualys">
+							<i class="align-middle" data-feather="user"></i> <span class="align-middle">Qualys VM</span>
 						</a>
 					</li>
 					<!-- <li class="sidebar-item">
