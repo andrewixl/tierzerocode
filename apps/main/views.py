@@ -374,9 +374,3 @@ def syncQualysDevices(request):
 
 # Machine.Read.All
 # DeviceManagementManagedDevices.Read.All
-
-# def test(request):
-# 	# Checks User Permissions and Models
-# 	loginChecks(request)
-
-# 	return render( request, 'main/index_test.html')
