@@ -13,6 +13,7 @@ urlpatterns = [
     re_path(r'^integrations$', views.integrations),
     re_path(r'^enable-integration/(?P<id>\d+)$', views.enableIntegration),
     re_path(r'^disable-integration/(?P<id>\d+)$', views.disableIntegration),
+    re_path(r'^update-integration/(?P<id>\d+)$', views.updateIntegration),
     re_path(r'^error500$', views.error500),
     re_path(r'^sync-intune-devices$', views.syncIntuneDevices),
     re_path(r'^sync-sophos-devices$', views.syncSophosDevices),

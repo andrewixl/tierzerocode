@@ -27,8 +27,10 @@
 											<div class="dropdown-menu dropdown-menu-end">
 												{% if True == integrationStatus.2 %}
 												<a class="dropdown-item" href="/disable-integration/{{integrationStatus.4}}">Disable Integration</a>
-												<a class="dropdown-item" href="#">Configure Integration</a>
+												<a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#{{integrationStatus.0.split|join:'_'}}_modal" href="#">Configure Integration</a>
+												{% if True == integrationStatus.3 %}
 												<a class="dropdown-item" href="/sync-intune-devices">Sync Integration</a>
+												{% endif %}
 												{% elif False == integrationStatus.2 %}
 												<a class="dropdown-item" href="/enable-integration/{{integrationStatus.4}}">Enable Integration</a>
 												{% endif %}
@@ -47,6 +49,43 @@
 									<div class="badge bg-danger my-2">Not Configured</div>
 									{% endif %}
 								</div>
+								<!-- BEGIN primary modal -->
+								<div class="modal fade" id="{{integrationStatus.0.split|join:'_'}}_modal" tabindex="-1" role="dialog" aria-hidden="true">
+									<div class="modal-dialog modal-dialog-centered" role="document">
+										<div class="modal-content">
+											<div class="modal-header">
+												<h5 class="modal-title">Configure {{integrationStatus.0}} Integration</h5>
+												<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+											</div>
+											<div class="modal-body m-3">
+												<form action="/update-integration/{{integrationStatus.4}}" method="post">
+													{% csrf_token %}
+													<div class="mb-3">
+														<label class="form-label">Client ID <span style="color: red;">*</span></label>
+														<input type="text" class="form-control" name="client_id" placeholder="Client ID" value="{{integrationStatus.5}}">
+													</div>
+													<div class="mb-3">
+														<label class="form-label">Client Secret <span style="color: red;">*</span></label>
+														<input type="password" class="form-control" name="client_secret" placeholder="Client Secret" required>
+													</div>
+													<div class="mb-3">
+														<label class="form-label">Tenant ID <span style="color: red;">*</span></label>
+														<input type="text" class="form-control" name="tenant_id" placeholder="Tenant ID" value="{{integrationStatus.6}}">
+													</div>
+													<div class="mb-3">
+														<label class="form-label">Tenant Domain <span style="color: red;">*</span></label>
+														<input type="text" class="form-control" name="tenant_domain" placeholder="example.com" value="{{integrationStatus.7}}">
+													</div>
+											</div>
+											<div class="modal-footer">
+												<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+												<button type="submit" class="btn btn-primary">Save changes</button>
+											</div>
+												</form>
+										</div>
+									</div>
+								</div>
+								<!-- END primary modal -->
 								<!-- <div class="card-body px-4 pt-2">
 									<p>Last Synced: NULL</p>
 									<p>Last Sync Status: SUCCESS</p>

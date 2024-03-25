@@ -119,7 +119,7 @@
 					<li class="sidebar-item">
 					{% endif %}
 
-						<a class="sidebar-link" href="/endpoints/{{enabled_integration.integration_type}}">
+						<a class="sidebar-link" href="/endpoints/{{enabled_integration.integration_type.split|join:'-'}}">
 							<!-- <i class="align-middle" data-feather="user"></i> <span class="align-middle">Defender for Endpoint</span> -->
 							<img src="{% static enabled_integration.image_navbar_path %}" class="align-middle" width="24" height="24" style="margin-right: 5px;" alt="{{enabled_integration.integration_type}}"> <span class="align-middle">{{enabled_integration.integration_type}}</span>
 						</a>

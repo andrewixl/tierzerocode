@@ -240,15 +240,15 @@ def endpointList(request, integration):
 	
 	endpoint_list = []
 
-	if integration == 'intune':
+	if integration == 'Microsoft-Intune':
 		endpoints = IntuneDevice.objects.all()
-	elif integration == 'sophos':
+	elif integration == 'Sophos-Central':
 		endpoints = SophosDevice.objects.all()
-	elif integration == 'defender':
+	elif integration == 'Microsoft-Defender-for-Endpoint':
 		endpoints = DefenderDevice.objects.all()
 	# elif integration == 'crowdstrike':
 	# 	endpoints = CrowdStrikeDevice.objects.all()
-	elif integration == 'qualys':
+	elif integration == 'Qualys':
 		endpoints = QualysDevice.objects.all()
 
 	for endpoint in endpoints:
@@ -275,9 +275,9 @@ def integrations(request):
 	for integration_name in integration_names:
 		integration = Integration.objects.get(integration_type = integration_name)
 		if integration.tenant_domain:
-			integrationStatuses.append([integration.integration_type, integration.image_integration_path, integration.enabled, True, integration.id])
+			integrationStatuses.append([integration.integration_type, integration.image_integration_path, integration.enabled, True, integration.id, integration.client_id, integration.tenant_id, integration.tenant_domain])
 		else:
-			integrationStatuses.append([integration.integration_type, integration.image_integration_path, integration.enabled, False, integration.id])
+			integrationStatuses.append([integration.integration_type, integration.image_integration_path, integration.enabled, False, integration.id, integration.client_id, integration.tenant_id, integration.tenant_domain])
 	
 	context = {
 		'page':'integrations',
@@ -310,6 +310,23 @@ def disableIntegration(request, id):
 	
 	integration_update = Integration.objects.get(id=id)
 	integration_update.enabled = False
+	integration_update.save()
+
+	return redirect ('/integrations')
+
+############################################################################################
+
+def updateIntegration(request, id):
+	# Checks User Permissions and Required Models
+	redirect_url = loginChecks(request)
+	if redirect_url:
+		return redirect(redirect_url)
+
+	integration_update = Integration.objects.get(id=id)
+	integration_update.client_id = request.POST['client_id']
+	integration_update.client_secret = request.POST['client_secret']
+	integration_update.tenant_id = request.POST['tenant_id']
+	integration_update.tenant_domain = request.POST['tenant_domain']
 	integration_update.save()
 
 	return redirect ('/integrations')
