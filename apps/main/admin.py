@@ -1,11 +1,13 @@
 from django.contrib import admin
-from .models import Device, Integration, IntuneDevice, SophosDevice, DefenderDevice, QualysDevice
+from .models import Device, Integration, MicrosoftEntraIDDevice, IntuneDevice, SophosDevice, DefenderDevice, QualysDevice
 # CrowdStrikeDevice
 
 admin.site.register(Device)
 
 # Integration Models
 admin.site.register(Integration)
+
+admin.site.register(MicrosoftEntraIDDevice)
 
 # Microsoft Intune Models
 admin.site.register(IntuneDevice)

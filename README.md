@@ -29,10 +29,11 @@ bash install.sh
 
 ## Integrate with your tools
 
-- [ ] Microsoft Intune
 - [ ] Microsoft Defender for Endpoint
+- [ ] Microsoft Entra ID
+- [ ] Microsoft Intune
 - [ ] Sophos Central
-- [ ] Qualys Vulnerability Management
+- [ ] Qualys Vulnerability Management (Limited to First 1000 Devices)
 
 ## Roadmap
 - [ ] CrowdStrike Falcon (Under Development)

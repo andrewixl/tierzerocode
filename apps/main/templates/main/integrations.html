@@ -29,7 +29,7 @@
 												<a class="dropdown-item" href="/disable-integration/{{integrationStatus.4}}">Disable Integration</a>
 												<a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#{{integrationStatus.0.split|join:'_'}}_modal" href="#">Configure Integration</a>
 												{% if True == integrationStatus.3 %}
-												<a class="dropdown-item" href="/sync-intune-devices">Sync Integration</a>
+												<a class="dropdown-item" href="/sync-{{integrationStatus.0.split|join:'-'}}-devices">Sync Integration</a>
 												{% endif %}
 												{% elif False == integrationStatus.2 %}
 												<a class="dropdown-item" href="/enable-integration/{{integrationStatus.4}}">Enable Integration</a>
@@ -122,34 +122,6 @@
 							</div>
 						</div>
 						<!-- ---------------------------- END SCCM CARD ---------------------------- -->
-						<!-- ---------------------------- START ENTRA ID CARD ---------------------------- -->
-						<div class="col-12 col-md-6 col-lg-3">
-							<div class="card">
-								<img class="card-img-top" src="{% static 'main/img/integration_images/webp/microsoft_entra_id_logo.webp' %}" alt="Entra ID">
-								<div class="card-header px-4 pt-4">
-									<div class="card-actions float-end">
-										<div class="dropdown position-relative">
-											<a href="#" data-bs-toggle="dropdown" data-bs-display="static">
-												<i class="align-middle" data-feather="more-horizontal"></i>
-											</a>
-
-											<!-- <div class="dropdown-menu dropdown-menu-end">
-												<a class="dropdown-item" href="#">Enable Integration</a>
-												<a class="dropdown-item" href="#">Disable Integration</a>
-												<a class="dropdown-item" href="#">Configure Integration</a>
-											</div> -->
-										</div>
-									</div>
-									<h5 class="card-title mb-0">Microsoft Entra ID</h5>
-									<div class="badge bg-info my-2">Under Development</div>
-								</div>
-								<!-- <div class="card-body px-4 pt-2">
-									<p>Nam pretium turpis et arcu. Duis arcu tortor, suscipit eget, imperdiet nec, imperdiet iaculis, ipsum. Sed aliquam
-										ultrices mauris.</p>
-								</div> -->
-							</div>
-						</div>
-						<!-- ---------------------------- END ENTRA ID CARD ---------------------------- -->
 						<!-- ---------------------------- START TENABLE CARD ---------------------------- -->
 						<div class="col-12 col-md-6 col-lg-3">
 							<div class="card">

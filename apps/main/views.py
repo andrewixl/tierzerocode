@@ -1,20 +1,24 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from .pulldevices.masterlist import *
-from .pulldevices.intune import *
-from .pulldevices.sophos import *
-from .pulldevices.defender import *
-from .pulldevices.crowdstrike import *
-from .pulldevices.qualys import *
 
-# Import Integrations
-from .models import Integration, Device, IntuneDevice, SophosDevice, DefenderDevice
+# Import Integration API Scripts
+from .pulldevices.CrowdStrikeFalcon import *
+from .pulldevices.defender import *
+from .pulldevices.MicrosoftEntraID import *
+from .pulldevices.MicrosoftIntune import *
+from .pulldevices.SophosCentral import *
+from .pulldevices.Qualys import *
+
+# Import Integrations Models
+from .models import Integration, Device
+from .models import CrowdStrikeFalconDevice, DefenderDevice, MicrosoftEntraIDDevice, IntuneDevice, SophosDevice, QualysDevice
 from ..login_app.models import User
 
 ############################################################################################
 
 # Reused Data Sets
-integration_names = ['CrowdStrike Falcon', 'Microsoft Defender for Endpoint', 'Microsoft Intune', 'Sophos Central', 'Qualys']
+integration_names = ['CrowdStrike Falcon', 'Microsoft Defender for Endpoint', 'Microsoft Entra ID', 'Microsoft Intune', 'Sophos Central', 'Qualys']
 
 ############################################################################################
 
@@ -242,10 +246,12 @@ def endpointList(request, integration):
 
 	if integration == 'Microsoft-Intune':
 		endpoints = IntuneDevice.objects.all()
-	elif integration == 'Sophos-Central':
-		endpoints = SophosDevice.objects.all()
+	elif integration == 'Microsoft-Entra-ID':
+		endpoints = MicrosoftEntraIDDevice.objects.all()
 	elif integration == 'Microsoft-Defender-for-Endpoint':
 		endpoints = DefenderDevice.objects.all()
+	elif integration == 'Sophos-Central':
+		endpoints = SophosDevice.objects.all()
 	# elif integration == 'crowdstrike':
 	# 	endpoints = CrowdStrikeDevice.objects.all()
 	elif integration == 'Qualys':
@@ -341,52 +347,73 @@ def error500(request):
 
 ############################################################################################
 
-def syncIntuneDevices(request):
+def syncDevices(request, integration):
 	# Checks User Permissions and Required Models
 	redirect_url = loginChecks(request)
 	if redirect_url:
 		return redirect(redirect_url)
-
-	syncIntune()
+	
+	if integration == 'Crowdstrike-Falcon':
+		syncCrowdStrike()
+	elif integration == 'Microsoft-Defender-for-Endpoint':
+		syncDefender()
+	elif integration == 'Microsoft-Entra-ID':
+		syncMicrosoftEntraID()
+	elif integration == 'Microsoft-Intune':
+		syncIntune()
+	elif integration == 'Sophos-Central':
+		syncSophos()
+	elif integration == 'Qualys':
+		syncQualys()
 	return redirect('/integrations')
 
-def syncSophosDevices(request):
-	# Checks User Permissions and Required Models
-	redirect_url = loginChecks(request)
-	if redirect_url:
-		return redirect(redirect_url)
+# def syncIntuneDevices(request):
+# 	# Checks User Permissions and Required Models
+# 	redirect_url = loginChecks(request)
+# 	if redirect_url:
+# 		return redirect(redirect_url)
 
-	syncSophos()
-	return redirect('/integrations')
+# 	syncIntune()
+# 	return redirect('/integrations')
 
-def syncDefenderDevices(request):
-	# Checks User Permissions and Required Models
-	redirect_url = loginChecks(request)
-	if redirect_url:
-		return redirect(redirect_url)
+# def syncSophosDevices(request):
+# 	# Checks User Permissions and Required Models
+# 	redirect_url = loginChecks(request)
+# 	if redirect_url:
+# 		return redirect(redirect_url)
 
-	syncDefender()
-	return redirect('/integrations')
+# 	syncSophos()
+# 	return redirect('/integrations')
 
-def syncCrowdStrikeDevices(request):
-	# Checks User Permissions and Required Models
-	redirect_url = loginChecks(request)
-	if redirect_url:
-		return redirect(redirect_url)
+# def syncDefenderDevices(request):
+# 	# Checks User Permissions and Required Models
+# 	redirect_url = loginChecks(request)
+# 	if redirect_url:
+# 		return redirect(redirect_url)
 
-	syncCrowdStrike()
-	return redirect('/integrations')
+# 	syncDefender()
+# 	return redirect('/integrations')
 
-def syncQualysDevices(request):
-	# Checks User Permissions and Required Models
-	redirect_url = loginChecks(request)
-	if redirect_url:
-		return redirect(redirect_url)
+# def syncCrowdStrikeDevices(request):
+# 	# Checks User Permissions and Required Models
+# 	redirect_url = loginChecks(request)
+# 	if redirect_url:
+# 		return redirect(redirect_url)
 
-	syncQualys()
-	return redirect('/integrations')
+# 	syncCrowdStrike()
+# 	return redirect('/integrations')
+
+# def syncQualysDevices(request):
+# 	# Checks User Permissions and Required Models
+# 	redirect_url = loginChecks(request)
+# 	if redirect_url:
+# 		return redirect(redirect_url)
+
+# 	syncQualys()
+# 	return redirect('/integrations')
 
 ############################################################################################
 
-# Machine.Read.All
-# DeviceManagementManagedDevices.Read.All
+# Machine.Read.All - Defender
+# DeviceManagementManagedDevices.Read.All - Intune
+# Device.Read.All - Entra ID

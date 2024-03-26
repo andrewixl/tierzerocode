@@ -24,11 +24,11 @@ class Device(models.Model):
 class Integration(models.Model):
     enabled = models.BooleanField(null=True, default=False)
     INTEGRATION_CHOICES = (
+        ("CrowdStrike Falcon", "CrowdStrike Falcon"),
+        ("Microsoft Defender for Endpoint", "Microsoft Defender for Endpoint"),
+        ("Microsoft Entra ID", "Microsoft Entra ID"),
         ("Microsoft Intune", "Microsoft Intune"),
         ("Sophos Central", "Sophos Central"),
-        ("Microsoft Defender for Endpoint", "Microsoft Defender for Endpoint"),
-        ("CrowdStrike Falcon", "CrowdStrike Falcon"),
-        ("System Center Configuration Manager", "System Center Configuration Manager"),
         ("Qualys", "Qualys"),  
     )
     integration_type = models.CharField(max_length=35, choices=INTEGRATION_CHOICES, null=True)
@@ -41,6 +41,31 @@ class Integration(models.Model):
 
     def __str__(self):
         return self.integration_type
+
+class CrowdStrikeFalconDevice(models.Model):
+    id = models.CharField(max_length = 100, primary_key=True)
+    hostname = models.CharField(max_length = 100, null=True)
+    osPlatform = models.CharField(max_length = 50, null=True)
+    endpointType = models.CharField(max_length = 25, null=True)
+    parentDevice = models.ForeignKey("Device", on_delete=models.CASCADE, null=True, related_name='integrationCrowdStrikeFalcon')
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
+
+    def __str__(self):
+        return self.hostname
+
+class MicrosoftEntraIDDevice(models.Model):
+    id = models.CharField(max_length = 100, primary_key=True)
+    deviceId = models.CharField(max_length = 100, null=True)
+    hostname = models.CharField(max_length = 100, null=True)
+    osPlatform = models.CharField(max_length = 50, null=True)
+    endpointType = models.CharField(max_length = 25, null=True)
+    parentDevice = models.ForeignKey("Device", on_delete=models.CASCADE, null=True, related_name='integrationMicrosoftEntraID')
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
+
+    def __str__(self):
+        return self.hostname
 
 class IntuneDevice(models.Model):
     id = models.CharField(max_length = 100, primary_key=True)
