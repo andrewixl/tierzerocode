@@ -25,6 +25,9 @@ def updateMasterList(devices, tenant_domain):
                 elif 'android' in os_platform_lower:
                     endpointType = 'Mobile'
                     osPlatform = 'Android'
+                elif 'ios' in os_platform_lower or 'ipados' in os_platform_lower:
+                    endpointType = 'Mobile'
+                    osPlatform = 'iOS/iPadOS'
                 else:
                     print (device.osPlatform)
                     endpointType = 'Other'

@@ -64,6 +64,9 @@ def updateMicrosoftEntraIDDeviceDatabase(graph_result):
         elif 'android' in os_platform_lower:
             endpointType = 'Mobile'
             osPlatform_clean  = 'Android'
+        elif 'ios' in os_platform_lower or 'ipados' in os_platform_lower:
+            endpointType = 'Mobile'
+            osPlatform_clean = 'iOS/iPadOS'
         else:
             endpointType = 'Other'
             osPlatform_clean  = 'Other'

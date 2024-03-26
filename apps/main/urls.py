@@ -7,6 +7,7 @@ from django.urls import path
 
 urlpatterns = [
     re_path(r'^$', views.index),
+    re_path(r'^profile-settings$', views.profileSettings),
     re_path(r'^endpoints/master-list$', views.masterList),
     re_path(r'^endpoints/(?P<integration>[-\w]+)$', views.endpointList),
     re_path(r'^initial-setup$', views.initialSetup),
@@ -16,9 +17,4 @@ urlpatterns = [
     re_path(r'^update-integration/(?P<id>\d+)$', views.updateIntegration),
     re_path(r'^error500$', views.error500),
     re_path(r'^sync-(?P<integration>[-\w]+)-devices$', views.syncDevices),
-    # re_path(r'^sync-intune-devices$', views.syncIntuneDevices),
-    # re_path(r'^sync-sophos-devices$', views.syncSophosDevices),
-    # re_path(r'^sync-defender-devices$', views.syncDefenderDevices),
-    # re_path(r'^sync-crowdstrike-devices$', views.syncCrowdStrikeDevices),
-    # re_path(r'^sync-qualys-devices$', views.syncQualysDevices),
 ] 

@@ -4,6 +4,7 @@ class Device(models.Model):
     hostname = models.CharField(max_length = 50, null=True)
     OS_PLATFORM_CHOICES = (
         ("Android", "Android"),
+        ("iOS/iPadOS", "iOS/iPadOS"),
         ("Ubuntu", "Ubuntu"),
         ("Windows", "Windows"),
         ("Windows Server", "Windows Server"),

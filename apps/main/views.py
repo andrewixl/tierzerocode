@@ -184,6 +184,20 @@ def index(request):
 
 ############################################################################################
 
+def profileSettings(request):
+	# Checks User Permissions and Required Models
+	redirect_url = loginChecks(request)
+	if redirect_url:
+		return redirect(redirect_url)
+	
+	context = {
+		'page':"profile-settings",
+		'enabled_integrations': getEnabledIntegrations(),
+	}
+	return render( request, 'main/profile-settings.html', context)
+
+############################################################################################
+
 def masterList(request):
 	# Checks User Permissions and Required Models
 	redirect_url = loginChecks(request)
@@ -194,38 +208,50 @@ def masterList(request):
 
 	endpoints = Device.objects.all()
 	for endpoint in endpoints:
+		crowdstrike = False
+		defender = False
+		microsoftentraid = False
 		intune = False
 		sophos = False
-		defender = False
-		crowdstrike = False
-
+		qualys = False
+	
 		try:
-			if len(endpoint.integrationIntune.filter(hostname = endpoint.hostname)) == 1:
-				intune = True
-		except:
-			intune = False
-		try:
-			if len(endpoint.integrationSophos.get(hostname = endpoint.hostname)) == 1:
-				sophos = True
-			elif len(endpoint.integrationSophos.get(hostname = endpoint.hostname)) > 1:
-				sophos = True
-		except:
-			sophos = False
-		try:
-			if len(endpoint.integrationDefender.filter(hostname = endpoint.hostname)) == 1:
-				defender = True
-			elif len(endpoint.integrationDefender.filter(hostname = endpoint.hostname)) > 1:
-				defender = True
-		except:
-			print("entered exception for Defender")
-			defender = False
-		try:
-			if endpoint.integrationCrowdStrike.get(hostname = endpoint.hostname):
+			if len(endpoint.integrationCrowdStrikeFalcon.filter(hostname = endpoint.hostname)) >= 1:
 				crowdstrike = True
 		except:
+			print (endpoint.hostname + " not in CrowdStrike Falcon")
 			crowdstrike = False
-		# endpoint_list.append([endpoint.hostname, intune, sophos, defender, crowdstrike, False])
-		endpoint_list.append([endpoint.hostname, intune, sophos, defender])
+		try:
+			if len(endpoint.integrationDefender.filter(hostname = endpoint.hostname)) >= 1:
+				defender = True
+		except:
+			print (endpoint.hostname + " not in Defender")
+			defender = False
+		try:
+			if len(endpoint.integrationMicrosoftEntraID.filter(hostname = endpoint.hostname)) >= 1:
+				microsoftentraid = True
+		except:
+			print (endpoint.hostname + " not in Microsoft Entra ID")
+			microsoftentraid = False
+		try:
+			if len(endpoint.integrationIntune.filter(hostname = endpoint.hostname)) >= 1:
+				intune = True
+		except:
+			print (endpoint.hostname + " not in Intune")
+			intune = False
+		try:
+			if len(endpoint.integrationSophos.filter(hostname = endpoint.hostname)) >= 1:
+				sophos = True
+		except:
+			print (endpoint.hostname + " not in Sophos")
+			sophos = False
+		try:
+			if len(endpoint.integrationQualys.filter(hostname = endpoint.hostname)) >= 1:
+				qualys = True
+		except:
+			qualys = False
+
+		endpoint_list.append([endpoint.hostname, crowdstrike, defender, microsoftentraid, intune, sophos, qualys])
 
 	context = {
 		'page':"master-list",
@@ -244,6 +270,8 @@ def endpointList(request, integration):
 	
 	endpoint_list = []
 
+	# if integration == 'crowdstrike':
+	# 	endpoints = CrowdStrikeDevice.objects.all()
 	if integration == 'Microsoft-Intune':
 		endpoints = IntuneDevice.objects.all()
 	elif integration == 'Microsoft-Entra-ID':
@@ -252,8 +280,6 @@ def endpointList(request, integration):
 		endpoints = DefenderDevice.objects.all()
 	elif integration == 'Sophos-Central':
 		endpoints = SophosDevice.objects.all()
-	# elif integration == 'crowdstrike':
-	# 	endpoints = CrowdStrikeDevice.objects.all()
 	elif integration == 'Qualys':
 		endpoints = QualysDevice.objects.all()
 
@@ -340,8 +366,10 @@ def updateIntegration(request, id):
 ############################################################################################
 
 def error500(request):
-	# Checks User Permissions and Models
-	loginChecks(request)
+	# Checks User Permissions and Required Models
+	redirect_url = loginChecks(request)
+	if redirect_url:
+		return redirect(redirect_url)
 	
 	return render( request, 'main/pages-500.html')
 
@@ -366,51 +394,6 @@ def syncDevices(request, integration):
 	elif integration == 'Qualys':
 		syncQualys()
 	return redirect('/integrations')
-
-# def syncIntuneDevices(request):
-# 	# Checks User Permissions and Required Models
-# 	redirect_url = loginChecks(request)
-# 	if redirect_url:
-# 		return redirect(redirect_url)
-
-# 	syncIntune()
-# 	return redirect('/integrations')
-
-# def syncSophosDevices(request):
-# 	# Checks User Permissions and Required Models
-# 	redirect_url = loginChecks(request)
-# 	if redirect_url:
-# 		return redirect(redirect_url)
-
-# 	syncSophos()
-# 	return redirect('/integrations')
-
-# def syncDefenderDevices(request):
-# 	# Checks User Permissions and Required Models
-# 	redirect_url = loginChecks(request)
-# 	if redirect_url:
-# 		return redirect(redirect_url)
-
-# 	syncDefender()
-# 	return redirect('/integrations')
-
-# def syncCrowdStrikeDevices(request):
-# 	# Checks User Permissions and Required Models
-# 	redirect_url = loginChecks(request)
-# 	if redirect_url:
-# 		return redirect(redirect_url)
-
-# 	syncCrowdStrike()
-# 	return redirect('/integrations')
-
-# def syncQualysDevices(request):
-# 	# Checks User Permissions and Required Models
-# 	redirect_url = loginChecks(request)
-# 	if redirect_url:
-# 		return redirect(redirect_url)
-
-# 	syncQualys()
-# 	return redirect('/integrations')
 
 ############################################################################################
 
