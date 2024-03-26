@@ -88,6 +88,22 @@ def index(request):
 	redirect_url = loginChecks(request)
 	if redirect_url:
 		return redirect(redirect_url)
+	
+	integration_device_counts = [["Master List Endpoints", len(Device.objects.all())]]
+	for integration_name in integration_names:
+		if True == Integration.objects.get(integration_type = integration_name).enabled:
+			if integration_name == 'CrowdStrike Falcon':
+				integration_device_counts.append([integration_name, len(CrowdStrikeFalconDevice.objects.all())])
+			elif integration_name == 'Microsoft Defender for Endpoint':
+				integration_device_counts.append([integration_name, len(DefenderDevice.objects.all())])
+			elif integration_name == 'Microsoft Entra ID':
+				integration_device_counts.append([integration_name, len(MicrosoftEntraIDDevice.objects.all())])
+			elif integration_name == 'Microsoft Intune':
+				integration_device_counts.append([integration_name, len(IntuneDevice.objects.all())])
+			elif integration_name == 'Sophos Central':
+				integration_device_counts.append([integration_name, len(SophosDevice.objects.all())])
+			elif integration_name == 'Qualys':
+				integration_device_counts.append([integration_name, len(QualysDevice.objects.all())])		
 
 	# Query to get the count of each os platform
 	os_platform_counts = Device.objects.values('osPlatform').annotate(count=Count('osPlatform'))
@@ -110,39 +126,55 @@ def index(request):
 	endpoint_list = []
 	endpoints = Device.objects.all()
 	for endpoint in endpoints:
+		crowdstrike = False
+		defender = False
+		microsoftentraid = False
 		intune = False
 		sophos = False
-		defender = False
-		crowdstrike = False
+		qualys = False
+
 		try:
-			if len(endpoint.integrationIntune.filter(hostname = endpoint.hostname)) == 1:
-				intune = True
-		except:
-			intune = False
-		try:
-			if len(endpoint.integrationSophos.filter(hostname = endpoint.hostname)) == 1:
-				sophos = True
-		except:
-			sophos = False
-		try:
-			if len(endpoint.integrationDefender.filter(hostname = endpoint.hostname)) == 1:
-				defender = True
-			elif len(endpoint.integrationDefender.filter(hostname = endpoint.hostname)) > 1:
-				defender = True
-		except:
-			defender = False
-		try:
-			if len(endpoint.integrationCrowdStrike.filter(hostname = endpoint.hostname)) == 1:
+			if len(endpoint.integrationCrowdStrikeFalcon.filter(hostname = endpoint.hostname)) >= 1:
 				crowdstrike = True
 		except:
+			print (endpoint.hostname + " not in CrowdStrike Falcon")
 			crowdstrike = False
-		endpoint_list.append([intune, sophos, defender])
+		try:
+			if len(endpoint.integrationDefender.filter(hostname = endpoint.hostname)) >= 1:
+				defender = True
+		except:
+			print (endpoint.hostname + " not in Defender")
+			defender = False
+		try:
+			if len(endpoint.integrationMicrosoftEntraID.filter(hostname = endpoint.hostname)) >= 1:
+				microsoftentraid = True
+		except:
+			print (endpoint.hostname + " not in Microsoft Entra ID")
+			microsoftentraid = False
+		try:
+			if len(endpoint.integrationIntune.filter(hostname = endpoint.hostname)) >= 1:
+				intune = True
+		except:
+			print (endpoint.hostname + " not in Intune")
+			intune = False
+		try:
+			if len(endpoint.integrationSophos.filter(hostname = endpoint.hostname)) >= 1:
+				sophos = True
+		except:
+			print (endpoint.hostname + " not in Sophos")
+			sophos = False
+		try:
+			if len(endpoint.integrationQualys.filter(hostname = endpoint.hostname)) >= 1:
+				qualys = True
+		except:
+			qualys = False
+		endpoint_list.append([crowdstrike, defender, microsoftentraid, intune, sophos, qualys])
 		
 	
 	count_all_true = 0
 	count_any_false = 0
 	for sublist in endpoint_list:
-		if sublist == [True, True, True]:
+		if sublist == [True, True, True, True, True, True]:
 			count_all_true += 1
 		if False in sublist:
 			count_any_false += 1
@@ -150,11 +182,7 @@ def index(request):
 	context = {
 		'page':'dashboard',
 		'enabled_integrations': getEnabledIntegrations(),
-
-		'totalDeviceEndpoints':len(Device.objects.all()),
-		'totalIntuneEndpoints':len(IntuneDevice.objects.all()),
-		'totalSophosEndpoints':len(SophosDevice.objects.all()),
-		'totalDefenderEndpoints':len(DefenderDevice.objects.all()),
+		'endpoint_device_counts': integration_device_counts,
 
 		'osPlatformLabels': osPlatformLabels,
         'osPlatformData': osPlatformData,
