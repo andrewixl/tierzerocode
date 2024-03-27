@@ -35,7 +35,7 @@ def getCrowdStrikeAccessToken(client_id, client_secret, tenant_id):
         print("An error occurred:", str(e))
 
 def getCrowdStrikeDevices(access_token):
-    url = 'https://api.crowdstrike.com/devices/queries/devices/v1?limit=13'
+    url = 'https://api.crowdstrike.com/devices/queries/devices/v1?limit=5000'
     # url = 'https://api.crowdstrike.com/devices/queries/devices-scroll/v1'
     headers = {
     'Authorization': access_token
@@ -48,7 +48,9 @@ def getCrowdStrikeDevices(access_token):
 
     url = 'https://api.crowdstrike.com/devices/entities/devices/v2'
     headers = {
-    'Authorization': access_token
+    'accept': 'application/json',
+    'Authorization': access_token,
+    'Content-Type': 'application/json',
     }
 
     body = {
@@ -56,19 +58,20 @@ def getCrowdStrikeDevices(access_token):
     }
 
     # Make a GET request to the provided url, passing the access token in a header
-    crowdstrike_result = requests.post(url=url, headers=headers, data=body)
+    crowdstrike_result = requests.post(url=url, headers=headers, json=body)
 
     print(crowdstrike_result.json())
 
     # Print the results in a JSON format
     return crowdstrike_result.json()
 
-def syncCrowdStrike():
+def syncCrowdStrikeFalcon():
     data = Integration.objects.get(integration_type = "CrowdStrike Falcon")
     client_id = data.client_id
     client_secret = data.client_secret
     tenant_id = data.tenant_id
     tenant_domain = data.tenant_domain
+    print("Syncing CrowdStrike Falcon")
     getCrowdStrikeDevices(getCrowdStrikeAccessToken(client_id, client_secret, tenant_id))
     #     updateIntuneDeviceDatabase(getIntuneDevices(getIntuneAccessToken(client_id, client_secret, tenant_id)))
     #     devices = IntuneDevice.objects.all()

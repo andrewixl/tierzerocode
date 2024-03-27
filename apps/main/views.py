@@ -4,7 +4,7 @@ from .pulldevices.masterlist import *
 
 # Import Integration API Scripts
 from .pulldevices.CrowdStrikeFalcon import *
-from .pulldevices.defender import *
+from .pulldevices.MicrosoftDefenderforEndpoint import *
 from .pulldevices.MicrosoftEntraID import *
 from .pulldevices.MicrosoftIntune import *
 from .pulldevices.SophosCentral import *
@@ -89,6 +89,7 @@ def index(request):
 	if redirect_url:
 		return redirect(redirect_url)
 	
+	# Count of devices for each integration
 	integration_device_counts = [["Master List Endpoints", len(Device.objects.all())]]
 	for integration_name in integration_names:
 		if True == Integration.objects.get(integration_type = integration_name).enabled:
@@ -113,6 +114,9 @@ def index(request):
 	for item in os_platform_counts:
 		osPlatformLabels.append(item['osPlatform'])
 		osPlatformData.append(item['count'])
+	
+	print(osPlatformLabels)
+	print(osPlatformData)
 	
 	# Query to get the count of each endpoint type
 	endpoint_type_counts = Device.objects.values('endpointType').annotate(count=Count('endpointType'))
@@ -191,6 +195,7 @@ def index(request):
 			len(Device.objects.filter(osPlatform="Ubuntu")),
 			len(Device.objects.filter(osPlatform="Windows")),
 			len(Device.objects.filter(osPlatform="Windows Server")),
+			len(Device.objects.filter(osPlatform="iOS/iPadOS")),
 		],
 
 		'endpointTypeLabels': endpointTypeLabels,
@@ -409,8 +414,11 @@ def syncDevices(request, integration):
 	if redirect_url:
 		return redirect(redirect_url)
 	
-	if integration == 'Crowdstrike-Falcon':
-		syncCrowdStrike()
+	print(integration)
+
+	if integration == 'CrowdStrike-Falcon':
+		print("Calling Sync CrowdStrike Falcon")
+		syncCrowdStrikeFalcon()
 	elif integration == 'Microsoft-Defender-for-Endpoint':
 		syncDefender()
 	elif integration == 'Microsoft-Entra-ID':

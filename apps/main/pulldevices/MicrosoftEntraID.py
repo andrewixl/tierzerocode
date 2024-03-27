@@ -1,7 +1,9 @@
-from ..models import MicrosoftEntraIDDevice, Integration
-import msal
-import requests
+# Import Dependencies
+import msal, requests
 from datetime import datetime
+# Import Models
+from ..models import MicrosoftEntraIDDevice, Integration
+# Import Functions
 from .masterlist import *
 
 def getMicrosoftEntraIDAccessToken(client_id, client_secret, tenant_id):
