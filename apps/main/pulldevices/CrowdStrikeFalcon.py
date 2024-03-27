@@ -35,8 +35,8 @@ def getCrowdStrikeAccessToken(client_id, client_secret, tenant_id):
         print("An error occurred:", str(e))
 
 def getCrowdStrikeDevices(access_token):
-    url = 'https://api.crowdstrike.com/devices/queries/devices/v1?limit=5000'
-    # url = 'https://api.crowdstrike.com/devices/queries/devices-scroll/v1'
+    # url = 'https://api.crowdstrike.com/devices/queries/devices/v1?limit=20'
+    url = 'https://api.crowdstrike.com/devices/queries/devices-scroll/v1'
     headers = {
     'Authorization': access_token
     }
@@ -44,7 +44,26 @@ def getCrowdStrikeDevices(access_token):
     # Make a GET request to the provided url, passing the access token in a header
     crowdstrike_aids = ((requests.get(url=url, headers=headers)).json())['resources']
 
-    print(crowdstrike_aids)
+    print(str(len(crowdstrike_aids)) + " devices found")
+
+    total_devices = len(crowdstrike_aids)
+    total_devices_count = total_devices
+    device_pagination_arr = []
+    while total_devices_count > 0:
+        if total_devices_count > 5000 and len(device_pagination_arr) == 0:
+            device_pagination_arr.append(5000)
+            total_devices_count -= 5000
+        elif total_devices_count < 5000 and len(device_pagination_arr) == 0:
+            device_pagination_arr.append(total_devices_count)
+            total_devices_count = 0
+        elif total_devices_count > 5000:
+            device_pagination_arr.append(5000 + device_pagination_arr[-1])
+            total_devices_count -= 5000
+        elif total_devices_count < 5000:
+            device_pagination_arr.append(total_devices_count + device_pagination_arr[-1])
+            total_devices_count = 0
+
+    # print(crowdstrike_aids)
 
     url = 'https://api.crowdstrike.com/devices/entities/devices/v2'
     headers = {
@@ -60,7 +79,7 @@ def getCrowdStrikeDevices(access_token):
     # Make a GET request to the provided url, passing the access token in a header
     crowdstrike_result = requests.post(url=url, headers=headers, json=body)
 
-    print(crowdstrike_result.json())
+    # print(crowdstrike_result.json())
 
     # Print the results in a JSON format
     return crowdstrike_result.json()
