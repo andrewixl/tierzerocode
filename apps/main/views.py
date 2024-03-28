@@ -303,9 +303,9 @@ def endpointList(request, integration):
 	
 	endpoint_list = []
 
-	# if integration == 'crowdstrike':
-	# 	endpoints = CrowdStrikeDevice.objects.all()
-	if integration == 'Microsoft-Intune':
+	if integration == 'CrowdStrike-Falcon':
+		endpoints = CrowdStrikeFalconDevice.objects.all()
+	elif integration == 'Microsoft-Intune':
 		endpoints = IntuneDevice.objects.all()
 	elif integration == 'Microsoft-Entra-ID':
 		endpoints = MicrosoftEntraIDDevice.objects.all()

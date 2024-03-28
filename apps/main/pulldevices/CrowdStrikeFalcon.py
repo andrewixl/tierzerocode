@@ -1,6 +1,6 @@
 # from ..models import CrowdStrikeDevice, CrowdStrikeIntegration
-from ..models import Integration
-import msal
+from ..models import Integration, CrowdStrikeFalconDevice
+# import msal
 import requests
 from datetime import datetime
 from .masterlist import *
@@ -11,10 +11,8 @@ def getCrowdStrikeAccessToken(client_id, client_secret, tenant_id):
 
     # Define the authentication payload
     auth_payload = {
-        # 'grant_type': 'client_credentials',
         'client_id': client_id,
         'client_secret': client_secret,
-        # 'scope': 'token'
     }
 
     try:
@@ -44,11 +42,10 @@ def getCrowdStrikeDevices(access_token):
     # Make a GET request to the provided url, passing the access token in a header
     crowdstrike_aids = ((requests.get(url=url, headers=headers)).json())['resources']
 
-    print(str(len(crowdstrike_aids)) + " devices found")
-
     total_devices = len(crowdstrike_aids)
     total_devices_count = total_devices
-    device_pagination_arr = []
+    # [5000, 10000, 14666]
+    device_pagination_arr = [0]
     while total_devices_count > 0:
         if total_devices_count > 5000 and len(device_pagination_arr) == 0:
             device_pagination_arr.append(5000)
@@ -62,27 +59,72 @@ def getCrowdStrikeDevices(access_token):
         elif total_devices_count < 5000:
             device_pagination_arr.append(total_devices_count + device_pagination_arr[-1])
             total_devices_count = 0
+            
+    total_crowdstrike_results = []
+    for pagination_arr in range(len(device_pagination_arr)):
+        print(device_pagination_arr[pagination_arr])
+        if pagination_arr == 0:
+            pass
+        else:
+            url = 'https://api.crowdstrike.com/devices/entities/devices/v2'
+            headers = {
+            'accept': 'application/json',
+            'Authorization': access_token,
+            'Content-Type': 'application/json',
+            }
 
-    # print(crowdstrike_aids)
+            body = {
+                'ids': crowdstrike_aids[device_pagination_arr[pagination_arr-1]:device_pagination_arr[pagination_arr]],
+            }
 
-    url = 'https://api.crowdstrike.com/devices/entities/devices/v2'
-    headers = {
-    'accept': 'application/json',
-    'Authorization': access_token,
-    'Content-Type': 'application/json',
-    }
+            # Make a GET request to the provided url, passing the access token in a header
+            crowdstrike_result = requests.post(url=url, headers=headers, json=body)
 
-    body = {
-        'ids': crowdstrike_aids,
-    }
+            # print(crowdstrike_result.json())
 
-    # Make a GET request to the provided url, passing the access token in a header
-    crowdstrike_result = requests.post(url=url, headers=headers, json=body)
+            # Print the results in a JSON format
+            total_crowdstrike_results.append(crowdstrike_result.json())
+    return (total_crowdstrike_results)
 
-    # print(crowdstrike_result.json())
+def updateCrowdStrikeDeviceDatabase(total_crowdstrike_results):
+    for crowdstrike_results in total_crowdstrike_results:
+        for device_data in crowdstrike_results['resources']:
+            try:
+                # Extract relevant data from the JSON
+                device_id = device_data.get('device_id')
+                hostname = device_data.get('hostname')
 
-    # Print the results in a JSON format
-    return crowdstrike_result.json()
+                os_platform_lower = (device_data.get('os_version')).lower()
+                if 'server' in os_platform_lower and 'windows' in os_platform_lower:
+                    endpointType = 'Server'
+                    osPlatform_clean = 'Windows Server'
+                elif 'ubuntu' in os_platform_lower:
+                    endpointType = 'Server'
+                    osPlatform_clean  = 'Ubuntu'
+                elif 'windows' in os_platform_lower:
+                    endpointType = 'Client'
+                    osPlatform_clean  = 'Windows'
+                elif 'android' in os_platform_lower:
+                    endpointType = 'Mobile'
+                    osPlatform_clean  = 'Android'
+                elif 'ios' in os_platform_lower or 'ipados' in os_platform_lower:
+                    endpointType = 'Mobile'
+                    osPlatform_clean = 'iOS/iPadOS'
+                else:
+                    endpointType = 'Other'
+                    osPlatform_clean  = 'Other'
+                #Ventura (13)
+                
+                crowdstrikefalcon_device, created = CrowdStrikeFalconDevice.objects.update_or_create(
+                    id=device_id,
+                    defaults={
+                        'hostname': hostname.lower(),
+                        'osPlatform': osPlatform_clean,
+                        'endpointType': endpointType,
+                    }
+                )
+            except Exception as NoneType:
+                print("An error occurred:", str(NoneType) + ' ' + str(device_id))
 
 def syncCrowdStrikeFalcon():
     data = Integration.objects.get(integration_type = "CrowdStrike Falcon")
@@ -91,8 +133,7 @@ def syncCrowdStrikeFalcon():
     tenant_id = data.tenant_id
     tenant_domain = data.tenant_domain
     print("Syncing CrowdStrike Falcon")
-    getCrowdStrikeDevices(getCrowdStrikeAccessToken(client_id, client_secret, tenant_id))
-    #     updateIntuneDeviceDatabase(getIntuneDevices(getIntuneAccessToken(client_id, client_secret, tenant_id)))
-    #     devices = IntuneDevice.objects.all()
-    #     updateMasterList(devices, tenant_domain)
+    updateCrowdStrikeDeviceDatabase(getCrowdStrikeDevices(getCrowdStrikeAccessToken(client_id, client_secret, tenant_id)))
+    devices = CrowdStrikeFalconDevice.objects.all()
+    updateMasterList(devices, tenant_domain)
     return True
