@@ -1,7 +1,11 @@
+# Import Dependencies
 import requests
 from datetime import datetime
+# Import Models
 from ..models import Integration, SophosDevice
+# Import Functions Scripts
 from .masterlist import *
+from .DataCleaner import *
 
 def getSophosAccessToken(client_id, client_secret, tenant_id):
     # Define the authentication endpoint URL
@@ -65,6 +69,7 @@ def updateSophosDeviceDatabase(json_data):
         hostname = device_data.get('hostname').lower()
         tenant_id = device_data.get('tenant', {}).get('id')
         os_data = device_data.get('os', {})
+        os_platform = os_data.get('name')
         ipv4_addresses = ', '.join(device_data.get('ipv4Addresses', []))
         mac_addresses = ', '.join(device_data.get('macAddresses', []))
         associated_person = device_data.get('associatedPerson', {}).get('viaLogin')
@@ -73,25 +78,8 @@ def updateSophosDeviceDatabase(json_data):
         lockdown_data = device_data.get('lockdown', {})
         isolation_data = device_data.get('isolation', {})
 
-        os_platform_lower = (os_data.get('name')).lower()
-        if 'server' in os_platform_lower and 'windows' in os_platform_lower:
-            endpointType = 'Server'
-            osPlatform_clean = 'Windows Server'
-        elif 'ubuntu' in os_platform_lower:
-            endpointType = 'Server'
-            osPlatform_clean  = 'Ubuntu'
-        elif 'windows' in os_platform_lower:
-            endpointType = 'Client'
-            osPlatform_clean  = 'Windows'
-        elif 'android' in os_platform_lower:
-            endpointType = 'Mobile'
-            osPlatform_clean  = 'Android'
-        elif 'ios' in os_platform_lower or 'ipados' in os_platform_lower:
-            endpointType = 'Mobile'
-            osPlatform_clean = 'iOS/iPadOS'
-        else:
-            endpointType = 'Other'
-            osPlatform_clean  = 'Other'
+        # [osPlatform_clean, endpointType]
+        clean_data = cleanAPIData(os_platform)
 
         # Create or update the SophosDevice instance
         sophos_device, created = SophosDevice.objects.update_or_create(
@@ -101,8 +89,8 @@ def updateSophosDeviceDatabase(json_data):
                 'hostname': hostname.lower(),
                 'tenant_id': tenant_id,
                 'os_isServer': os_data.get('isServer'),
-                'osPlatform': osPlatform_clean,
-                'endpointType': endpointType,
+                'osPlatform': clean_data[0],
+                'endpointType': clean_data[1],
                 'os_name': os_data.get('platform'),
                 'os_majorVersion': os_data.get('majorVersion'),
                 'os_minorVersion': os_data.get('minorVersion'),

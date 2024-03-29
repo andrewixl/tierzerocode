@@ -1,8 +1,11 @@
-from ..models import DefenderDevice, Integration
-import msal
-import requests
+# Import Dependencies
+import msal, requests
 from datetime import datetime
+# Import Models
+from ..models import DefenderDevice, Integration
+# Import Function Scripts
 from .masterlist import *
+from .DataCleaner import *
 
 def getDefenderAccessToken(client_id, client_secret, tenant_id):
     # Enter the details of your AAD app registration
@@ -46,39 +49,21 @@ def updateDefenderDeviceDatabase(json_data):
     for device_data in json_data['value']:
         if device_data.get('onboardingStatus') == 'Onboarded' and not device_data.get('healthStatus') == 'Inactive':
             device_id = device_data['id']
+            hostname = (device_data['computerDnsName'].split('.', 1)[0]).lower()
+            os_platform = device_data['osPlatform']
 
-            os_platform_lower = (device_data['osPlatform']).lower()
-            if 'server' in os_platform_lower and 'windows' in os_platform_lower:
-                endpointType = 'Server'
-                osPlatform_clean = 'Windows Server'
-            elif 'ubuntu' in os_platform_lower:
-                endpointType = 'Server'
-                osPlatform_clean  = 'Ubuntu'
-            elif 'windows' in os_platform_lower:
-                endpointType = 'Client'
-                osPlatform_clean  = 'Windows'
-            elif 'android' in os_platform_lower:
-                endpointType = 'Mobile'
-                osPlatform_clean  = 'Android'
-            else:
-                endpointType = 'Other'
-                osPlatform_clean  = 'Other'
+            # [osPlatform_clean, endpointType]
+            clean_data = cleanAPIData(os_platform)
 
             defaults = {
-                'mergedIntoMachineId': device_data['mergedIntoMachineId'],
-                'isPotentialDuplication': device_data['isPotentialDuplication'],
-                'isExcluded': device_data['isExcluded'],
-                'exclusionReason': device_data['exclusionReason'],
-                'hostname': (device_data['computerDnsName'].split('.', 1)[0]).lower(),
+                'hostname': hostname,
                 'firstSeen': device_data['firstSeen'],
                 'lastSeen': device_data['lastSeen'],
-                'osPlatform': osPlatform_clean,
-                'endpointType': endpointType,
+                'osPlatform': clean_data[0],
+                'endpointType': clean_data[1],
                 'osVersion': device_data['osVersion'],
                 'osProcessor': device_data['osProcessor'],
                 'version': device_data['version'],
-                'lastIpAddress': device_data['lastIpAddress'],
-                'lastExternalIpAddress': device_data['lastExternalIpAddress'],
                 'agentVersion': device_data['agentVersion'],
                 'osBuild': device_data['osBuild'],
                 'healthStatus': device_data['healthStatus'],

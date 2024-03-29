@@ -11,7 +11,7 @@ from .pulldevices.SophosCentral import *
 from .pulldevices.Qualys import *
 
 # Import Integrations Models
-from .models import Integration, Device
+from .models import Integration, Device, DeviceComplianceSettings
 from .models import CrowdStrikeFalconDevice, DefenderDevice, MicrosoftEntraIDDevice, IntuneDevice, SophosDevice, QualysDevice
 from ..login_app.models import User
 
@@ -19,6 +19,7 @@ from ..login_app.models import User
 
 # Reused Data Sets
 integration_names = ['CrowdStrike Falcon', 'Microsoft Defender for Endpoint', 'Microsoft Entra ID', 'Microsoft Intune', 'Sophos Central', 'Qualys']
+os_platforms = ['Android', 'iOS/iPadOS', 'MacOS', 'Ubuntu', 'Windows', 'Windows Server', 'Other']
 
 ############################################################################################
 
@@ -46,19 +47,28 @@ def checkIntegrations(request):
 	for integration in integration_names:
 		if len(Integration.objects.filter(integration_type = integration)) == 0:
 			return False
-	else:
-		return True
+		else:
+			return True
+def checkDeviceComplianceSettings(request):
+	for os_platform in os_platforms:
+		if len(DeviceComplianceSettings.objects.filter(os_platform = os_platform)) == 0:
+			return False
+		else:
+			return True
 def loginChecks(request):
 	results = []
 	results.append(checkLogin(request))
 	results.append(checkActive(request))
 	results.append(checkIntegrations(request))
+	results.append(checkDeviceComplianceSettings(request))
 	if results[0] == False:
 		return '/identity/login'
 	elif results[1] == False:
 		return '/identity/accountsuspended'
 	elif results[2] == False:
 		print("Entering Initial Setup")
+		return '/initial-setup'
+	elif results[3] == False:
 		return '/initial-setup'
 	else:
 		return None
@@ -78,6 +88,14 @@ def initialSetup(request):
 			image_navbar_path = 'main/img/navbar_icons/webp/' + (integration.replace(" ", "_")).lower() + '_logo_nav.webp'
 			image_integration_path = 'main/img/integration_images/webp/' + (integration.replace(" ", "_")).lower() + '_logo.webp'
 			Integration.objects.create(enabled = False, integration_type = integration, image_navbar_path=image_navbar_path, image_integration_path=image_integration_path)
+
+	for os_platform in os_platforms:
+		if len(DeviceComplianceSettings.objects.filter(os_platform = os_platform)) == 0:
+			default_settings = []
+			for setting in range(len(os_platforms)-1):
+				default_settings.append(0)
+			DeviceComplianceSettings.objects.create(os_platform = os_platform, settings = default_settings)
+
 	return redirect(request.META.get('HTTP_REFERER', '/'))
 
 ############################################################################################
@@ -223,9 +241,17 @@ def profileSettings(request):
 	if redirect_url:
 		return redirect(redirect_url)
 	
+	settings = []
+
+	for device_compliance_setting in DeviceComplianceSettings.objects.all():
+		settings.append([device_compliance_setting.os_platform, device_compliance_setting.settings])
+	
+	print(settings)
+
 	context = {
 		'page':"profile-settings",
 		'enabled_integrations': getEnabledIntegrations(),
+		'settings':settings,
 	}
 	return render( request, 'main/profile-settings.html', context)
 

@@ -9,30 +9,11 @@ def updateMasterList(devices, tenant_domain):
 
         hostname = str(device).lower()
         hostname_without_suffix = hostname[:-len(tenant_domain_suffix)] if hostname.endswith(tenant_domain_suffix) else hostname
-        os_platform_lower = (device.osPlatform).lower()
+        # os_platform_lower = (device.osPlatform).lower()
 
         if device.parentDevice is None:
             if len(Device.objects.filter(hostname=hostname_without_suffix)) == 0:
-                if 'server' in os_platform_lower and 'windows' in os_platform_lower:
-                    endpointType = 'Server'
-                    osPlatform = 'Windows Server'
-                elif 'ubuntu' in os_platform_lower:
-                    endpointType = 'Server'
-                    osPlatform = 'Ubuntu'
-                elif 'windows' in os_platform_lower:
-                    endpointType = 'Client'
-                    osPlatform = 'Windows'
-                elif 'android' in os_platform_lower:
-                    endpointType = 'Mobile'
-                    osPlatform = 'Android'
-                elif 'ios' in os_platform_lower or 'ipados' in os_platform_lower:
-                    endpointType = 'Mobile'
-                    osPlatform = 'iOS/iPadOS'
-                else:
-                    print (device.osPlatform)
-                    endpointType = 'Other'
-                    osPlatform = 'Other'
-                newDevice = Device.objects.create(hostname=hostname_without_suffix, osPlatform=osPlatform, endpointType=endpointType)
+                newDevice = Device.objects.create(hostname=hostname_without_suffix, osPlatform=device.osPlatform, endpointType=device.endpointType)
                 device.parentDevice = newDevice
             else:
                 device.parentDevice = Device.objects.get(hostname=hostname_without_suffix)

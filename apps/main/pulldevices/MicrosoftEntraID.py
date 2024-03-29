@@ -3,8 +3,9 @@ import msal, requests
 from datetime import datetime
 # Import Models
 from ..models import MicrosoftEntraIDDevice, Integration
-# Import Functions
+# Import Function Scripts
 from .masterlist import *
+from .DataCleaner import *
 
 def getMicrosoftEntraIDAccessToken(client_id, client_secret, tenant_id):
     # Enter the details of your AAD app registration
@@ -46,6 +47,7 @@ def updateMicrosoftEntraIDDeviceDatabase(graph_result):
     for device_data in data['value']:
         device_id = device_data['id']
         device_name = device_data['displayName']
+        os_platform = device_data['operatingSystem']
 
         # Check if the device exists in the database
         try:
@@ -53,32 +55,17 @@ def updateMicrosoftEntraIDDeviceDatabase(graph_result):
         except MicrosoftEntraIDDevice.DoesNotExist:
             device = None
         
-        os_platform_lower = (device_data['operatingSystem']).lower()
-        if 'server' in os_platform_lower and 'windows' in os_platform_lower:
-            endpointType = 'Server'
-            osPlatform_clean = 'Windows Server'
-        elif 'ubuntu' in os_platform_lower:
-            endpointType = 'Server'
-            osPlatform_clean  = 'Ubuntu'
-        elif 'windows' in os_platform_lower:
-            endpointType = 'Client'
-            osPlatform_clean  = 'Windows'
-        elif 'android' in os_platform_lower:
-            endpointType = 'Mobile'
-            osPlatform_clean  = 'Android'
-        elif 'ios' in os_platform_lower or 'ipados' in os_platform_lower:
-            endpointType = 'Mobile'
-            osPlatform_clean = 'iOS/iPadOS'
-        else:
-            endpointType = 'Other'
-            osPlatform_clean  = 'Other'
+        # [osPlatform_clean, endpointType]
+        clean_data = cleanAPIData(os_platform)
 
         # Prepare data for updating/creating device
         device_fields = {
             'hostname': device_name.lower(),
             'deviceId': device_data['deviceId'],
-            'osPlatform': osPlatform_clean,
-            'endpointType': endpointType,
+            # 'osPlatform': osPlatform_clean,
+            # 'endpointType': endpointType,
+            'osPlatform': clean_data[0],
+            'endpointType': clean_data[1],
         }
 
         # If device exists, update; otherwise, create new

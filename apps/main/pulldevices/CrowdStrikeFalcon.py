@@ -1,9 +1,11 @@
-# from ..models import CrowdStrikeDevice, CrowdStrikeIntegration
-from ..models import Integration, CrowdStrikeFalconDevice
-# import msal
+# Import Dependencies
 import requests
 from datetime import datetime
+# Import Models
+from ..models import Integration, CrowdStrikeFalconDevice
+# Import Functions Scripts
 from .masterlist import *
+from .DataCleaner import *
 
 def getCrowdStrikeAccessToken(client_id, client_secret, tenant_id):
     # Define the authentication endpoint URL
@@ -80,8 +82,6 @@ def getCrowdStrikeDevices(access_token):
             # Make a GET request to the provided url, passing the access token in a header
             crowdstrike_result = requests.post(url=url, headers=headers, json=body)
 
-            # print(crowdstrike_result.json())
-
             # Print the results in a JSON format
             total_crowdstrike_results.append(crowdstrike_result.json())
     return (total_crowdstrike_results)
@@ -93,34 +93,17 @@ def updateCrowdStrikeDeviceDatabase(total_crowdstrike_results):
                 # Extract relevant data from the JSON
                 device_id = device_data.get('device_id')
                 hostname = device_data.get('hostname')
+                os_platform = device_data.get('os_version')
 
-                os_platform_lower = (device_data.get('os_version')).lower()
-                if 'server' in os_platform_lower and 'windows' in os_platform_lower:
-                    endpointType = 'Server'
-                    osPlatform_clean = 'Windows Server'
-                elif 'ubuntu' in os_platform_lower:
-                    endpointType = 'Server'
-                    osPlatform_clean  = 'Ubuntu'
-                elif 'windows' in os_platform_lower:
-                    endpointType = 'Client'
-                    osPlatform_clean  = 'Windows'
-                elif 'android' in os_platform_lower:
-                    endpointType = 'Mobile'
-                    osPlatform_clean  = 'Android'
-                elif 'ios' in os_platform_lower or 'ipados' in os_platform_lower:
-                    endpointType = 'Mobile'
-                    osPlatform_clean = 'iOS/iPadOS'
-                else:
-                    endpointType = 'Other'
-                    osPlatform_clean  = 'Other'
-                #Ventura (13)
+                # [osPlatform_clean, endpointType]
+                clean_data = cleanAPIData(os_platform)
                 
                 crowdstrikefalcon_device, created = CrowdStrikeFalconDevice.objects.update_or_create(
                     id=device_id,
                     defaults={
                         'hostname': hostname.lower(),
-                        'osPlatform': osPlatform_clean,
-                        'endpointType': endpointType,
+                        'osPlatform': clean_data[0],
+                        'endpointType': clean_data[1],
                     }
                 )
             except Exception as NoneType:

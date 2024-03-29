@@ -1,8 +1,11 @@
-from ..models import QualysDevice, Integration
-import json, xmltodict
-import requests
+# Import Dependencies
+import requests, json, xmltodict
 from datetime import datetime
+# Import Models
+from ..models import QualysDevice, Integration
+# Import Functions Scripts
 from .masterlist import *
+from .DataCleaner import *
 
 def getQualysAccessToken(client_id, client_secret, tenant_id):
     # Define the authentication endpoint URL
@@ -84,36 +87,21 @@ def getQualysDevices(s):
 def updateQualysDeviceDatabase(json_data):
     host_list = json_data.get("HOST_LIST_OUTPUT", {}).get("RESPONSE", {}).get("HOST_LIST", {}).get("HOST", [])
     for host_data in host_list:
-        os_platform_lower = (host_data.get("OS")).lower()
-        if 'server' in os_platform_lower and 'windows' in os_platform_lower:
-            endpointType = 'Server'
-            osPlatform_clean = 'Windows Server'
-        elif 'ubuntu' in os_platform_lower:
-            endpointType = 'Server'
-            osPlatform_clean  = 'Ubuntu'
-        elif 'windows' in os_platform_lower:
-            endpointType = 'Client'
-            osPlatform_clean  = 'Windows'
-        elif 'android' in os_platform_lower:
-            endpointType = 'Mobile'
-            osPlatform_clean  = 'Android'
-        else:
-            endpointType = 'Other'
-            osPlatform_clean  = 'Other'
-
-
         device_id = host_data.get("ID")
         hostname = host_data.get("DNS_DATA", {}).get("HOSTNAME").lower()
+        os_platform = host_data.get("OS")
         first_found_date = host_data.get("FIRST_FOUND_DATE")
         ip_address = host_data.get("IP")
 
+        clean_data = cleanAPIData(os_platform)     
+        
         # Check if the device already exists, if not, create it
         if not QualysDevice.objects.filter(id=device_id).exists():
             QualysDevice.objects.create(
                 id=device_id,
                 hostname=hostname,
-                osPlatform=osPlatform_clean,
-                endpointType = endpointType,
+                osPlatform=clean_data[0],
+                endpointType = clean_data[1],
                 firstFoundDate=first_found_date,
                 ipAddress=ip_address
             )

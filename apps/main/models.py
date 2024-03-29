@@ -5,6 +5,7 @@ class Device(models.Model):
     OS_PLATFORM_CHOICES = (
         ("Android", "Android"),
         ("iOS/iPadOS", "iOS/iPadOS"),
+        ("MacOS", "MacOS"),
         ("Ubuntu", "Ubuntu"),
         ("Windows", "Windows"),
         ("Windows Server", "Windows Server"),
@@ -21,6 +22,13 @@ class Device(models.Model):
 
     def __str__(self):
         return self.hostname
+
+class DeviceComplianceSettings(models.Model):
+    os_platform = models.CharField(max_length = 100, null=True)
+    settings = models.JSONField(null=True)
+
+    def __str__(self):
+        return self.os_platform
     
 class Integration(models.Model):
     enabled = models.BooleanField(null=True, default=False)
@@ -163,10 +171,6 @@ class SophosDevice(models.Model):
 
 class DefenderDevice(models.Model):
     id = models.CharField(max_length = 100, primary_key=True)
-    mergedIntoMachineId = models.CharField(max_length = 50, null=True)
-    isPotentialDuplication = models.BooleanField(null=True)
-    isExcluded = models.BooleanField(null=True)
-    exclusionReason = models.CharField(max_length = 50, null=True)
     hostname = models.CharField(max_length = 100, null=True)
     firstSeen = models.CharField(max_length = 50, null=True)
     lastSeen = models.CharField(max_length = 50, null=True)
@@ -175,8 +179,6 @@ class DefenderDevice(models.Model):
     osVersion = models.CharField(max_length = 50, null=True)
     osProcessor = models.CharField(max_length = 50, null=True)
     version = models.CharField(max_length = 50, null=True)
-    lastIpAddress = models.CharField(max_length = 50, null=True)
-    lastExternalIpAddress = models.CharField(max_length = 50, null=True)
     agentVersion = models.CharField(max_length = 50, null=True)
     osBuild = models.IntegerField(null=True)
     healthStatus = models.CharField(max_length = 50, null=True)

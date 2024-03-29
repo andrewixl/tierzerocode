@@ -3,8 +3,9 @@ import msal, requests
 from datetime import datetime
 # Import Models
 from ..models import IntuneDevice, Integration
-# Import Functions
+# Import Function Scripts
 from .masterlist import *
+from .DataCleaner import *
 
 def getIntuneAccessToken(client_id, client_secret, tenant_id):
     authority = 'https://login.microsoftonline.com/' + tenant_id
@@ -45,29 +46,16 @@ def updateIntuneDeviceDatabase(graph_result):
     for device_data in data['value']:
         device_id = device_data['id']
         device_name = device_data['deviceName']
+        os_platform = device_data['operatingSystem']
 
         # Check if the device exists in the database
         try:
             device = IntuneDevice.objects.get(id=device_id)
         except IntuneDevice.DoesNotExist:
             device = None
-        
-        os_platform_lower = (device_data['operatingSystem']).lower()
-        if 'server' in os_platform_lower and 'windows' in os_platform_lower:
-            endpointType = 'Server'
-            osPlatform_clean = 'Windows Server'
-        elif 'ubuntu' in os_platform_lower:
-            endpointType = 'Server'
-            osPlatform_clean  = 'Ubuntu'
-        elif 'windows' in os_platform_lower:
-            endpointType = 'Client'
-            osPlatform_clean  = 'Windows'
-        elif 'android' in os_platform_lower:
-            endpointType = 'Mobile'
-            osPlatform_clean  = 'Android'
-        else:
-            endpointType = 'Other'
-            osPlatform_clean  = 'Other'
+
+        # [osPlatform_clean, endpointType]
+        clean_data = cleanAPIData(os_platform)
 
         # Prepare data for updating/creating device
         device_fields = {
@@ -76,8 +64,8 @@ def updateIntuneDeviceDatabase(graph_result):
             'managedDeviceOwnerType': device_data['managedDeviceOwnerType'],
             'enrolledDateTime': datetime.fromisoformat(device_data['enrolledDateTime']),
             'lastSyncDateTime': datetime.fromisoformat(device_data['lastSyncDateTime']),
-            'osPlatform': osPlatform_clean,
-            'endpointType': endpointType,
+            'osPlatform': clean_data[0],
+            'endpointType': clean_data[1],
             'complianceState': device_data['complianceState'],
             'jailBroken': device_data['jailBroken'],
             'managementAgent': device_data['managementAgent'],

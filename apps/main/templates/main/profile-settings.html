@@ -8,20 +8,18 @@
 
 					<div class="row">
 						<div class="col-md-3 col-xl-2">
-
 							<div class="card">
-								<div class="card-header">
-									<h5 class="card-title mb-0">Profile Settings</h5>
-								</div>
-
 								<div class="list-group list-group-flush" role="tablist">
+									<div class="card-header bg-secondary">
+										<h5 class="card-title text-white mb-0">Profile Settings</h5>
+									</div>
 									<a class="list-group-item list-group-item-action active" data-bs-toggle="list" href="#account" role="tab">
 										Account
 									</a>
 									<!-- <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#password" role="tab">
 										Password
-									</a> -->
-									<!-- <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#" role="tab">
+									</a>
+									<a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#" role="tab">
 										Privacy and safety
 									</a>
 									<a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#" role="tab">
@@ -29,64 +27,30 @@
 									</a>
 									<a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#" role="tab">
 										Web notifications
+									</a> -->
+									<div class="card-header bg-secondary">
+										<h5 class="card-title text-white warning mb-0">System Settings</h5>
+									</div>
+									<a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#compliance-settings" role="tab">
+										Compliance Settings
 									</a>
-									<a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#" role="tab">
-										Widgets
-									</a>
-									<a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#" role="tab">
+									<!-- <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#" role="tab">
 										Your data
 									</a>
 									<a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#" role="tab">
 										Delete account
 									</a> -->
 								</div>
+
+								
 							</div>
 						</div>
 
 						<div class="col-md-9 col-xl-10">
 							<div class="tab-content">
 								<div class="tab-pane fade show active" id="account" role="tabpanel">
-
-									<!-- <div class="card">
-										<div class="card-header">
-
-											<h5 class="card-title mb-0">Public info</h5>
-										</div>
-										<div class="card-body">
-											<form>
-												<div class="row">
-													<div class="col-md-8">
-														<div class="mb-3">
-															<label class="form-label" for="inputUsername">Username</label>
-															<input type="text" class="form-control" id="inputUsername" placeholder="Username">
-														</div>
-														<div class="mb-3">
-															<label class="form-label" for="inputUsername">Biography</label>
-															<textarea rows="2" class="form-control" id="inputBio"
-																placeholder="Tell something about yourself"></textarea>
-														</div>
-													</div>
-													<div class="col-md-4">
-														<div class="text-center">
-															<img alt="Charles Hall" src="img/avatars/avatar.jpg" class="rounded-circle img-responsive mt-2"
-																width="128" height="128" />
-															<div class="mt-2">
-																<span class="btn btn-primary"><i class="fas fa-upload"></i> Upload</span>
-															</div>
-															<small>For best results, use an image at least 128px by 128px in .jpg format</small>
-														</div>
-													</div>
-												</div>
-
-												<button type="submit" class="btn btn-primary">Save changes</button>
-											</form>
-
-										</div>
-									</div> -->
-
 									<div class="card">
 										<div class="card-header">
-
 											<h5 class="card-title mb-0">Profile Info</h5>
 										</div>
 										<div class="card-body">
@@ -105,63 +69,97 @@
 													<label class="form-label" for="inputEmail4">Email</label>
 													<input type="email" class="form-control" id="inputEmail4" name="email_address" placeholder="Email" value="{{request.session.email}}" disabled>
 												</div>
-												<!-- <div class="mb-3">
-													<label class="form-label" for="inputAddress">Address</label>
-													<input type="text" class="form-control" id="inputAddress" placeholder="1234 Main St">
-												</div>
-												<div class="mb-3">
-													<label class="form-label" for="inputAddress2">Address 2</label>
-													<input type="text" class="form-control" id="inputAddress2" placeholder="Apartment, studio, or floor">
-												</div>
-												<div class="row">
-													<div class="mb-3 col-md-6">
-														<label class="form-label" for="inputCity">City</label>
-														<input type="text" class="form-control" id="inputCity">
-													</div>
-													<div class="mb-3 col-md-4">
-														<label class="form-label" for="inputState">State</label>
-														<select id="inputState" class="form-control">
-															<option selected>Choose...</option>
-															<option>...</option>
-														</select>
-													</div>
-													<div class="mb-3 col-md-2">
-														<label class="form-label" for="inputZip">Zip</label>
-														<input type="text" class="form-control" id="inputZip">
-													</div>
-												</div> -->
 												<button type="submit" class="btn btn-primary" disabled>Save Changes</button>
 											</form>
 
 										</div>
 									</div>
-
 								</div>
-								<!-- <div class="tab-pane fade" id="password" role="tabpanel">
+								<div class="tab-pane fade show" id="compliance-settings" role="tabpanel">
 									<div class="card">
-										<div class="card-body">
-											<h5 class="card-title">Password</h5>
+										<div class="card-header">
 
-											<form>
-												<div class="mb-3">
-													<label class="form-label" for="inputPasswordCurrent">Current password</label>
-													<input type="password" class="form-control" id="inputPasswordCurrent">
-													<small><a href="#">Forgot your password?</a></small>
+											<h5 class="card-title mb-0">Compliance Settings</h5>
+										</div>
+										<div class="card-body">
+											<form action="" method="post">
+												{% for setting in settings %}
+												<div>
+													<label class="form-check form-check-inline">
+														<!-- <input class="form-check-input" type="checkbox" value="option1"> -->
+														<span class="form-check-label">
+															{{setting.0}} Devices
+														</span>
+													</label>
+													<label class="form-check form-check-inline">
+														{% if setting.1.0 == 1 %}
+														<input class="form-check-input" type="checkbox" name="CrowdStrike-Falcon" value="True" checked>
+														{% else %}
+														<input class="form-check-input" type="checkbox" name="CrowdStrike-Falcon" value="False">
+														{% endif %}
+														<span class="form-check-label">
+															CrowdStrike Falcon
+														</span>
+													</label>
+													<label class="form-check form-check-inline">
+														{% if setting.1.1 == 1 %}
+														<input class="form-check-input" type="checkbox" name="Microsoft-Defender-for-Endpoint" value="True" checked>
+														{% else %}
+														<input class="form-check-input" type="checkbox" name="Microsoft-Defender-for-Endpoint" value="False">
+														{% endif %}
+														<span class="form-check-label">
+															Microsoft Defender for Endpoint
+														</span>
+													</label>
+													<label class="form-check form-check-inline">
+														{% if setting.1.2 == 1 %}
+														<input class="form-check-input" type="checkbox" name="Microsoft-Entra-ID" value="True" checked>
+														{% else %}
+														<input class="form-check-input" type="checkbox" name="Microsoft-Entra-ID" value="False">
+														{% endif %}
+														<span class="form-check-label">
+															Microsoft Entra ID
+														</span>
+													</label>
+													<label class="form-check form-check-inline">
+														{% if setting.1.3 == 1 %}
+														<input class="form-check-input" type="checkbox" name="Microsoft-Intune" value="True" checked>
+														{% else %}
+														<input class="form-check-input" type="checkbox" name="Microsoft-Intune" value="False">
+														{% endif %}
+														<span class="form-check-label">
+															Microsoft Intune
+														</span>
+													</label>
+													<label class="form-check form-check-inline">
+														{% if setting.1.4 == 1 %}
+														<input class="form-check-input" type="checkbox" name="Sophos-Central" value="True" checked>
+														{% else %}
+														<input class="form-check-input" type="checkbox" name="Sophos-Central" value="False">
+														{% endif %}
+														<span class="form-check-label">
+															Sophos Central
+														</span>
+													</label>
+													<label class="form-check form-check-inline">
+														{% if setting.1.5 == 1 %}
+														<input class="form-check-input" type="checkbox" name="Qualys" value="True" checked>
+														{% else %}
+														<input class="form-check-input" type="checkbox" name="Qualys" value="False">
+														{% endif %}
+														<span class="form-check-label">
+															Qualys
+														</span>
+													</label>
 												</div>
-												<div class="mb-3">
-													<label class="form-label" for="inputPasswordNew">New password</label>
-													<input type="password" class="form-control" id="inputPasswordNew">
-												</div>
-												<div class="mb-3">
-													<label class="form-label" for="inputPasswordNew2">Verify password</label>
-													<input type="password" class="form-control" id="inputPasswordNew2">
-												</div>
-												<button type="submit" class="btn btn-primary">Save changes</button>
+												<br>
+												{% endfor %}
+												<button type="submit" class="btn btn-primary" disabled>Save Changes</button>
 											</form>
 
 										</div>
 									</div>
-								</div> -->
+								</div>
 							</div>
 						</div>
 					</div>
