@@ -19,6 +19,9 @@ class Device(models.Model):
         ("Other", "Other"),
     )
     endpointType = models.CharField(max_length=9, choices=ENDPOINT_TYPE_CHOICES, null=True)
+    integration = models.ManyToManyField("Integration", related_name='devices', null=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
 
     def __str__(self):
         return self.hostname

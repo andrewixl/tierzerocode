@@ -68,13 +68,13 @@
 								{{request.session.firstName}} {{request.session.lastName}}
 							</a>
 							<div class="dropdown-menu dropdown-menu-start">
-								<a class="dropdown-item" href="/profile-settings"><i class="align-middle me-1" data-feather="user"></i> Profile</a>
+								<!-- <a class="dropdown-item" href="/profile-settings"><i class="align-middle me-1" data-feather="user"></i> Profile</a>
 								<a class="dropdown-item" href="#"><i class="align-middle me-1" data-feather="pie-chart"></i> Analytics</a>
-								<div class="dropdown-divider"></div>
-								<a class="dropdown-item" href="pages-settings.html"><i class="align-middle me-1" data-feather="settings"></i> Settings</a>
+								<div class="dropdown-divider"></div> -->
+								<a class="dropdown-item" href="/profile-settings"><i class="align-middle me-1" data-feather="settings"></i> Settings</a>
 								<a class="dropdown-item" href="#"><i class="align-middle me-1" data-feather="help-circle"></i> Help Center</a>
 								<div class="dropdown-divider"></div>
-								<a class="dropdown-item" href="#">Log out</a>
+								<a class="dropdown-item" href="/identity/logout">Log out</a>
 							</div>
 
 							<div class="sidebar-user-subtitle">Administrator</div>
@@ -582,13 +582,16 @@
                 type: "pie",
                 data: {
                     labels: {{ osPlatformLabels|safe }},
-                    datasets: [{
-                        data: {{ osPlatformData|safe }},
+                    datasets: [{ 
+						data: {{ osPlatformData|safe }},
                         backgroundColor: [
                             window.theme.primary,
-                            window.theme.warning,
-                            window.theme.danger,
-							window.theme.success,
+                            window.theme.secondary,
+                            window.theme.success,
+							window.theme.danger,
+							window.theme.warning,
+							window.theme.info,
+							window.theme.dark,
                             "#E8EAED"
                         ],
                         borderWidth: 5,
@@ -675,9 +678,10 @@
                     datasets: [{
                         data: {{ endpointTypeData|safe }},
                         backgroundColor: [
-                            window.theme.primary,
-                            window.theme.warning,
-                            window.theme.danger,
+							window.theme.primary,
+                            window.theme.secondary,
+                            window.theme.success,
+							window.theme.danger,
                             "#E8EAED"
                         ],
                         borderWidth: 5,

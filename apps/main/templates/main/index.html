@@ -24,7 +24,11 @@
 
 													<div class="col-auto">
 														<div class="stat text-primary">
+															{% if endpoint_device_count.0 == 'Master List Endpoints' %}
 															<i class="align-middle" data-feather="list"></i>
+															{% else %}
+															<img src="{% static endpoint_device_count.2 %}" class="align-middle" width="24" height="24" alt="{{endpoint_device_count.0}}">
+															{% endif %}
 														</div>
 													</div>
 												</div>
@@ -58,20 +62,28 @@
 													<td class="text-end">{{osPlatformCount.0}}</td>
 												</tr>
 												<tr>
-													<td><i class="fas fa-circle text-warning fa-fw"></i> Ubuntu Server</td>
+													<td><i class="fas fa-circle text-secondary fa-fw"></i> iOS/iPadOS</td>
 													<td class="text-end">{{osPlatformCount.1}}</td>
 												</tr>
 												<tr>
-													<td><i class="fas fa-circle text-danger fa-fw"></i> Windows</td>
+													<td><i class="fas fa-circle text-success fa-fw"></i> MacOS</td>
 													<td class="text-end">{{osPlatformCount.2}}</td>
 												</tr>
 												<tr>
-													<td><i class="fas fa-circle text-success fa-fw"></i> Windows Server</td>
+													<td><i class="fas fa-circle text-danger fa-fw"></i> Ubuntu Server</td>
 													<td class="text-end">{{osPlatformCount.3}}</td>
 												</tr>
 												<tr>
-													<td><i class="fas fa-circle text-info fa-fw"></i> iOS/iPadOS</td>
+													<td><i class="fas fa-circle text-warning fa-fw"></i> Windows</td>
 													<td class="text-end">{{osPlatformCount.4}}</td>
+												</tr>
+												<tr>
+													<td><i class="fas fa-circle text-info fa-fw"></i> Windows Server</td>
+													<td class="text-end">{{osPlatformCount.5}}</td>
+												</tr>
+												<tr>
+													<td><i class="fas fa-circle text-dark fa-fw"></i> Other</td>
+													<td class="text-end">{{osPlatformCount.6}}</td>
 												</tr>
 											</tbody>
 										</table>
@@ -99,12 +111,16 @@
 													<td class="text-end">{{endpointTypeCount.0}}</td>
 												</tr>
 												<tr>
-													<td><i class="fas fa-circle text-warning fa-fw"></i> Mobile</td>
+													<td><i class="fas fa-circle text-secondary fa-fw"></i> Mobile</td>
 													<td class="text-end">{{endpointTypeCount.1}}</td>
 												</tr>
 												<tr>
-													<td><i class="fas fa-circle text-danger fa-fw"></i> Server</td>
+													<td><i class="fas fa-circle text-success fa-fw"></i> Server</td>
 													<td class="text-end">{{endpointTypeCount.2}}</td>
+												</tr>
+												<tr>
+													<td><i class="fas fa-circle text-danger fa-fw"></i> Other</td>
+													<td class="text-end">{{endpointTypeCount.3}}</td>
 												</tr>
 											</tbody>
 										</table>

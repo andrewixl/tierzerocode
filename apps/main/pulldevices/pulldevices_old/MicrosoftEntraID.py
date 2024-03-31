@@ -51,8 +51,8 @@ def updateMicrosoftEntraIDDeviceDatabase(graph_result):
 
         # Check if the device exists in the database
         try:
-            device = Device.objects.get(hostname=device_name.lower())
-        except Device.DoesNotExist:
+            device = MicrosoftEntraIDDevice.objects.get(id=device_id)
+        except MicrosoftEntraIDDevice.DoesNotExist:
             device = None
         
         # [osPlatform_clean, endpointType]
@@ -61,9 +61,10 @@ def updateMicrosoftEntraIDDeviceDatabase(graph_result):
         # Prepare data for updating/creating device
         device_fields = {
             'hostname': device_name.lower(),
-            # 'deviceId': device_data['deviceId'],
+            'deviceId': device_data['deviceId'],
             'osPlatform': clean_data[0],
             'endpointType': clean_data[1],
+            'integration': 'Microsoft Entra ID'
         }
 
         # If device exists, update; otherwise, create new
@@ -72,10 +73,9 @@ def updateMicrosoftEntraIDDeviceDatabase(graph_result):
                 setattr(device, field, value)
             device.updated_at = datetime.now()
             device.save()
-            device.integration.add(Integration.objects.get(integration_type = "Microsoft Entra ID"))
         else:
-            device = Device.objects.create(**device_fields)
-            device.integration.add(Integration.objects.get(integration_type = "Microsoft Entra ID"))
+            # MicrosoftEntraIDDevice.objects.create(id=device_id, **device_fields)
+            MicrosoftEntraIDDevice.objects.create(id=device_id, **device_fields)
 
 
 def syncMicrosoftEntraID():
@@ -85,6 +85,6 @@ def syncMicrosoftEntraID():
     tenant_id = data.tenant_id
     tenant_domain = data.tenant_domain
     updateMicrosoftEntraIDDeviceDatabase(getMicrosoftEntraIDDevices(getMicrosoftEntraIDAccessToken(client_id, client_secret, tenant_id)))
-    # devices = MicrosoftEntraIDDevice.objects.all()
-    # updateMasterList(devices, tenant_domain)
+    devices = MicrosoftEntraIDDevice.objects.all()
+    updateMasterList(devices, tenant_domain)
     return True

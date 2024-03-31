@@ -277,41 +277,39 @@ def masterList(request):
 		intune = False
 		sophos = False
 		qualys = False
-
-		print(endpoint.integration.all())
 	
 		try:
-			if endpoint.integration.filter(integration_type = "CrowdStrike Falcon"):
+			if len(endpoint.integrationCrowdStrikeFalcon.filter(hostname = endpoint.hostname)) >= 1:
 				crowdstrike = True
 		except:
 			print (endpoint.hostname + " not in CrowdStrike Falcon")
 			crowdstrike = False
 		try:
-			if endpoint.integration.filter(integration_type = "Microsoft Defender for Endpoint"):
+			if len(endpoint.integrationDefender.filter(hostname = endpoint.hostname)) >= 1:
 				defender = True
 		except:
 			print (endpoint.hostname + " not in Defender")
 			defender = False
 		try:
-			if endpoint.integration.filter(integration_type = "Microsoft Entra ID"):
+			if len(endpoint.integrationMicrosoftEntraID.filter(hostname = endpoint.hostname)) >= 1:
 				microsoftentraid = True
 		except:
 			print (endpoint.hostname + " not in Microsoft Entra ID")
 			microsoftentraid = False
 		try:
-			if endpoint.integration.filter(integration_type = "Microsoft Intune"):
+			if len(endpoint.integrationIntune.filter(hostname = endpoint.hostname)) >= 1:
 				intune = True
 		except:
 			print (endpoint.hostname + " not in Intune")
 			intune = False
 		try:
-			if endpoint.integration.filter(integration_type = "Sophos Central"):
+			if len(endpoint.integrationSophos.filter(hostname = endpoint.hostname)) >= 1:
 				sophos = True
 		except:
 			print (endpoint.hostname + " not in Sophos")
 			sophos = False
 		try:
-			if endpoint.integration.filter(integration_type = "Qualys"):
+			if len(endpoint.integrationQualys.filter(hostname = endpoint.hostname)) >= 1:
 				qualys = True
 		except:
 			qualys = False

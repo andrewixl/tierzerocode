@@ -82,33 +82,31 @@ def updateSophosDeviceDatabase(json_data):
         clean_data = cleanAPIData(os_platform)
 
         # Create or update the SophosDevice instance
-        sophos_device, created = Device.objects.update_or_create(
-            # id=device_id,
-            hostname=hostname.lower(),
+        sophos_device, created = SophosDevice.objects.update_or_create(
+            id=device_id,
             defaults={
-                # 'type': device_type,
+                'type': device_type,
                 'hostname': hostname.lower(),
-                # 'tenant_id': tenant_id,
-                # 'os_isServer': os_data.get('isServer'),
+                'tenant_id': tenant_id,
+                'os_isServer': os_data.get('isServer'),
                 'osPlatform': clean_data[0],
                 'endpointType': clean_data[1],
-                # 'os_name': os_data.get('platform'),
-                # 'os_majorVersion': os_data.get('majorVersion'),/
-                # 'os_minorVersion': os_data.get('minorVersion'),
-                # 'os_build': os_data.get('build'),
-                # 'ipv4Addresses': ipv4_addresses,
-                # 'macAddresses': mac_addresses,
-                # 'associatedPerson_viaLogin': associated_person,
-                # 'tamperProtectionEnabled': tamper_protection_enabled,
-                # 'lastSeenAt': datetime.strptime(last_seen_at, '%Y-%m-%dT%H:%M:%S.%fZ') if last_seen_at else None,
-                # 'lockdown_status': lockdown_data.get('status'),
-                # 'lockdown_updateStatus': lockdown_data.get('updateStatus'),
-                # 'isolation_status': isolation_data.get('status'),
-                # 'isolation_adminIsolated': isolation_data.get('adminIsolated'),
-                # 'isolation_selfIsolated': isolation_data.get('selfIsolated')
+                'os_name': os_data.get('platform'),
+                'os_majorVersion': os_data.get('majorVersion'),
+                'os_minorVersion': os_data.get('minorVersion'),
+                'os_build': os_data.get('build'),
+                'ipv4Addresses': ipv4_addresses,
+                'macAddresses': mac_addresses,
+                'associatedPerson_viaLogin': associated_person,
+                'tamperProtectionEnabled': tamper_protection_enabled,
+                'lastSeenAt': datetime.strptime(last_seen_at, '%Y-%m-%dT%H:%M:%S.%fZ') if last_seen_at else None,
+                'lockdown_status': lockdown_data.get('status'),
+                'lockdown_updateStatus': lockdown_data.get('updateStatus'),
+                'isolation_status': isolation_data.get('status'),
+                'isolation_adminIsolated': isolation_data.get('adminIsolated'),
+                'isolation_selfIsolated': isolation_data.get('selfIsolated')
             }
         )
-        sophos_device.integration.add(Integration.objects.get(integration_type = "Sophos Central"))
     
 def syncSophos():
     data = Integration.objects.get(integration_type = "Sophos Central")
@@ -118,7 +116,7 @@ def syncSophos():
     tenant_domain = data.tenant_domain
     print(client_id)
     updateSophosDeviceDatabase(getSophosDevices(getSophosAccessToken(client_id, client_secret, tenant_id)))
-    # devices = SophosDevice.objects.all()
-    # updateMasterList(devices, tenant_domain)
+    devices = SophosDevice.objects.all()
+    updateMasterList(devices, tenant_domain)
     return True
 

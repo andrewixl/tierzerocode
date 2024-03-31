@@ -32,7 +32,7 @@ def getQualysAccessToken(client_id, client_secret, tenant_id):
         if response.status_code == 200:
             # Extract the access token from the response
             session_token = response.cookies['QualysSession']
-            # print(session_token)
+            print(session_token)
             
             # Print the access token (or use it for further API requests)
             return s
@@ -87,28 +87,24 @@ def getQualysDevices(s):
 def updateQualysDeviceDatabase(json_data):
     host_list = json_data.get("HOST_LIST_OUTPUT", {}).get("RESPONSE", {}).get("HOST_LIST", {}).get("HOST", [])
     for host_data in host_list:
-        # device_id = host_data.get("ID")
+        device_id = host_data.get("ID")
         hostname = host_data.get("DNS_DATA", {}).get("HOSTNAME").lower()
         os_platform = host_data.get("OS")
-        # first_found_date = host_data.get("FIRST_FOUND_DATE")
-        # ip_address = host_data.get("IP")
+        first_found_date = host_data.get("FIRST_FOUND_DATE")
+        ip_address = host_data.get("IP")
 
         clean_data = cleanAPIData(os_platform)     
         
         # Check if the device already exists, if not, create it
-        if not Device.objects.filter(hostname=hostname).exists():
-            device = Device.objects.create(
-                # id=device_id,
+        if not QualysDevice.objects.filter(id=device_id).exists():
+            QualysDevice.objects.create(
+                id=device_id,
                 hostname=hostname,
                 osPlatform=clean_data[0],
                 endpointType = clean_data[1],
-                # firstFoundDate=first_found_date,
-                # ipAddress=ip_address
+                firstFoundDate=first_found_date,
+                ipAddress=ip_address
             )
-            device.integration.add(Integration.objects.get(integration_type = "Qualys"))
-        else:
-            device = Device.objects.get(hostname=hostname)
-            device.integration.add(Integration.objects.get(integration_type = "Qualys"))
 
 def syncQualys():
     data = Integration.objects.get(integration_type = "Qualys")
@@ -117,6 +113,6 @@ def syncQualys():
     tenant_id = data.tenant_id
     tenant_domain = data.tenant_domain
     updateQualysDeviceDatabase(getQualysDevices(getQualysAccessToken(client_id, client_secret, tenant_id)))
-    # devices = QualysDevice.objects.all()
-    # updateMasterList(devices, tenant_domain)
+    devices = QualysDevice.objects.all()
+    updateMasterList(devices, tenant_domain)
     return True

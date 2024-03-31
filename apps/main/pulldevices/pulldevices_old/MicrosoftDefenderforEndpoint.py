@@ -48,7 +48,7 @@ def getDefenderDevices(access_token):
 def updateDefenderDeviceDatabase(json_data):
     for device_data in json_data['value']:
         if device_data.get('onboardingStatus') == 'Onboarded' and not device_data.get('healthStatus') == 'Inactive':
-            # device_id = device_data['id']
+            device_id = device_data['id']
             hostname = (device_data['computerDnsName'].split('.', 1)[0]).lower()
             os_platform = device_data['osPlatform']
 
@@ -57,32 +57,31 @@ def updateDefenderDeviceDatabase(json_data):
 
             defaults = {
                 'hostname': hostname,
-                # 'firstSeen': device_data['firstSeen'],
-                # 'lastSeen': device_data['lastSeen'],
+                'firstSeen': device_data['firstSeen'],
+                'lastSeen': device_data['lastSeen'],
                 'osPlatform': clean_data[0],
                 'endpointType': clean_data[1],
-                # 'osVersion': device_data['osVersion'],
-                # 'osProcessor': device_data['osProcessor'],
-                # 'version': device_data['version'],
-                # 'agentVersion': device_data['agentVersion'],
-                # 'osBuild': device_data['osBuild'],
-                # 'healthStatus': device_data['healthStatus'],
-                # 'deviceValue': device_data['deviceValue'],
-                # 'rbacGroupId': device_data['rbacGroupId'],
-                # 'rbacGroupName': device_data['rbacGroupName'],
-                # 'riskScore': device_data['riskScore'],
-                # 'exposureLevel': device_data['exposureLevel'],
-                # 'isAadJoined': device_data['isAadJoined'],
-                # 'aadDeviceId': device_data['aadDeviceId'],
-                # 'defenderAvStatus': device_data['defenderAvStatus'],
-                # 'onboardingStatus': device_data['onboardingStatus'],
-                # 'osArchitecture': device_data['osArchitecture'],
-                # 'managedBy': device_data['managedBy'],
-                # 'managedByStatus': device_data['managedByStatus'],
-                # 'vmMetadata': device_data['vmMetadata'],
+                'osVersion': device_data['osVersion'],
+                'osProcessor': device_data['osProcessor'],
+                'version': device_data['version'],
+                'agentVersion': device_data['agentVersion'],
+                'osBuild': device_data['osBuild'],
+                'healthStatus': device_data['healthStatus'],
+                'deviceValue': device_data['deviceValue'],
+                'rbacGroupId': device_data['rbacGroupId'],
+                'rbacGroupName': device_data['rbacGroupName'],
+                'riskScore': device_data['riskScore'],
+                'exposureLevel': device_data['exposureLevel'],
+                'isAadJoined': device_data['isAadJoined'],
+                'aadDeviceId': device_data['aadDeviceId'],
+                'defenderAvStatus': device_data['defenderAvStatus'],
+                'onboardingStatus': device_data['onboardingStatus'],
+                'osArchitecture': device_data['osArchitecture'],
+                'managedBy': device_data['managedBy'],
+                'managedByStatus': device_data['managedByStatus'],
+                'vmMetadata': device_data['vmMetadata'],
             }
-            obj, created = Device.objects.update_or_create(hostname=hostname, defaults=defaults)
-            obj.integration.add(Integration.objects.get(integration_type = "Microsoft Defender for Endpoint"))
+            obj, created = DefenderDevice.objects.update_or_create(id=device_id, defaults=defaults)
 
 def syncDefender():
     data = Integration.objects.get(integration_type = "Microsoft Defender for Endpoint")
@@ -91,6 +90,6 @@ def syncDefender():
     tenant_id = data.tenant_id
     tenant_domain = data.tenant_domain
     updateDefenderDeviceDatabase(getDefenderDevices(getDefenderAccessToken(client_id, client_secret, tenant_id)))
-    # devices = DefenderDevice.objects.all()
-    # updateMasterList(devices, tenant_domain)
+    devices = DefenderDevice.objects.all()
+    updateMasterList(devices, tenant_domain)
     return True

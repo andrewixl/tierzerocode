@@ -44,14 +44,14 @@ def updateIntuneDeviceDatabase(graph_result):
     data = graph_result
 
     for device_data in data['value']:
-        device_id = device_data['id']
-        device_name = device_data['deviceName']
+        # device_id = device_data['id']
+        hostname = device_data['deviceName']
         os_platform = device_data['operatingSystem']
 
         # Check if the device exists in the database
         try:
-            device = IntuneDevice.objects.get(id=device_id)
-        except IntuneDevice.DoesNotExist:
+            device = Device.objects.get(hostname=hostname.lower())
+        except Device.DoesNotExist:
             device = None
 
         # [osPlatform_clean, endpointType]
@@ -59,59 +59,59 @@ def updateIntuneDeviceDatabase(graph_result):
 
         # Prepare data for updating/creating device
         device_fields = {
-            'userId': device_data['userId'],
-            'hostname': device_name.lower(),
-            'managedDeviceOwnerType': device_data['managedDeviceOwnerType'],
-            'enrolledDateTime': datetime.fromisoformat(device_data['enrolledDateTime']),
-            'lastSyncDateTime': datetime.fromisoformat(device_data['lastSyncDateTime']),
+            # 'userId': device_data['userId'],
+            'hostname': hostname.lower(),
+            # 'managedDeviceOwnerType': device_data['managedDeviceOwnerType'],
+            # 'enrolledDateTime': datetime.fromisoformat(device_data['enrolledDateTime']),
+            # 'lastSyncDateTime': datetime.fromisoformat(device_data['lastSyncDateTime']),
             'osPlatform': clean_data[0],
             'endpointType': clean_data[1],
-            'complianceState': device_data['complianceState'],
-            'jailBroken': device_data['jailBroken'],
-            'managementAgent': device_data['managementAgent'],
-            'osVersion': device_data['osVersion'],
-            'easActivated': device_data['easActivated'],
-            'easDeviceId': device_data['easDeviceId'],
-            'easActivationDateTime': datetime.fromisoformat(device_data['easActivationDateTime']),
-            'azureADRegistered': device_data['azureADRegistered'],
-            'deviceEnrollmentType': device_data['deviceEnrollmentType'],
-            'activationLockBypassCode': device_data['activationLockBypassCode'],
-            'emailAddress': device_data['emailAddress'],
-            'azureADDeviceId': device_data['azureADDeviceId'],
-            'deviceRegistrationState': device_data['deviceRegistrationState'],
-            'deviceCategoryDisplayName': device_data['deviceCategoryDisplayName'],
-            'isSupervised': device_data['isSupervised'],
-            'exchangeLastSuccessfulSyncDateTime': datetime.fromisoformat(device_data['exchangeLastSuccessfulSyncDateTime']),
-            'exchangeAccessState': device_data['exchangeAccessState'],
-            'exchangeAccessStateReason': device_data['exchangeAccessStateReason'],
-            'remoteAssistanceSessionUrl': device_data['remoteAssistanceSessionUrl'],
-            'remoteAssistanceSessionErrorDetails': device_data['remoteAssistanceSessionErrorDetails'],
-            'isEncrypted': device_data['isEncrypted'],
-            'userPrincipalName': device_data['userPrincipalName'],
-            'model': device_data['model'],
-            'manufacturer': device_data['manufacturer'],
-            'imei': device_data['imei'],
-            'complianceGracePeriodExpirationDateTime': datetime.fromisoformat(device_data['complianceGracePeriodExpirationDateTime']),
-            'serialNumber': device_data['serialNumber'],
-            'phoneNumber': device_data['phoneNumber'],
-            'androidSecurityPatchLevel': device_data['androidSecurityPatchLevel'],
-            'userDisplayName': device_data['userDisplayName'],
-            'configurationManagerClientEnabledFeatures': device_data['configurationManagerClientEnabledFeatures'],
-            'wiFiMacAddress': device_data['wiFiMacAddress'],
-            'deviceHealthAttestationState': device_data['deviceHealthAttestationState'],
-            'subscriberCarrier': device_data['subscriberCarrier'],
-            'meid': device_data['meid'],
-            'totalStorageSpaceInBytes': device_data['totalStorageSpaceInBytes'],
-            'freeStorageSpaceInBytes': device_data['freeStorageSpaceInBytes'],
-            'managedDeviceName': device_data['managedDeviceName'],
-            'partnerReportedThreatState': device_data['partnerReportedThreatState'],
-            'requireUserEnrollmentApproval': device_data['requireUserEnrollmentApproval'],
-            'managementCertificateExpirationDate': datetime.fromisoformat(device_data['managementCertificateExpirationDate']),
-            'iccid': device_data['iccid'],
-            'udid': device_data['udid'],
-            'notes': device_data['notes'],
-            'ethernetMacAddress': device_data['ethernetMacAddress'],
-            'physicalMemoryInBytes': device_data['physicalMemoryInBytes']
+            # 'complianceState': device_data['complianceState'],
+            # 'jailBroken': device_data['jailBroken'],
+            # 'managementAgent': device_data['managementAgent'],
+            # 'osVersion': device_data['osVersion'],
+            # 'easActivated': device_data['easActivated'],
+            # 'easDeviceId': device_data['easDeviceId'],
+            # 'easActivationDateTime': datetime.fromisoformat(device_data['easActivationDateTime']),
+            # 'azureADRegistered': device_data['azureADRegistered'],
+            # 'deviceEnrollmentType': device_data['deviceEnrollmentType'],
+            # 'activationLockBypassCode': device_data['activationLockBypassCode'],
+            # 'emailAddress': device_data['emailAddress'],
+            # 'azureADDeviceId': device_data['azureADDeviceId'],
+            # 'deviceRegistrationState': device_data['deviceRegistrationState'],
+            # 'deviceCategoryDisplayName': device_data['deviceCategoryDisplayName'],
+            # 'isSupervised': device_data['isSupervised'],
+            # 'exchangeLastSuccessfulSyncDateTime': datetime.fromisoformat(device_data['exchangeLastSuccessfulSyncDateTime']),
+            # 'exchangeAccessState': device_data['exchangeAccessState'],
+            # 'exchangeAccessStateReason': device_data['exchangeAccessStateReason'],
+            # 'remoteAssistanceSessionUrl': device_data['remoteAssistanceSessionUrl'],
+            # 'remoteAssistanceSessionErrorDetails': device_data['remoteAssistanceSessionErrorDetails'],
+            # 'isEncrypted': device_data['isEncrypted'],
+            # 'userPrincipalName': device_data['userPrincipalName'],
+            # 'model': device_data['model'],
+            # 'manufacturer': device_data['manufacturer'],
+            # 'imei': device_data['imei'],
+            # 'complianceGracePeriodExpirationDateTime': datetime.fromisoformat(device_data['complianceGracePeriodExpirationDateTime']),
+            # 'serialNumber': device_data['serialNumber'],
+            # 'phoneNumber': device_data['phoneNumber'],
+            # 'androidSecurityPatchLevel': device_data['androidSecurityPatchLevel'],
+            # 'userDisplayName': device_data['userDisplayName'],
+            # 'configurationManagerClientEnabledFeatures': device_data['configurationManagerClientEnabledFeatures'],
+            # 'wiFiMacAddress': device_data['wiFiMacAddress'],
+            # 'deviceHealthAttestationState': device_data['deviceHealthAttestationState'],
+            # 'subscriberCarrier': device_data['subscriberCarrier'],
+            # 'meid': device_data['meid'],
+            # 'totalStorageSpaceInBytes': device_data['totalStorageSpaceInBytes'],
+            # 'freeStorageSpaceInBytes': device_data['freeStorageSpaceInBytes'],
+            # 'managedDeviceName': device_data['managedDeviceName'],
+            # 'partnerReportedThreatState': device_data['partnerReportedThreatState'],
+            # 'requireUserEnrollmentApproval': device_data['requireUserEnrollmentApproval'],
+            # 'managementCertificateExpirationDate': datetime.fromisoformat(device_data['managementCertificateExpirationDate']),
+            # 'iccid': device_data['iccid'],
+            # 'udid': device_data['udid'],
+            # 'notes': device_data['notes'],
+            # 'ethernetMacAddress': device_data['ethernetMacAddress'],
+            # 'physicalMemoryInBytes': device_data['physicalMemoryInBytes']
         }
 
         # If device exists, update; otherwise, create new
@@ -120,8 +120,10 @@ def updateIntuneDeviceDatabase(graph_result):
                 setattr(device, field, value)
             device.updated_at = datetime.now()
             device.save()
+            device.integration.add(Integration.objects.get(integration_type = "Microsoft Intune"))
         else:
-            IntuneDevice.objects.create(id=device_id, **device_fields)
+            device = Device.objects.create(id=device_id, **device_fields)
+            device.integration.add(Integration.objects.get(integration_type = "Microsoft Intune"))
 
 def syncIntune():
     data = Integration.objects.get(integration_type = "Microsoft Intune")
@@ -130,6 +132,6 @@ def syncIntune():
     tenant_id = data.tenant_id
     tenant_domain = data.tenant_domain
     updateIntuneDeviceDatabase(getIntuneDevices(getIntuneAccessToken(client_id, client_secret, tenant_id)))
-    devices = IntuneDevice.objects.all()
-    updateMasterList(devices, tenant_domain)
+    # devices = IntuneDevice.objects.all()
+    # updateMasterList(devices, tenant_domain)
     return True
