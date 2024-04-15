@@ -28,12 +28,9 @@
 										<thead>
 											<tr>
 												<th>Hostname</th>
-												<th>CrowdStrike</th>
-												<th>Defender</th>
-												<th>Entra ID</th>
-												<th>Intune</th>
-												<th>Sophos</th>
-												<th>Qualys</th>
+												{% for integration in enabled_integrations %}
+													<th>{{integration.integration_type_short}}</th>
+												{% endfor %}
 											</tr>
 										</thead>
 										<tbody>

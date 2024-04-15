@@ -44,6 +44,7 @@ class Integration(models.Model):
         ("Qualys", "Qualys"),  
     )
     integration_type = models.CharField(max_length=35, choices=INTEGRATION_CHOICES, null=True)
+    integration_type_short = models.CharField(max_length=35, null=True)
     image_navbar_path = models.CharField(max_length = 100, null=True)
     image_integration_path = models.CharField(max_length = 100, null=True)
     client_id = models.CharField(max_length = 100, null=True)

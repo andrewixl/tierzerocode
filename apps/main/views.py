@@ -19,6 +19,7 @@ from ..login_app.models import User
 
 # Reused Data Sets
 integration_names = ['CrowdStrike Falcon', 'Microsoft Defender for Endpoint', 'Microsoft Entra ID', 'Microsoft Intune', 'Sophos Central', 'Qualys']
+integration_names_short = ['CrowdStrike', 'Defender', 'Entra ID', 'Intune', 'Sophos', 'Qualys']
 os_platforms = ['Android', 'iOS/iPadOS', 'MacOS', 'Ubuntu', 'Windows', 'Windows Server', 'Other']
 
 ############################################################################################
@@ -111,33 +112,12 @@ def index(request):
 	integration_device_counts = [["Master List Endpoints", len(Device.objects.all())]]
 	for integration_name in integration_names:
 		if True == Integration.objects.get(integration_type = integration_name).enabled:
-			if integration_name == 'CrowdStrike Falcon':
-				integration_device_counts.append([integration_name, len(CrowdStrikeFalconDevice.objects.all()), 'main/img/navbar_icons/webp/crowdstrike_falcon_logo_nav.webp'])
-			elif integration_name == 'Microsoft Defender for Endpoint':
-				integration_device_counts.append([integration_name, len(DefenderDevice.objects.all()), 'main/img/navbar_icons/webp/microsoft_defender_for_endpoint_logo_nav.webp'])
-			elif integration_name == 'Microsoft Entra ID':
-				integration_device_counts.append([integration_name, len(MicrosoftEntraIDDevice.objects.all()), 'main/img/navbar_icons/webp/microsoft_entra_id_logo_nav.webp'])
-			elif integration_name == 'Microsoft Intune':
-				integration_device_counts.append([integration_name, len(IntuneDevice.objects.all()), 'main/img/navbar_icons/webp/microsoft_intune_logo_nav.webp'])
-			elif integration_name == 'Sophos Central':
-				integration_device_counts.append([integration_name, len(SophosDevice.objects.all()), 'main/img/navbar_icons/webp/sophos_central_logo_nav.webp'])
-			elif integration_name == 'Qualys':
-				integration_device_counts.append([integration_name, len(QualysDevice.objects.all()), 'main/img/navbar_icons/webp/qualys_logo_nav.webp'])		
+			integration_device_counts.append([integration_name, len(Device.objects.filter(integration__integration_type=integration_name)), Integration.objects.get(integration_type=integration_name).image_navbar_path])
 
 	# Query to get the count of each os platform
-	# os_platform_counts = Device.objects.values('osPlatform').annotate(count=Count('osPlatform'))
-    # Prepare data for chart
-	# osPlatformLabels = []
 	osPlatformData = []
-	# for item in os_platform_counts:
-		# osPlatformLabels.append(item['osPlatform'])
-		# osPlatformData.append(item['count'])
 	for os_platform in os_platforms:
 		osPlatformData.append(len(Device.objects.filter(osPlatform=os_platform)))
-	
-	# print(osPlatformLabels)
-	print(os_platforms)
-	print(osPlatformData)
 	
 	# Query to get the count of each endpoint type
 	endpoint_type_counts = Device.objects.values('endpointType').annotate(count=Count('endpointType'))
@@ -267,60 +247,27 @@ def masterList(request):
 	if redirect_url:
 		return redirect(redirect_url)
 	
+	enabled_integrations = getEnabledIntegrations()
 	endpoint_list = []
 
 	endpoints = Device.objects.all()
 	for endpoint in endpoints:
-		crowdstrike = False
-		defender = False
-		microsoftentraid = False
-		intune = False
-		sophos = False
-		qualys = False
+		endpoint_data = [endpoint.hostname]
 
-		print(endpoint.integration.all())
-	
-		try:
-			if endpoint.integration.filter(integration_type = "CrowdStrike Falcon"):
-				crowdstrike = True
-		except:
-			print (endpoint.hostname + " not in CrowdStrike Falcon")
-			crowdstrike = False
-		try:
-			if endpoint.integration.filter(integration_type = "Microsoft Defender for Endpoint"):
-				defender = True
-		except:
-			print (endpoint.hostname + " not in Defender")
-			defender = False
-		try:
-			if endpoint.integration.filter(integration_type = "Microsoft Entra ID"):
-				microsoftentraid = True
-		except:
-			print (endpoint.hostname + " not in Microsoft Entra ID")
-			microsoftentraid = False
-		try:
-			if endpoint.integration.filter(integration_type = "Microsoft Intune"):
-				intune = True
-		except:
-			print (endpoint.hostname + " not in Intune")
-			intune = False
-		try:
-			if endpoint.integration.filter(integration_type = "Sophos Central"):
-				sophos = True
-		except:
-			print (endpoint.hostname + " not in Sophos")
-			sophos = False
-		try:
-			if endpoint.integration.filter(integration_type = "Qualys"):
-				qualys = True
-		except:
-			qualys = False
+		for integration in enabled_integrations:
+			try:
+				if endpoint.integration.filter(integration_type = integration):
+					endpoint_data.append(True)
+				else:
+					endpoint_data.append(False)
+			except:
+				endpoint_data.append(False)
 
-		endpoint_list.append([endpoint.hostname, crowdstrike, defender, microsoftentraid, intune, sophos, qualys])
+		endpoint_list.append(endpoint_data)
 
 	context = {
 		'page':"master-list",
-		'enabled_integrations': getEnabledIntegrations(),
+		'enabled_integrations': enabled_integrations,
 		'endpoint_list':endpoint_list,
 	}
 	return render( request, 'main/master-list.html', context)
@@ -333,31 +280,20 @@ def endpointList(request, integration):
 	if redirect_url:
 		return redirect(redirect_url)
 	
+	integration_clean = integration.replace("-", " ")
+	endpoints = Device.objects.filter(integration__integration_type=integration_clean)
+
 	endpoint_list = []
-
-	if integration == 'CrowdStrike-Falcon':
-		endpoints = CrowdStrikeFalconDevice.objects.all()
-	elif integration == 'Microsoft-Intune':
-		endpoints = IntuneDevice.objects.all()
-	elif integration == 'Microsoft-Entra-ID':
-		endpoints = MicrosoftEntraIDDevice.objects.all()
-	elif integration == 'Microsoft-Defender-for-Endpoint':
-		endpoints = DefenderDevice.objects.all()
-	elif integration == 'Sophos-Central':
-		endpoints = SophosDevice.objects.all()
-	elif integration == 'Qualys':
-		endpoints = QualysDevice.objects.all()
-
 	for endpoint in endpoints:
 		endpoint_list.append([endpoint.hostname, endpoint.osPlatform, endpoint.endpointType, endpoint.created_at])
 
 	context = {
 		'page':integration,
 		'enabled_integrations': getEnabledIntegrations(),
-		'integration':integration.title(),
+		'integration':integration_clean.title(),
 		'endpoint_list':endpoint_list,
 	}
-	return render( request, 'main/endpoint-list.html', context)
+	return render(request, 'main/endpoint-list.html', context)
 
 ############################################################################################
 
