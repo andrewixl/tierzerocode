@@ -59,31 +59,31 @@
 											<tbody>
 												<tr>
 													<td><i class="fas fa-circle text-primary fa-fw"></i> Android</td>
-													<td class="text-end">{{osPlatformCount.0}}</td>
+													<td class="text-end">{{osPlatformData.0}}</td>
 												</tr>
 												<tr>
 													<td><i class="fas fa-circle text-secondary fa-fw"></i> iOS/iPadOS</td>
-													<td class="text-end">{{osPlatformCount.1}}</td>
+													<td class="text-end">{{osPlatformData.1}}</td>
 												</tr>
 												<tr>
 													<td><i class="fas fa-circle text-success fa-fw"></i> MacOS</td>
-													<td class="text-end">{{osPlatformCount.2}}</td>
+													<td class="text-end">{{osPlatformData.2}}</td>
 												</tr>
 												<tr>
 													<td><i class="fas fa-circle text-danger fa-fw"></i> Ubuntu Server</td>
-													<td class="text-end">{{osPlatformCount.3}}</td>
+													<td class="text-end">{{osPlatformData.3}}</td>
 												</tr>
 												<tr>
 													<td><i class="fas fa-circle text-warning fa-fw"></i> Windows</td>
-													<td class="text-end">{{osPlatformCount.4}}</td>
+													<td class="text-end">{{osPlatformData.4}}</td>
 												</tr>
 												<tr>
 													<td><i class="fas fa-circle text-info fa-fw"></i> Windows Server</td>
-													<td class="text-end">{{osPlatformCount.5}}</td>
+													<td class="text-end">{{osPlatformData.5}}</td>
 												</tr>
 												<tr>
 													<td><i class="fas fa-circle text-dark fa-fw"></i> Other</td>
-													<td class="text-end">{{osPlatformCount.6}}</td>
+													<td class="text-end">{{osPlatformData.6}}</td>
 												</tr>
 											</tbody>
 										</table>
@@ -108,19 +108,19 @@
 											<tbody>
 												<tr>
 													<td><i class="fas fa-circle text-primary fa-fw"></i> Client</td>
-													<td class="text-end">{{endpointTypeCount.0}}</td>
+													<td class="text-end">{{endpointTypeData.0}}</td>
 												</tr>
 												<tr>
 													<td><i class="fas fa-circle text-secondary fa-fw"></i> Mobile</td>
-													<td class="text-end">{{endpointTypeCount.1}}</td>
+													<td class="text-end">{{endpointTypeData.1}}</td>
 												</tr>
 												<tr>
 													<td><i class="fas fa-circle text-success fa-fw"></i> Server</td>
-													<td class="text-end">{{endpointTypeCount.2}}</td>
+													<td class="text-end">{{endpointTypeData.2}}</td>
 												</tr>
 												<tr>
 													<td><i class="fas fa-circle text-danger fa-fw"></i> Other</td>
-													<td class="text-end">{{endpointTypeCount.3}}</td>
+													<td class="text-end">{{endpointTypeData.3}}</td>
 												</tr>
 											</tbody>
 										</table>
@@ -527,4 +527,97 @@
 
 				</div>
 			</main>
+			<script>
+				document.addEventListener("DOMContentLoaded", function() {
+					// Pie chart
+					new Chart(document.getElementById("dashboard-os-platform-pie"), {
+						type: "pie",
+						data: {
+							labels: {{ osPlatformLabels|safe }},
+							datasets: [{ 
+								data: {{ osPlatformData|safe }},
+								backgroundColor: [
+									window.theme.primary,
+									window.theme.secondary,
+									window.theme.success,
+									window.theme.danger,
+									window.theme.warning,
+									window.theme.info,
+									'rgb(0,0,0)',
+								],
+								borderWidth: 5,
+								borderColor: window.theme.white
+							}]
+						},
+						options: {
+							responsive: !window.MSInputMethodContext,
+							maintainAspectRatio: false,
+							legend: {
+								display: false
+							},
+							cutoutPercentage: 70
+						}
+					});
+				});
+			</script>
+			<script>
+				document.addEventListener("DOMContentLoaded", function() {
+					// Pie chart
+					new Chart(document.getElementById("dashboard-endpoint-type-pie"), {
+						type: "pie",
+						data: {
+							labels: {{ endpointTypeLabels|safe }},
+							datasets: [{
+								data: {{ endpointTypeData|safe }},
+								backgroundColor: [
+									window.theme.primary,
+									window.theme.secondary,
+									window.theme.success,
+									window.theme.danger,
+									// "#E8EAED"
+								],
+								borderWidth: 5,
+								borderColor: window.theme.white
+							}]
+						},
+						options: {
+							responsive: !window.MSInputMethodContext,
+							maintainAspectRatio: false,
+							legend: {
+								display: false
+							},
+							cutoutPercentage: 70
+						}
+					});
+				});
+			</script>
+			<script>
+				document.addEventListener("DOMContentLoaded", function() {
+					// Pie chart
+					new Chart(document.getElementById("dashboard-tier-zero-pie"), {
+						type: "pie",
+						data: {
+							labels: {{ compliantLabels|safe }},
+							datasets: [{
+								data: {{ compliantData|safe }},
+								backgroundColor: [
+									window.theme.success,
+									window.theme.danger,
+									"#E8EAED"
+								],
+								borderWidth: 5,
+								borderColor: window.theme.white
+							}]
+						},
+						options: {
+							responsive: !window.MSInputMethodContext,
+							maintainAspectRatio: false,
+							legend: {
+								display: false
+							},
+							cutoutPercentage: 70
+						}
+					});
+				});
+			</script>
 {% endblock %}

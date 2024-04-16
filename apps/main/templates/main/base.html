@@ -575,69 +575,7 @@
 			});
 		});
 	</script> -->
-	<script>
-        document.addEventListener("DOMContentLoaded", function() {
-            // Pie chart
-            new Chart(document.getElementById("dashboard-os-platform-pie"), {
-                type: "pie",
-                data: {
-                    labels: {{ osPlatformLabels|safe }},
-                    datasets: [{ 
-						data: {{ osPlatformData|safe }},
-                        backgroundColor: [
-                            window.theme.primary,
-                            window.theme.secondary,
-                            window.theme.success,
-							window.theme.danger,
-							window.theme.warning,
-							window.theme.info,
-							window.theme.dark,
-                            "#E8EAED"
-                        ],
-                        borderWidth: 5,
-                        borderColor: window.theme.white
-                    }]
-                },
-                options: {
-                    responsive: !window.MSInputMethodContext,
-                    maintainAspectRatio: false,
-                    legend: {
-                        display: false
-                    },
-                    cutoutPercentage: 70
-                }
-            });
-        });
-    </script>
-	<script>
-        document.addEventListener("DOMContentLoaded", function() {
-            // Pie chart
-            new Chart(document.getElementById("dashboard-tier-zero-pie"), {
-                type: "pie",
-                data: {
-                    labels: {{ compliantLabels|safe }},
-                    datasets: [{
-                        data: {{ compliantData|safe }},
-                        backgroundColor: [
-							window.theme.success,
-                            window.theme.danger,
-                            "#E8EAED"
-                        ],
-                        borderWidth: 5,
-                        borderColor: window.theme.white
-                    }]
-                },
-                options: {
-                    responsive: !window.MSInputMethodContext,
-                    maintainAspectRatio: false,
-                    legend: {
-                        display: false
-                    },
-                    cutoutPercentage: 70
-                }
-            });
-        });
-    </script>
+	
 	<!-- <script>
 		document.addEventListener("DOMContentLoaded", function() {
 			// Pie chart
@@ -668,37 +606,7 @@
 			});
 		});
 	</script> -->
-	<script>
-        document.addEventListener("DOMContentLoaded", function() {
-            // Pie chart
-            new Chart(document.getElementById("dashboard-endpoint-type-pie"), {
-                type: "pie",
-                data: {
-                    labels: {{ endpointTypeLabels|safe }},
-                    datasets: [{
-                        data: {{ endpointTypeData|safe }},
-                        backgroundColor: [
-							window.theme.primary,
-                            window.theme.secondary,
-                            window.theme.success,
-							window.theme.danger,
-                            "#E8EAED"
-                        ],
-                        borderWidth: 5,
-                        borderColor: window.theme.white
-                    }]
-                },
-                options: {
-                    responsive: !window.MSInputMethodContext,
-                    maintainAspectRatio: false,
-                    legend: {
-                        display: false
-                    },
-                    cutoutPercentage: 70
-                }
-            });
-        });
-    </script>
+	
 	<!-- <script>
 		document.addEventListener("DOMContentLoaded", function() {
 			// Bar chart

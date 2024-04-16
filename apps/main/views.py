@@ -12,7 +12,7 @@ from .pulldevices.Qualys import *
 
 # Import Integrations Models
 from .models import Integration, Device, DeviceComplianceSettings
-from .models import CrowdStrikeFalconDevice, DefenderDevice, MicrosoftEntraIDDevice, IntuneDevice, SophosDevice, QualysDevice
+# from .models import CrowdStrikeFalconDevice, DefenderDevice, MicrosoftEntraIDDevice, IntuneDevice, SophosDevice, QualysDevice
 from ..login_app.models import User
 
 ############################################################################################
@@ -21,6 +21,7 @@ from ..login_app.models import User
 integration_names = ['CrowdStrike Falcon', 'Microsoft Defender for Endpoint', 'Microsoft Entra ID', 'Microsoft Intune', 'Sophos Central', 'Qualys']
 integration_names_short = ['CrowdStrike', 'Defender', 'Entra ID', 'Intune', 'Sophos', 'Qualys']
 os_platforms = ['Android', 'iOS/iPadOS', 'MacOS', 'Ubuntu', 'Windows', 'Windows Server', 'Other']
+endpoint_types = ['Client', 'Mobile', 'Server', 'Other']
 
 ############################################################################################
 
@@ -120,97 +121,44 @@ def index(request):
 		osPlatformData.append(len(Device.objects.filter(osPlatform=os_platform)))
 	
 	# Query to get the count of each endpoint type
-	endpoint_type_counts = Device.objects.values('endpointType').annotate(count=Count('endpointType'))
+	endpoint_data = Device.objects.all()
     # Prepare data for chart
-	endpointTypeLabels = []
 	endpointTypeData = []
-	endpointIcons = []
-	for item in endpoint_type_counts:
-		endpointTypeLabels.append(item['endpointType'])
-		endpointTypeData.append(item['count'])
-		endpointIcons.append('main/img/navbar_icons/webp/' + (item['endpointType'].replace(" ", "_")).lower() + '_logo_nav.webp')
+	for endpoint_type in endpoint_types:
+		endpointTypeData.append(len(Device.objects.filter(endpointType=endpoint_type)))
 
+	# Tier Zero Pie Chart Calculations
 	endpoint_list = []
+	enabled_integrations = getEnabledIntegrations()
 	endpoints = Device.objects.all()
 	for endpoint in endpoints:
-		crowdstrike = False
-		defender = False
-		microsoftentraid = False
-		intune = False
-		sophos = False
-		qualys = False
+		endpoint_data = []
+		for integration in enabled_integrations:
+			try:
+				if endpoint.integration.filter(integration_type = integration):
+					endpoint_data.append(True)
+				else:
+					endpoint_data.append(False)
+			except:
+				endpoint_data.append(False)
 
-		try:
-			if len(endpoint.integrationCrowdStrikeFalcon.filter(hostname = endpoint.hostname)) >= 1:
-				crowdstrike = True
-		except:
-			print (endpoint.hostname + " not in CrowdStrike Falcon")
-			crowdstrike = False
-		try:
-			if len(endpoint.integrationDefender.filter(hostname = endpoint.hostname)) >= 1:
-				defender = True
-		except:
-			print (endpoint.hostname + " not in Defender")
-			defender = False
-		try:
-			if len(endpoint.integrationMicrosoftEntraID.filter(hostname = endpoint.hostname)) >= 1:
-				microsoftentraid = True
-		except:
-			print (endpoint.hostname + " not in Microsoft Entra ID")
-			microsoftentraid = False
-		try:
-			if len(endpoint.integrationIntune.filter(hostname = endpoint.hostname)) >= 1:
-				intune = True
-		except:
-			print (endpoint.hostname + " not in Intune")
-			intune = False
-		try:
-			if len(endpoint.integrationSophos.filter(hostname = endpoint.hostname)) >= 1:
-				sophos = True
-		except:
-			print (endpoint.hostname + " not in Sophos")
-			sophos = False
-		try:
-			if len(endpoint.integrationQualys.filter(hostname = endpoint.hostname)) >= 1:
-				qualys = True
-		except:
-			qualys = False
-		endpoint_list.append([crowdstrike, defender, microsoftentraid, intune, sophos, qualys])
-		
-	
-	count_all_true = 0
-	count_any_false = 0
-	for sublist in endpoint_list:
-		if sublist == [True, True, True, True, True, True]:
-			count_all_true += 1
-		if False in sublist:
-			count_any_false += 1
+		if False not in endpoint_data:
+			endpoint_list.append(True)
+		else:
+			endpoint_list.append(False)	
+
+	count_all_true = endpoint_list.count(True)
+	count_any_false = endpoint_list.count(False)
 
 	context = {
 		'page':'dashboard',
-		'enabled_integrations': getEnabledIntegrations(),
+		'enabled_integrations': enabled_integrations,
 		'endpoint_device_counts': integration_device_counts,
-		'endpointIcons': endpointIcons,
 
 		'osPlatformLabels': os_platforms,
         'osPlatformData': osPlatformData,
-		'osPlatformCount': [
-			len(Device.objects.filter(osPlatform="Android")),
-			len(Device.objects.filter(osPlatform="iOS/iPadOS")),
-			len(Device.objects.filter(osPlatform="MacOS")),
-			len(Device.objects.filter(osPlatform="Ubuntu")),
-			len(Device.objects.filter(osPlatform="Windows")),
-			len(Device.objects.filter(osPlatform="Windows Server")),
-			len(Device.objects.filter(osPlatform="Other")),
-		],
-
-		'endpointTypeLabels': endpointTypeLabels,
+		'endpointTypeLabels': endpoint_types,
         'endpointTypeData': endpointTypeData,
-		'endpointTypeCount': [
-			len(Device.objects.filter(endpointType="Client")),
-			len(Device.objects.filter(endpointType="Mobile")),
-			len(Device.objects.filter(endpointType="Server")),
-		],	
 
 		'compliantLabels': ['Compliant', 'Non-Compliant'],
         'compliantData': [count_all_true, count_any_false],
@@ -241,6 +189,28 @@ def profileSettings(request):
 
 ############################################################################################
 
+def deviceData(request, id):
+	# Checks User Permissions and Required Models
+	redirect_url = loginChecks(request)
+	if redirect_url:
+		return redirect(redirect_url)
+	
+	device = Device.objects.get(id=id)
+	integrations = device.integration.all()
+	integration_list = []
+	for integration in integrations:
+		integration_list.append(integration.integration_type)
+	
+	context = {
+		'page':"device-data",
+		'enabled_integrations': getEnabledIntegrations(),
+		'device':device,
+		'integrations':integration_list,
+	}
+	return render( request, 'main/device-data.html', context)
+
+############################################################################################
+
 def masterList(request):
 	# Checks User Permissions and Required Models
 	redirect_url = loginChecks(request)
@@ -252,7 +222,7 @@ def masterList(request):
 
 	endpoints = Device.objects.all()
 	for endpoint in endpoints:
-		endpoint_data = [endpoint.hostname]
+		endpoint_data = [endpoint]
 
 		for integration in enabled_integrations:
 			try:

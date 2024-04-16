@@ -2,7 +2,7 @@
 import msal, requests
 from datetime import datetime
 # Import Models
-from ..models import MicrosoftEntraIDDevice, Integration
+from ..models import Integration
 # Import Function Scripts
 from .masterlist import *
 from .DataCleaner import *

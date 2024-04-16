@@ -10,6 +10,7 @@ urlpatterns = [
     re_path(r'^profile-settings$', views.profileSettings),
     re_path(r'^endpoints/master-list$', views.masterList),
     re_path(r'^endpoints/(?P<integration>[-\w]+)$', views.endpointList),
+    re_path(r'^device/(?P<id>\d+)$', views.deviceData),
     re_path(r'^initial-setup$', views.initialSetup),
     re_path(r'^integrations$', views.integrations),
     re_path(r'^enable-integration/(?P<id>\d+)$', views.enableIntegration),

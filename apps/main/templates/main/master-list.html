@@ -42,7 +42,7 @@
 													{% elif check == False %}
 														<td><i class="fa fa-exclamation-circle text-danger"></i></td>
 													{% else %}
-														<td>{{check}}</td>
+														<td><a href="/device/{{check.id}}">{{check.hostname}}</a></td>
 													{% endif %}
 												{% endfor %}
 											</tr>
