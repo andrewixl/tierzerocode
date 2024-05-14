@@ -85,6 +85,6 @@ def syncMicrosoftEntraID():
     tenant_id = data.tenant_id
     tenant_domain = data.tenant_domain
     updateMicrosoftEntraIDDeviceDatabase(getMicrosoftEntraIDDevices(getMicrosoftEntraIDAccessToken(client_id, client_secret, tenant_id)))
-    # devices = MicrosoftEntraIDDevice.objects.all()
-    # updateMasterList(devices, tenant_domain)
+    data.last_synced_at = datetime.now()
+    data.save()
     return True

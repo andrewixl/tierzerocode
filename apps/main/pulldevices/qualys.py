@@ -117,6 +117,6 @@ def syncQualys():
     tenant_id = data.tenant_id
     tenant_domain = data.tenant_domain
     updateQualysDeviceDatabase(getQualysDevices(getQualysAccessToken(client_id, client_secret, tenant_id)))
-    # devices = QualysDevice.objects.all()
-    # updateMasterList(devices, tenant_domain)
+    data.last_synced_at = datetime.now()
+    data.save()
     return True

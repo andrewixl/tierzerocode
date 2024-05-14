@@ -119,4 +119,6 @@ def syncCrowdStrikeFalcon():
     updateCrowdStrikeDeviceDatabase(getCrowdStrikeDevices(getCrowdStrikeAccessToken(client_id, client_secret, tenant_id)))
     devices = CrowdStrikeFalconDevice.objects.all()
     updateMasterList(devices, tenant_domain)
+    data.last_synced_at = datetime.now()
+    data.save()
     return True

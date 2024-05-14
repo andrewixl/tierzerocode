@@ -91,6 +91,6 @@ def syncDefender():
     tenant_id = data.tenant_id
     tenant_domain = data.tenant_domain
     updateDefenderDeviceDatabase(getDefenderDevices(getDefenderAccessToken(client_id, client_secret, tenant_id)))
-    # devices = DefenderDevice.objects.all()
-    # updateMasterList(devices, tenant_domain)
+    data.last_synced_at = datetime.now()
+    data.save()
     return True

@@ -48,6 +48,8 @@
 									{% elif False == integrationStatus.3 %}
 									<div class="badge bg-danger my-2">Not Configured</div>
 									{% endif %}
+
+									<p>Last Sync: {{integrationStatus.8}}</p>
 								</div>
 								<!-- BEGIN primary modal -->
 								<div class="modal fade" id="{{integrationStatus.0.split|join:'_'}}_modal" tabindex="-1" role="dialog" aria-hidden="true">

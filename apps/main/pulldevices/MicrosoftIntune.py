@@ -132,6 +132,6 @@ def syncIntune():
     tenant_id = data.tenant_id
     tenant_domain = data.tenant_domain
     updateIntuneDeviceDatabase(getIntuneDevices(getIntuneAccessToken(client_id, client_secret, tenant_id)))
-    # devices = IntuneDevice.objects.all()
-    # updateMasterList(devices, tenant_domain)
+    data.last_synced_at = datetime.now()
+    data.save()
     return True

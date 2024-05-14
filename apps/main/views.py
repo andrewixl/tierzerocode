@@ -89,14 +89,26 @@ def initialSetup(request):
 		if len(Integration.objects.filter(integration_type = integration)) == 0:
 			image_navbar_path = 'main/img/navbar_icons/webp/' + (integration.replace(" ", "_")).lower() + '_logo_nav.webp'
 			image_integration_path = 'main/img/integration_images/webp/' + (integration.replace(" ", "_")).lower() + '_logo.webp'
-			Integration.objects.create(enabled = False, integration_type = integration, image_navbar_path=image_navbar_path, image_integration_path=image_integration_path)
+			if integration == 'Microsoft Defender for Endpoint':
+				integration_short = 'Defender'
+			elif integration == 'Microsoft Entra ID':
+				integration_short = 'Entra ID'
+			elif integration == 'Microsoft Intune':
+				integration_short = 'Intune'
+			elif integration == 'Sophos Central':
+				integration_short = 'Sophos'
+			elif integration == 'CrowdStrike Falcon':
+				integration_short = 'CrowdStrike'
+			elif integration == 'Qualys':
+				integration_short = 'Qualys'
+			Integration.objects.create(enabled = False, integration_type = integration, integration_type_short = integration_short, image_navbar_path=image_navbar_path, image_integration_path=image_integration_path)
 
 	for os_platform in os_platforms:
 		if len(DeviceComplianceSettings.objects.filter(os_platform = os_platform)) == 0:
-			default_settings = []
-			for setting in range(len(os_platforms)-1):
-				default_settings.append(0)
-			DeviceComplianceSettings.objects.create(os_platform = os_platform, settings = default_settings)
+			# default_settings = []
+			# for setting in range(len(os_platforms)-1):
+			# 	default_settings.append(0)
+			DeviceComplianceSettings.objects.create(os_platform = os_platform, compliance_crowdstrike_falcon = True, compliance_microsoft_defender_for_endpoint = True, compliance_microsoft_entra_id = True, compliance_microsoft_intune = True, compliance_sophos_central = True, compliance_qualys = True)
 
 	return redirect(request.META.get('HTTP_REFERER', '/'))
 
@@ -131,6 +143,8 @@ def index(request):
 	endpoint_list = []
 	enabled_integrations = getEnabledIntegrations()
 	endpoints = Device.objects.all()
+	compliant = 0
+	non_compliant = 0
 	for endpoint in endpoints:
 		endpoint_data = []
 		for integration in enabled_integrations:
@@ -142,13 +156,35 @@ def index(request):
 			except:
 				endpoint_data.append(False)
 
-		if False not in endpoint_data:
+		print(endpoint.hostname)
+		print(endpoint_data)
+
+		endpoint_compliance = DeviceComplianceSettings.objects.get(os_platform = endpoint.osPlatform)
+		endpoint_match = []
+		for integration in enabled_integrations:
+			if integration.integration_type == 'CrowdStrike Falcon':
+				endpoint_match.append(endpoint_compliance.crowdstrike_falcon)
+			elif integration.integration_type == 'Microsoft Defender for Endpoint':
+				endpoint_match.append(endpoint_compliance.microsoft_defender_for_endpoint)
+			elif integration.integration_type == 'Microsoft Entra ID':
+				endpoint_match.append(endpoint_compliance.microsoft_entra_id)
+			elif integration.integration_type == 'Microsoft Intune':
+				endpoint_match.append(endpoint_compliance.microsoft_intune)
+			elif integration.integration_type == 'Sophos Central':
+				endpoint_match.append(endpoint_compliance.sophos_central)
+			elif integration.integration_type == 'Qualys':
+				endpoint_match.append(endpoint_compliance.qualys)
+
+		if endpoint_data == endpoint_match:
 			endpoint_list.append(True)
 		else:
 			endpoint_list.append(False)	
 
 	count_all_true = endpoint_list.count(True)
 	count_any_false = endpoint_list.count(False)
+
+	print("Compliant: " + str(count_all_true))
+	print("Non-Compliant: " + str(count_any_false))
 
 	context = {
 		'page':'dashboard',
@@ -211,6 +247,20 @@ def deviceData(request, id):
 
 ############################################################################################
 
+def complianceSettings(os_platform, integration):
+	if integration == 'CrowdStrike Falcon':
+		return DeviceComplianceSettings.objects.get(os_platform = os_platform).crowdstrike_falcon
+	elif integration == 'Microsoft Defender for Endpoint':
+		return DeviceComplianceSettings.objects.get(os_platform = os_platform).microsoft_defender_for_endpoint
+	elif integration == 'Microsoft Entra ID':
+		return DeviceComplianceSettings.objects.get(os_platform = os_platform).microsoft_entra_id
+	elif integration == 'Microsoft Intune':
+		return DeviceComplianceSettings.objects.get(os_platform = os_platform).microsoft_intune
+	elif integration == 'Sophos Central':
+		return DeviceComplianceSettings.objects.get(os_platform = os_platform).sophos_central
+	elif integration == 'Qualys':
+		return DeviceComplianceSettings.objects.get(os_platform = os_platform).qualys
+
 def masterList(request):
 	# Checks User Permissions and Required Models
 	redirect_url = loginChecks(request)
@@ -223,17 +273,24 @@ def masterList(request):
 	endpoints = Device.objects.all()
 	for endpoint in endpoints:
 		endpoint_data = [endpoint]
+		compliant_settings = DeviceComplianceSettings.objects.get(os_platform = endpoint.osPlatform)
 
 		for integration in enabled_integrations:
 			try:
-				if endpoint.integration.filter(integration_type = integration):
-					endpoint_data.append(True)
+				if complianceSettings(endpoint.osPlatform, integration.integration_type):
+					if endpoint.integration.filter(integration_type = integration):
+						endpoint_data.append(True)
+					else:
+						endpoint_data.append(False)
 				else:
-					endpoint_data.append(False)
+					endpoint_data.append(None)
 			except:
 				endpoint_data.append(False)
 
 		endpoint_list.append(endpoint_data)
+
+		print (endpoint.hostname + " - " + str(endpoint.osPlatform))
+		print (endpoint_data)
 
 	context = {
 		'page':"master-list",
@@ -278,9 +335,9 @@ def integrations(request):
 	for integration_name in integration_names:
 		integration = Integration.objects.get(integration_type = integration_name)
 		if integration.tenant_domain:
-			integrationStatuses.append([integration.integration_type, integration.image_integration_path, integration.enabled, True, integration.id, integration.client_id, integration.tenant_id, integration.tenant_domain])
+			integrationStatuses.append([integration.integration_type, integration.image_integration_path, integration.enabled, True, integration.id, integration.client_id, integration.tenant_id, integration.tenant_domain, integration.last_synced_at])
 		else:
-			integrationStatuses.append([integration.integration_type, integration.image_integration_path, integration.enabled, False, integration.id, integration.client_id, integration.tenant_id, integration.tenant_domain])
+			integrationStatuses.append([integration.integration_type, integration.image_integration_path, integration.enabled, False, integration.id, integration.client_id, integration.tenant_id, integration.tenant_domain, integration.last_synced_at])
 	
 	context = {
 		'page':'integrations',

@@ -28,7 +28,14 @@ class Device(models.Model):
 
 class DeviceComplianceSettings(models.Model):
     os_platform = models.CharField(max_length = 100, null=True)
-    settings = models.JSONField(null=True)
+    crowdstrike_falcon = models.BooleanField(null=True)
+    microsoft_defender_for_endpoint = models.BooleanField(null=True)
+    microsoft_entra_id = models.BooleanField(null=True)
+    microsoft_intune = models.BooleanField(null=True)
+    sophos_central = models.BooleanField(null=True)
+    qualys = models.BooleanField(null=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
 
     def __str__(self):
         return self.os_platform
@@ -51,6 +58,9 @@ class Integration(models.Model):
     client_secret = models.CharField(max_length = 200, null=True)
     tenant_id = models.CharField(max_length = 100, null=True)
     tenant_domain = models.CharField(max_length = 50, null=True)
+    last_synced_at = models.DateTimeField(null=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
 
     def __str__(self):
         return self.integration_type
