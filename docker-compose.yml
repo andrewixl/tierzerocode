@@ -1,0 +1,12 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./tzc/:/home/app/tzc/
+    restart: always
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./.env.dev
