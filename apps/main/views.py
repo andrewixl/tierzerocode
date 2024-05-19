@@ -108,7 +108,7 @@ def initialSetup(request):
 			# default_settings = []
 			# for setting in range(len(os_platforms)-1):
 			# 	default_settings.append(0)
-			DeviceComplianceSettings.objects.create(os_platform = os_platform, compliance_crowdstrike_falcon = True, compliance_microsoft_defender_for_endpoint = True, compliance_microsoft_entra_id = True, compliance_microsoft_intune = True, compliance_sophos_central = True, compliance_qualys = True)
+			DeviceComplianceSettings.objects.create(os_platform = os_platform, crowdstrike_falcon = True, microsoft_defender_for_endpoint = True, microsoft_entra_id = True, microsoft_intune = True, sophos_central = True, qualys = True)
 
 	return redirect(request.META.get('HTTP_REFERER', '/'))
 
