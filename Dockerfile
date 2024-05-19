@@ -1,7 +1,7 @@
 # base image
 FROM python:3.12.2
 # setup enviornment variable
-ENV DockerHOME=/home/app/tzc
+ENV DockerHOME=/tierzerocode
 
 # set work directory
 RUN mkdir -p $DockerHOME
@@ -27,4 +27,4 @@ EXPOSE 8000
 CMD python manage.py migrate
 CMD python manage.py collectstatic --noinput
 # start server
-CMD ["gunicorn","--bind", ":8000", "tzc.wsgi:application"]
+CMD ["gunicorn","--bind", ":8000", "tierzerocode.wsgi:application"]

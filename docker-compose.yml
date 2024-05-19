@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile
     volumes:
-      - ./tzc/:/home/app/tzc/
+      - ./tierzerocode/:/tierzerocode/
     restart: always
     ports:
       - "8000:8000"
