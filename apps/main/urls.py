@@ -2,6 +2,7 @@ from . import views
 from django.urls import re_path
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 from django.urls import path
 
@@ -18,4 +19,6 @@ urlpatterns = [
     re_path(r'^update-integration/(?P<id>\d+)$', views.updateIntegration),
     re_path(r'^error500$', views.error500),
     re_path(r'^sync-(?P<integration>[-\w]+)-devices$', views.syncDevices),
-]
+] 
+
+urlpatterns += staticfiles_urlpatterns()
