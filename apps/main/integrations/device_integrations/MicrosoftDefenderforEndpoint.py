@@ -2,7 +2,7 @@
 import msal, requests
 from datetime import datetime
 # Import Models
-from ..models import DefenderDevice, Integration
+from ...models import DefenderDevice, Integration
 # Import Function Scripts
 from .masterlist import *
 from .DataCleaner import *

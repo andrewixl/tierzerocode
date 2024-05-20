@@ -2,7 +2,7 @@
 import requests
 from datetime import datetime
 # Import Models
-from ..models import Integration, CrowdStrikeFalconDevice
+from ...models import Integration, CrowdStrikeFalconDevice
 # Import Functions Scripts
 from .masterlist import *
 from .DataCleaner import *

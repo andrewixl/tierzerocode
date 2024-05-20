@@ -2,7 +2,7 @@
 import requests
 from datetime import datetime
 # Import Models
-from ..models import Integration, SophosDevice
+from ...models import Integration, SophosDevice
 # Import Functions Scripts
 from .masterlist import *
 from .DataCleaner import *

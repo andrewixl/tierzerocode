@@ -6,7 +6,7 @@
 
 					<!-- <a href="#" class="btn btn-primary float-end mt-n1"><i class="fas fa-plus"></i> Submit Integration Request</a> -->
 					<div class="mb-3">
-						<h1 class="h3 d-inline align-middle">Integrations</h1>
+						<h1 class="h3 d-inline align-middle">Device Integrations</h1>
 						<!-- <a class="badge bg-primary ms-2" href="https://documentation.tierzerocode.com/integratons/"
 							target="_blank">Documentation<i class="fas fa-fw fa-external-link-alt"></i></a> -->
 					</div>
@@ -153,6 +153,193 @@
 						</div>
 						<!-- ---------------------------- END TENABLE CARD ---------------------------- -->
 					</div>
+
+					<!-- <a href="#" class="btn btn-primary float-end mt-n1"><i class="fas fa-plus"></i> Submit Integration Request</a> -->
+					<!-- <div class="mb-3">
+						<h1 class="h3 d-inline align-middle">Cloud Configuration Integrations</h1> -->
+						<!-- <a class="badge bg-primary ms-2" href="https://documentation.tierzerocode.com/integratons/"
+							target="_blank">Documentation<i class="fas fa-fw fa-external-link-alt"></i></a> -->
+					<!-- </div>
+					<div class="row"> -->
+						<!-- ---------------------------- START INTEGRATION CARD ---------------------------- -->
+						<!-- {% for integrationStatus in integrationStatuses %}
+						<div class="col-12 col-md-6 col-lg-3">
+							<div class="card">
+								<img class="card-img-top" src="{% static integrationStatus.1 %}" alt="{{integrationStatus.0}}">
+								<div class="card-header px-4 pt-4">
+									<div class="card-actions float-end">
+										<div class="dropdown position-relative">
+											<a href="#" data-bs-toggle="dropdown" data-bs-display="static">
+												<i class="align-middle" data-feather="more-horizontal"></i>
+											</a>
+
+											<div class="dropdown-menu dropdown-menu-end">
+												{% if True == integrationStatus.2 %}
+												<a class="dropdown-item" href="/disable-integration/{{integrationStatus.4}}">Disable Integration</a>
+												<a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#{{integrationStatus.0.split|join:'_'}}_modal" href="#">Configure Integration</a>
+												{% if True == integrationStatus.3 %}
+												<a class="dropdown-item" href="/sync-{{integrationStatus.0.split|join:'-'}}-devices">Sync Integration</a>
+												{% endif %}
+												{% elif False == integrationStatus.2 %}
+												<a class="dropdown-item" href="/enable-integration/{{integrationStatus.4}}">Enable Integration</a>
+												{% endif %}
+											</div>
+										</div>
+									</div>
+									<h5 class="card-title mb-0">{{integrationStatus.0}}</h5>
+									{% if True == integrationStatus.2 %}
+									<div class="badge bg-success my-2">Enabled</div>
+									{% elif False == integrationStatus.2 %}
+									<div class="badge bg-danger my-2">Disabled</div>
+									{% endif %}
+									{% if True == integrationStatus.3 %}
+									<div class="badge bg-success my-2">Configured</div>
+									{% elif False == integrationStatus.3 %}
+									<div class="badge bg-danger my-2">Not Configured</div>
+									{% endif %}
+
+									<p>Last Sync: {{integrationStatus.8}}</p>
+								</div> -->
+								<!-- BEGIN primary modal -->
+								<!-- <div class="modal fade" id="{{integrationStatus.0.split|join:'_'}}_modal" tabindex="-1" role="dialog" aria-hidden="true">
+									<div class="modal-dialog modal-dialog-centered" role="document">
+										<div class="modal-content">
+											<div class="modal-header">
+												<h5 class="modal-title">Configure {{integrationStatus.0}} Integration</h5>
+												<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+											</div>
+											<div class="modal-body m-3">
+												<form action="/update-integration/{{integrationStatus.4}}" method="post">
+													{% csrf_token %}
+													<div class="mb-3">
+														<label class="form-label">Client ID <span style="color: red;">*</span></label>
+														<input type="text" class="form-control" name="client_id" placeholder="Client ID" value="{{integrationStatus.5}}">
+													</div>
+													<div class="mb-3">
+														<label class="form-label">Client Secret <span style="color: red;">*</span></label>
+														<input type="password" class="form-control" name="client_secret" placeholder="Client Secret" required>
+													</div>
+													<div class="mb-3">
+														<label class="form-label">Tenant ID <span style="color: red;">*</span></label>
+														<input type="text" class="form-control" name="tenant_id" placeholder="Tenant ID" value="{{integrationStatus.6}}">
+													</div>
+													<div class="mb-3">
+														<label class="form-label">Tenant Domain <span style="color: red;">*</span></label>
+														<input type="text" class="form-control" name="tenant_domain" placeholder="example.com" value="{{integrationStatus.7}}">
+													</div>
+											</div>
+											<div class="modal-footer">
+												<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+												<button type="submit" class="btn btn-primary">Save changes</button>
+											</div>
+												</form>
+										</div>
+									</div>
+								</div> -->
+								<!-- END primary modal -->
+								<!-- <div class="card-body px-4 pt-2">
+									<p>Last Synced: NULL</p>
+									<p>Last Sync Status: SUCCESS</p>
+								</div> -->
+							<!-- </div>
+						</div>
+						{% endfor %} -->
+						<!-- ---------------------------- END INTEGRATION CARD ---------------------------- -->
+					<!-- </div> -->
+
+					<!-- <a href="#" class="btn btn-primary float-end mt-n1"><i class="fas fa-plus"></i> Submit Integration Request</a> -->
+					<!-- <div class="mb-3">
+						<h1 class="h3 d-inline align-middle">User Integrations</h1> -->
+						<!-- <a class="badge bg-primary ms-2" href="https://documentation.tierzerocode.com/integratons/"
+							target="_blank">Documentation<i class="fas fa-fw fa-external-link-alt"></i></a> -->
+					<!-- </div>
+					<div class="row"> -->
+						<!-- ---------------------------- START INTEGRATION CARD ---------------------------- -->
+						<!-- {% for integrationStatus in integrationStatuses %}
+						<div class="col-12 col-md-6 col-lg-3">
+							<div class="card">
+								<img class="card-img-top" src="{% static integrationStatus.1 %}" alt="{{integrationStatus.0}}">
+								<div class="card-header px-4 pt-4">
+									<div class="card-actions float-end">
+										<div class="dropdown position-relative">
+											<a href="#" data-bs-toggle="dropdown" data-bs-display="static">
+												<i class="align-middle" data-feather="more-horizontal"></i>
+											</a>
+
+											<div class="dropdown-menu dropdown-menu-end">
+												{% if True == integrationStatus.2 %}
+												<a class="dropdown-item" href="/disable-integration/{{integrationStatus.4}}">Disable Integration</a>
+												<a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#{{integrationStatus.0.split|join:'_'}}_modal" href="#">Configure Integration</a>
+												{% if True == integrationStatus.3 %}
+												<a class="dropdown-item" href="/sync-{{integrationStatus.0.split|join:'-'}}-devices">Sync Integration</a>
+												{% endif %}
+												{% elif False == integrationStatus.2 %}
+												<a class="dropdown-item" href="/enable-integration/{{integrationStatus.4}}">Enable Integration</a>
+												{% endif %}
+											</div>
+										</div>
+									</div>
+									<h5 class="card-title mb-0">{{integrationStatus.0}}</h5>
+									{% if True == integrationStatus.2 %}
+									<div class="badge bg-success my-2">Enabled</div>
+									{% elif False == integrationStatus.2 %}
+									<div class="badge bg-danger my-2">Disabled</div>
+									{% endif %}
+									{% if True == integrationStatus.3 %}
+									<div class="badge bg-success my-2">Configured</div>
+									{% elif False == integrationStatus.3 %}
+									<div class="badge bg-danger my-2">Not Configured</div>
+									{% endif %}
+
+									<p>Last Sync: {{integrationStatus.8}}</p>
+								</div> -->
+								<!-- BEGIN primary modal -->
+								<!-- <div class="modal fade" id="{{integrationStatus.0.split|join:'_'}}_modal" tabindex="-1" role="dialog" aria-hidden="true">
+									<div class="modal-dialog modal-dialog-centered" role="document">
+										<div class="modal-content">
+											<div class="modal-header">
+												<h5 class="modal-title">Configure {{integrationStatus.0}} Integration</h5>
+												<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+											</div>
+											<div class="modal-body m-3">
+												<form action="/update-integration/{{integrationStatus.4}}" method="post">
+													{% csrf_token %}
+													<div class="mb-3">
+														<label class="form-label">Client ID <span style="color: red;">*</span></label>
+														<input type="text" class="form-control" name="client_id" placeholder="Client ID" value="{{integrationStatus.5}}">
+													</div>
+													<div class="mb-3">
+														<label class="form-label">Client Secret <span style="color: red;">*</span></label>
+														<input type="password" class="form-control" name="client_secret" placeholder="Client Secret" required>
+													</div>
+													<div class="mb-3">
+														<label class="form-label">Tenant ID <span style="color: red;">*</span></label>
+														<input type="text" class="form-control" name="tenant_id" placeholder="Tenant ID" value="{{integrationStatus.6}}">
+													</div>
+													<div class="mb-3">
+														<label class="form-label">Tenant Domain <span style="color: red;">*</span></label>
+														<input type="text" class="form-control" name="tenant_domain" placeholder="example.com" value="{{integrationStatus.7}}">
+													</div>
+											</div>
+											<div class="modal-footer">
+												<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+												<button type="submit" class="btn btn-primary">Save changes</button>
+											</div>
+												</form>
+										</div>
+									</div>
+								</div> -->
+								<!-- END primary modal -->
+								<!-- <div class="card-body px-4 pt-2">
+									<p>Last Synced: NULL</p>
+									<p>Last Sync Status: SUCCESS</p>
+								</div> -->
+							<!-- </div>
+						</div>
+						{% endfor %} -->
+						<!-- ---------------------------- END INTEGRATION CARD ---------------------------- -->
+					<!-- </div> -->
+					<!-- <a href="/sync-Microsoft-Entra-ID-User-devices"><button>Sync User Data</button></a> -->
 				</div>
 			</main>
 

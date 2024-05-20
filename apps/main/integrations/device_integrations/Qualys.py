@@ -2,7 +2,7 @@
 import requests, json, xmltodict
 from datetime import datetime
 # Import Models
-from ..models import QualysDevice, Integration
+from ...models import QualysDevice, Integration
 # Import Functions Scripts
 from .masterlist import *
 from .DataCleaner import *

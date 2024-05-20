@@ -52,6 +52,12 @@ class Integration(models.Model):
     )
     integration_type = models.CharField(max_length=35, choices=INTEGRATION_CHOICES, null=True)
     integration_type_short = models.CharField(max_length=35, null=True)
+    INTEGRATION_CONTEXTS = (
+        ("Cloud Configuration", "Cloud Configuration"),
+        ("Device", "Device"),
+        ("User", "User"),
+    )
+    integration_context = models.CharField(max_length=35, choices=INTEGRATION_CONTEXTS, null=True)
     image_navbar_path = models.CharField(max_length = 100, null=True)
     image_integration_path = models.CharField(max_length = 100, null=True)
     client_id = models.CharField(max_length = 100, null=True)
@@ -229,3 +235,23 @@ class QualysDevice(models.Model):
 
     def __str__(self):
         return self.hostname
+    
+class UserData(models.Model):
+    upn = models.EmailField(max_length = 100, null=True)
+    uid = models.CharField(max_length = 150, null=True)
+    given_name = models.CharField(max_length = 50, null=True)
+    surname = models.CharField(max_length = 50, null=True)
+    email_authentication_method = models.BooleanField(null=True)
+    fido2_authentication_method = models.BooleanField(null=True)
+    microsoft_authenticator_authentication_method = models.BooleanField(null=True)
+    password_authentication_method = models.BooleanField(null=True)
+    phone_authentication_method = models.BooleanField(null=True)
+    software_oath_authentication_method = models.BooleanField(null=True)
+    temporary_access_pass_authentication_method = models.BooleanField(null=True)
+    windows_hello_for_business_authentication_method = models.BooleanField(null=True)
+    integration = models.ManyToManyField("Integration", related_name='users', null=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
+
+    def __str__(self):
+        return self.upn

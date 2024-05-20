@@ -1,14 +1,16 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from .pulldevices.masterlist import *
+from .integrations.device_integrations.masterlist import *
 
 # Import Integration API Scripts
-from .pulldevices.CrowdStrikeFalcon import *
-from .pulldevices.MicrosoftDefenderforEndpoint import *
-from .pulldevices.MicrosoftEntraID import *
-from .pulldevices.MicrosoftIntune import *
-from .pulldevices.SophosCentral import *
-from .pulldevices.Qualys import *
+from .integrations.device_integrations.CrowdStrikeFalcon import *
+from .integrations.device_integrations.MicrosoftDefenderforEndpoint import *
+from .integrations.device_integrations.MicrosoftEntraID import *
+from .integrations.device_integrations.MicrosoftIntune import *
+from .integrations.device_integrations.SophosCentral import *
+from .integrations.device_integrations.Qualys import *
+
+from .integrations.user_integrations.MicrosoftEntraID import *
 
 # Import Integrations Models
 from .models import Integration, Device, DeviceComplianceSettings
@@ -101,7 +103,7 @@ def initialSetup(request):
 				integration_short = 'CrowdStrike'
 			elif integration == 'Qualys':
 				integration_short = 'Qualys'
-			Integration.objects.create(enabled = False, integration_type = integration, integration_type_short = integration_short, image_navbar_path=image_navbar_path, image_integration_path=image_integration_path)
+			Integration.objects.create(enabled = False, integration_type = integration, integration_type_short = integration_short, integration_context="Device", image_navbar_path=image_navbar_path, image_integration_path=image_integration_path)
 
 	for os_platform in os_platforms:
 		if len(DeviceComplianceSettings.objects.filter(os_platform = os_platform)) == 0:
@@ -156,8 +158,8 @@ def index(request):
 			except:
 				endpoint_data.append(False)
 
-		print(endpoint.hostname)
-		print(endpoint_data)
+		# print(endpoint.hostname)
+		# print(endpoint_data)
 
 		endpoint_compliance = DeviceComplianceSettings.objects.get(os_platform = endpoint.osPlatform)
 		endpoint_match = []
@@ -183,8 +185,8 @@ def index(request):
 	count_all_true = endpoint_list.count(True)
 	count_any_false = endpoint_list.count(False)
 
-	print("Compliant: " + str(count_all_true))
-	print("Non-Compliant: " + str(count_any_false))
+	# print("Compliant: " + str(count_all_true))
+	# print("Non-Compliant: " + str(count_any_false))
 
 	context = {
 		'page':'dashboard',
@@ -209,17 +211,30 @@ def profileSettings(request):
 	if redirect_url:
 		return redirect(redirect_url)
 	
+	device_compliance_settings_list = []
 	settings = []
 
 	for device_compliance_setting in DeviceComplianceSettings.objects.all():
-		settings.append([device_compliance_setting.os_platform, device_compliance_setting.settings])
+		settings.append(device_compliance_setting)
 	
-	print(settings)
+	for setting in settings:
+		mini_list = []
+		for config in setting._meta.get_fields():
+			print(config)
+			if str(config) == 'main.DeviceComplianceSettings.id' or str(config) == 'main.DeviceComplianceSettings.os_platform':
+				vals = str(config).split(".")[2]
+			else:
+				vals = (str(config).split(".")[2]).replace("_", " ").title()
+			data = getattr(setting, config.name)
+			mini_list.append({str(vals):str(data)})
+		device_compliance_settings_list.append(mini_list)
+
+	print(device_compliance_settings_list)
 
 	context = {
 		'page':"profile-settings",
 		'enabled_integrations': getEnabledIntegrations(),
-		'settings':settings,
+		'devicecomps':device_compliance_settings_list,
 	}
 	return render( request, 'main/profile-settings.html', context)
 
@@ -418,6 +433,8 @@ def syncDevices(request, integration):
 		syncDefender()
 	elif integration == 'Microsoft-Entra-ID':
 		syncMicrosoftEntraID()
+	elif integration == 'Microsoft-Entra-ID-User':
+		syncMicrosoftEntraIDUser()
 	elif integration == 'Microsoft-Intune':
 		syncIntune()
 	elif integration == 'Sophos-Central':
