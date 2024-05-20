@@ -5,30 +5,18 @@
 # Tier Zero C.O.D.E (Tier Zero Correlation of Distributed Endpoints)
 
 ## Minimum Requirements
-- [ ] Ubuntu Server 22.04
-- [ ] 64 GB Storage Space
 - [ ] 4 GB RAM
 
 ## Getting started
 
+Docker Install
 ```bash
-sudo -i
-apt-get update && apt-get upgrade -y
-apt-get install python3-pip python3-dev nginx fail2ban git python3-certbot-nginx -y
-apt-get update
-pip3 install virtualenv
-git clone https://github.com/andrewixl/tierzerocode.git
-
-cd tierzerocode
-virtualenv venv
-source venv/bin/activate
-pip3 install -r requirements.txt
-sudo ufw allow 8000
-bash install.sh
+andrewixl/tierzerocode:latest
 ```
 
 ## Integrate with your tools
 
+- [ ] CrowdStrike Falcon
 - [ ] Microsoft Defender for Endpoint
 - [ ] Microsoft Entra ID
 - [ ] Microsoft Intune
@@ -36,9 +24,19 @@ bash install.sh
 - [ ] Qualys Vulnerability Management (Limited to First 1000 Devices)
 
 ## Roadmap
-- [ ] CrowdStrike Falcon (Under Development)
+- [ ] Qualys Vulnerability Management (All Devices)
+- [ ] Apple Business Manager (Under Development)
+- [ ] JAMF Now (Under Development)
+- [ ] JAMF Pro (Under Development)
 - [ ] Tenable (Under Development)
 - [ ] System Center Configuration Manager (Under Development)
+
+## Support
+Please sumbit any issues into the issues section within this GitHub
+
+## Contribute
+If you are feeling generous, love the project, or just want to show your appreciation please donated at the Patreon Link Below!
+https://www.patreon.com/tierzerocode
 
 <!-- ## Collaborate with your team
 

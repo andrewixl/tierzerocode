@@ -1,6 +1,5 @@
 from django.contrib import admin
 from django.urls import path, re_path, include
-from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 # from django.contrib.sitemaps.views import sitemap
 
 # sitemaps = {
@@ -14,5 +13,3 @@ urlpatterns = [
     re_path(r'^identity/', include('apps.login_app.urls')),
     re_path(r'^', include('apps.main.urls')),
 ]
-
-urlpatterns += staticfiles_urlpatterns()
