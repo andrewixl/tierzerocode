@@ -1,28 +1,25 @@
-# base image
-FROM python:3.12.2
+# For more information, please refer to https://aka.ms/vscode-docker-python
+FROM python:3-slim
 
-# set environment variables
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
-
-# Mounts the application code to the image
-COPY . /tierzerocode
-
-# where your code lives
-WORKDIR /tierzerocode
-
-# install dependencies
-RUN pip install --upgrade pip
-
-# Allows docker to cache installed dependencies between builds
-RUN pip install -r requirements.txt
-
-# migrate database
-RUN python manage.py migrate
-RUN python manage.py collectstatic --noinput
-
-# port where the Django app runs
 EXPOSE 8000
 
-# start server
-CMD ["gunicorn","--bind",":8000","--workers","3","tierzerocode.wsgi:application"]
+# Keeps Python from generating .pyc files in the container
+ENV PYTHONDONTWRITEBYTECODE=1
+
+# Turns off buffering for easier container logging
+ENV PYTHONUNBUFFERED=1
+
+# Install pip requirements
+COPY requirements.txt .
+RUN python -m pip install -r requirements.txt
+
+WORKDIR /app
+COPY . /app
+
+# Creates a non-root user with an explicit UID and adds permission to access the /app folder
+# For more info, please refer to https://aka.ms/vscode-docker-python-configure-containers
+RUN adduser -u 5678 --disabled-password --gecos "" appuser && chown -R appuser /app
+USER appuser
+
+# During debugging, this entry point will be overridden. For more information, please refer to https://aka.ms/vscode-docker-python-debug
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "tierzerocode.wsgi"]
