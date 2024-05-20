@@ -18,8 +18,8 @@ RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
 # migrate database
-CMD python manage.py migrate
-CMD python manage.py collectstatic --noinput
+RUN python manage.py migrate
+RUN python manage.py collectstatic --noinput
 
 # port where the Django app runs
 EXPOSE 8000
