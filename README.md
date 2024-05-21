@@ -9,14 +9,21 @@
 
 ## Getting started
 
-Docker Install
+Docker Install: Latest
 ```bash
 andrewixl/tierzerocode:latest
 ```
 
+Docker Install: Latest - Dev
+```bash
+andrewixl/tierzerocode:latest-dev
+```
+
+Port 8000
+
 ## Integrate with your tools
 
-- [ ] CrowdStrike Falcon
+- [ ] CrowdStrike Falcon - (May Be Limited to First 10000 Devices)
 - [ ] Microsoft Defender for Endpoint
 - [ ] Microsoft Entra ID
 - [ ] Microsoft Intune
