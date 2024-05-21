@@ -220,16 +220,16 @@ def profileSettings(request):
 	for setting in settings:
 		mini_list = []
 		for config in setting._meta.get_fields():
-			print(config)
+			# print(config)
 			if str(config) == 'main.DeviceComplianceSettings.id' or str(config) == 'main.DeviceComplianceSettings.os_platform':
 				vals = str(config).split(".")[2]
 			else:
 				vals = (str(config).split(".")[2]).replace("_", " ").title()
 			data = getattr(setting, config.name)
-			mini_list.append({str(vals):str(data)})
+			mini_list.append([str(vals),str(data)])
 		device_compliance_settings_list.append(mini_list)
 
-	print(device_compliance_settings_list)
+	# print(device_compliance_settings_list)
 
 	context = {
 		'page':"profile-settings",
@@ -237,6 +237,26 @@ def profileSettings(request):
 		'devicecomps':device_compliance_settings_list,
 	}
 	return render( request, 'main/profile-settings.html', context)
+
+def update_compliance(request, id):
+	# Checks User Permissions and Required Models
+	redirect_url = loginChecks(request)
+	if redirect_url:
+		return redirect(redirect_url)
+	
+	if request.method == 'POST':
+		device_compliance_setting = DeviceComplianceSettings.objects.get(id = id)
+
+		print (request.POST)
+			
+		device_compliance_setting.crowdstrike_falcon = str(request.POST.get('Crowdstrike Falcon', False)).replace("on", "True")
+		device_compliance_setting.microsoft_defender_for_endpoint = str(request.POST.get('Microsoft Defender For Endpoint', False)).replace("on", "True")
+		device_compliance_setting.microsoft_entra_id = str(request.POST.get('Microsoft Entra Id', False)).replace("on", "True")
+		device_compliance_setting.microsoft_intune = str(request.POST.get('Microsoft Intune', False)).replace("on", "True")
+		device_compliance_setting.sophos_central = str(request.POST.get('Sophos Central', False)).replace("on", "True")
+		device_compliance_setting.qualys = str(request.POST.get('Qualys', False)).replace("on", "True")
+		device_compliance_setting.save()
+	return redirect ('/profile-settings')
 
 ############################################################################################
 

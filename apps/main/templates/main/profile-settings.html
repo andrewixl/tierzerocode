@@ -83,31 +83,35 @@
 										</div>
 										<div class="card-body">
 											{% for devicecomp in devicecomps %}
-											<form action="" method="post">
+											<form action="/update_compliance/{{devicecomp.0.1}}" method="post">
+												{% csrf_token %}
 												<div>
 													<label class="form-check form-check-inline">
 														<!-- <input class="form-check-input" type="checkbox" value="option1"> -->
 														<span class="form-check-label">
-															{{devicecomp.1.os_platform}} Devices
+															{{devicecomp.1.1}} Devices
 														</span>
 													</label>
-													{% for key, value in devicecomp.items %}
+													{% for device in devicecomp %}
 													<label class="form-check form-check-inline">
-														{% if setting.1.'opdfsd dfs' == True %}
-														<input class="form-check-input" type="checkbox" name="CrowdStrike-Falcon" value="True" checked>
-														{% else %}
-														<input class="form-check-input" type="checkbox" name="CrowdStrike-Falcon" value="False">
-														{% endif %}
+														{% if device.1 == 'True' %}
+														<input class="form-check-input" type="checkbox" name="{{device.0}}" checked>
 														<span class="form-check-label">
-															{{value}} {{key}}
+															{{device.0}}
 														</span>
+														{% elif device.1 == 'False' %}
+														<input class="form-check-input" type="checkbox" name="{{device.0}}">
+														<span class="form-check-label">
+															{{device.0}}
+														</span>
+														{% endif %}
 													</label>
 													{% endfor %}
 												</div>
 												<br>
-												<button type="submit" class="btn btn-primary" disabled>Save Changes</button>
+												<button type="submit" class="btn btn-primary">Save Changes</button>
 											</form>
-											<br>
+											<hr><br>
 											{% endfor %}
 
 										</div>
