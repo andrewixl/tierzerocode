@@ -28,6 +28,8 @@ class Device(models.Model):
 
 class DeviceComplianceSettings(models.Model):
     os_platform = models.CharField(max_length = 100, null=True)
+    #X6969
+    cloudflare_zero_trust = models.BooleanField(null=True)
     crowdstrike_falcon = models.BooleanField(null=True)
     microsoft_defender_for_endpoint = models.BooleanField(null=True)
     microsoft_entra_id = models.BooleanField(null=True)
@@ -43,6 +45,8 @@ class DeviceComplianceSettings(models.Model):
 class Integration(models.Model):
     enabled = models.BooleanField(null=True, default=False)
     INTEGRATION_CHOICES = (
+        #X6969
+        ("Cloudflare Zero Trust", "Cloudflare Zero Trust"),
         ("CrowdStrike Falcon", "CrowdStrike Falcon"),
         ("Microsoft Defender for Endpoint", "Microsoft Defender for Endpoint"),
         ("Microsoft Entra ID", "Microsoft Entra ID"),

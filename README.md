@@ -35,7 +35,8 @@ Port 8000
 
 ## Integrate with your tools
 
-- [ ] CrowdStrike Falcon - (May Be Limited to First 10000 Devices)
+- [ ] Cloudflare Zero Trust
+- [ ] CrowdStrike Falcon
 - [ ] Microsoft Defender for Endpoint
 - [ ] Microsoft Entra ID
 - [ ] Microsoft Intune
@@ -45,7 +46,6 @@ Port 8000
 ## Roadmap
 - [ ] Qualys Vulnerability Management (All Devices)
 - [ ] Apple Business Manager (Under Development)
-- [ ] JAMF Now (Under Development)
 - [ ] JAMF Pro (Under Development)
 - [ ] Tenable (Under Development)
 - [ ] System Center Configuration Manager (Under Development)

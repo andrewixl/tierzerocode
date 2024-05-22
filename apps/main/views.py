@@ -3,6 +3,8 @@ from django.contrib import messages
 from .integrations.device_integrations.masterlist import *
 
 # Import Integration API Scripts
+#X6969
+from .integrations.device_integrations.CloudflareZeroTrust import *
 from .integrations.device_integrations.CrowdStrikeFalcon import *
 from .integrations.device_integrations.MicrosoftDefenderforEndpoint import *
 from .integrations.device_integrations.MicrosoftEntraID import *
@@ -20,8 +22,10 @@ from ..login_app.models import User
 ############################################################################################
 
 # Reused Data Sets
-integration_names = ['CrowdStrike Falcon', 'Microsoft Defender for Endpoint', 'Microsoft Entra ID', 'Microsoft Intune', 'Sophos Central', 'Qualys']
-integration_names_short = ['CrowdStrike', 'Defender', 'Entra ID', 'Intune', 'Sophos', 'Qualys']
+#X6969
+integration_names = ['Cloudflare Zero Trust', 'CrowdStrike Falcon', 'Microsoft Defender for Endpoint', 'Microsoft Entra ID', 'Microsoft Intune', 'Sophos Central', 'Qualys']
+#X6969
+integration_names_short = ['Cloudflare', 'CrowdStrike', 'Defender', 'Entra ID', 'Intune', 'Sophos', 'Qualys']
 os_platforms = ['Android', 'iOS/iPadOS', 'MacOS', 'Ubuntu', 'Windows', 'Windows Server', 'Other']
 endpoint_types = ['Client', 'Mobile', 'Server', 'Other']
 
@@ -91,7 +95,12 @@ def initialSetup(request):
 		if len(Integration.objects.filter(integration_type = integration)) == 0:
 			image_navbar_path = 'main/img/navbar_icons/webp/' + (integration.replace(" ", "_")).lower() + '_logo_nav.webp'
 			image_integration_path = 'main/img/integration_images/webp/' + (integration.replace(" ", "_")).lower() + '_logo.webp'
-			if integration == 'Microsoft Defender for Endpoint':
+			#X6969
+			if integration == 'Cloudflare Zero Trust':
+				integration_short = 'Cloudflare'
+			elif integration == 'CrowdStrike Falcon':
+				integration_short = 'CrowdStrike'
+			elif integration == 'Microsoft Defender for Endpoint':
 				integration_short = 'Defender'
 			elif integration == 'Microsoft Entra ID':
 				integration_short = 'Entra ID'
@@ -99,18 +108,14 @@ def initialSetup(request):
 				integration_short = 'Intune'
 			elif integration == 'Sophos Central':
 				integration_short = 'Sophos'
-			elif integration == 'CrowdStrike Falcon':
-				integration_short = 'CrowdStrike'
 			elif integration == 'Qualys':
 				integration_short = 'Qualys'
 			Integration.objects.create(enabled = False, integration_type = integration, integration_type_short = integration_short, integration_context="Device", image_navbar_path=image_navbar_path, image_integration_path=image_integration_path)
 
 	for os_platform in os_platforms:
 		if len(DeviceComplianceSettings.objects.filter(os_platform = os_platform)) == 0:
-			# default_settings = []
-			# for setting in range(len(os_platforms)-1):
-			# 	default_settings.append(0)
-			DeviceComplianceSettings.objects.create(os_platform = os_platform, crowdstrike_falcon = True, microsoft_defender_for_endpoint = True, microsoft_entra_id = True, microsoft_intune = True, sophos_central = True, qualys = True)
+			#X6969
+			DeviceComplianceSettings.objects.create(os_platform = os_platform, cloudflare_zero_trust = True, crowdstrike_falcon = True, microsoft_defender_for_endpoint = True, microsoft_entra_id = True, microsoft_intune = True, sophos_central = True, qualys = True)
 
 	return redirect(request.META.get('HTTP_REFERER', '/'))
 
@@ -164,7 +169,10 @@ def index(request):
 		endpoint_compliance = DeviceComplianceSettings.objects.get(os_platform = endpoint.osPlatform)
 		endpoint_match = []
 		for integration in enabled_integrations:
-			if integration.integration_type == 'CrowdStrike Falcon':
+			#X6969
+			if integration.integration_type == 'Cloudflare Zero Trust':
+				endpoint_match.append(endpoint_compliance.cloudflare_zero_trust)
+			elif integration.integration_type == 'CrowdStrike Falcon':
 				endpoint_match.append(endpoint_compliance.crowdstrike_falcon)
 			elif integration.integration_type == 'Microsoft Defender for Endpoint':
 				endpoint_match.append(endpoint_compliance.microsoft_defender_for_endpoint)
@@ -248,7 +256,8 @@ def update_compliance(request, id):
 		device_compliance_setting = DeviceComplianceSettings.objects.get(id = id)
 
 		print (request.POST)
-			
+		#X6969
+		device_compliance_setting.cloudflare_zero_trust = str(request.POST.get('Cloudflare Zero Trust', False)).replace("on", "True")
 		device_compliance_setting.crowdstrike_falcon = str(request.POST.get('Crowdstrike Falcon', False)).replace("on", "True")
 		device_compliance_setting.microsoft_defender_for_endpoint = str(request.POST.get('Microsoft Defender For Endpoint', False)).replace("on", "True")
 		device_compliance_setting.microsoft_entra_id = str(request.POST.get('Microsoft Entra Id', False)).replace("on", "True")
@@ -283,7 +292,10 @@ def deviceData(request, id):
 ############################################################################################
 
 def complianceSettings(os_platform, integration):
-	if integration == 'CrowdStrike Falcon':
+	#X6969
+	if integration == 'Cloudflare Zero Trust':
+		return DeviceComplianceSettings.objects.get(os_platform = os_platform).cloudflare_zero_trust
+	elif integration == 'CrowdStrike Falcon':
 		return DeviceComplianceSettings.objects.get(os_platform = os_platform).crowdstrike_falcon
 	elif integration == 'Microsoft Defender for Endpoint':
 		return DeviceComplianceSettings.objects.get(os_platform = os_platform).microsoft_defender_for_endpoint
@@ -445,8 +457,11 @@ def syncDevices(request, integration):
 		return redirect(redirect_url)
 	
 	print(integration)
-
-	if integration == 'CrowdStrike-Falcon':
+	#X6969
+	if integration == 'Cloudflare-Zero-Trust':
+		print("Calling Sync Cloudflare Zero Trust")
+		syncCloudflareZeroTrust()
+	elif integration == 'CrowdStrike-Falcon':
 		print("Calling Sync CrowdStrike Falcon")
 		syncCrowdStrikeFalcon()
 	elif integration == 'Microsoft-Defender-for-Endpoint':
