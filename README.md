@@ -21,6 +21,12 @@ andrewixl/tierzerocode:latest-dev
 
 Port 8000
 
+## Required Permissions per Integration
+- Microsoft Defender for Endpoint
+- Microsoft Entra ID
+- Microsoft Intune
+- Sophos Central
+
 ## Integrate with your tools
 
 - [ ] CrowdStrike Falcon - (May Be Limited to First 10000 Devices)
