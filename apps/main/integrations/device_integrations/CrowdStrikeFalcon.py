@@ -2,51 +2,47 @@
 import requests
 from datetime import datetime
 # Import Models
-from ...models import Integration, CrowdStrikeFalconDevice
+from ...models import Integration, Device
 # Import Functions Scripts
-from .masterlist import *
 from .DataCleaner import *
 
+######################################## Start Get CrowdStrike Falcon Access Token ########################################
 def getCrowdStrikeAccessToken(client_id, client_secret, tenant_id):
-    # Define the authentication endpoint URL
+    # Define the URL for the request
     auth_url = 'https://api.crowdstrike.com/oauth2/token'
-
     # Define the authentication payload
     auth_payload = {
         'client_id': client_id,
         'client_secret': client_secret,
     }
-
     try:
         # Make a POST request to the authentication endpoint
         response = requests.post(auth_url, data=auth_payload)
-        
         # Check if the request was successful (status code 200)
         if response.status_code == 200 or response.status_code == 201:
-            # Extract the access token from the response
-            access_token = response.json()['access_token']
-            
-            # Print the access token (or use it for further API requests)
-            return 'Bearer ' + access_token
+            # Return the access token
+            return 'Bearer ' + response.json()['access_token']
         else:
             print("Failed to authenticate. Status code:", response.status_code)
             print("Response:", response.text)
     except Exception as e:
         print("An error occurred:", str(e))
+######################################## End Get CrowdStrike Falcon Access Token ########################################
 
+######################################## Start Get CrowdStrike Falcon Devices ########################################
 def getCrowdStrikeDevices(access_token):
+    # Set the URL for the request
     # url = 'https://api.crowdstrike.com/devices/queries/devices/v1?limit=20'
     url = 'https://api.crowdstrike.com/devices/queries/devices-scroll/v1'
+    # Set the headers for the request
     headers = {
     'Authorization': access_token
     }
-
     # Make a GET request to the provided url, passing the access token in a header
     crowdstrike_aids = ((requests.get(url=url, headers=headers)).json())['resources']
 
     total_devices = len(crowdstrike_aids)
     total_devices_count = total_devices
-    # [5000, 10000, 14666]
     device_pagination_arr = [0]
     while total_devices_count > 0:
         if total_devices_count > 5000 and len(device_pagination_arr) == 0:
@@ -74,51 +70,63 @@ def getCrowdStrikeDevices(access_token):
             'Authorization': access_token,
             'Content-Type': 'application/json',
             }
-
             body = {
                 'ids': crowdstrike_aids[device_pagination_arr[pagination_arr-1]:device_pagination_arr[pagination_arr]],
             }
-
             # Make a GET request to the provided url, passing the access token in a header
             crowdstrike_result = requests.post(url=url, headers=headers, json=body)
-
-            # Print the results in a JSON format
             total_crowdstrike_results.append(crowdstrike_result.json())
-    return (total_crowdstrike_results)
 
+    # Return the results in a JSON format
+    return (total_crowdstrike_results)
+######################################## End Get CrowdStrike Falcon Devices ########################################
+
+######################################## Start Update/Create CrowdStrike Falcon Devices ########################################
 def updateCrowdStrikeDeviceDatabase(total_crowdstrike_results):
     for crowdstrike_results in total_crowdstrike_results:
         for device_data in crowdstrike_results['resources']:
+            # Set the hostname and osPlatform variables
             try:
-                # Extract relevant data from the JSON
-                device_id = device_data.get('device_id')
-                hostname = device_data.get('hostname')
-                os_platform = device_data.get('os_version')
+                hostname = device_data.get('hostname').lower()
+            except:
+                print(device_data)
+            os_platform = device_data.get('os_version')
+            # [osPlatform_clean, endpointType]
+            clean_data = cleanAPIData(os_platform)
+            # Prepare data for updating/creating device
+            defaults={
+                'hostname': hostname,
+                'osPlatform': clean_data[0],
+                'endpointType': clean_data[1],
+            }
+            # Update or Create the Device object
+            obj, created = Device.objects.update_or_create(hostname=hostname, defaults=defaults)
+            # Add the Microsoft Intune Integration to the Device object
+            obj.integration.add(Integration.objects.get(integration_type = "CrowdStrike Falcon"))
 
-                # [osPlatform_clean, endpointType]
-                clean_data = cleanAPIData(os_platform)
-                
-                crowdstrikefalcon_device, created = CrowdStrikeFalconDevice.objects.update_or_create(
-                    id=device_id,
-                    defaults={
-                        'hostname': hostname.lower(),
-                        'osPlatform': clean_data[0],
-                        'endpointType': clean_data[1],
-                    }
-                )
-            except Exception as NoneType:
-                print("An error occurred:", str(NoneType) + ' ' + str(device_id))
+######################################## End Update/Create CrowdStrike Falcon Devices ########################################
 
+######################################## Start Sync CrowdStrike Falcon ########################################
 def syncCrowdStrikeFalcon():
-    data = Integration.objects.get(integration_type = "CrowdStrike Falcon")
-    client_id = data.client_id
-    client_secret = data.client_secret
-    tenant_id = data.tenant_id
-    tenant_domain = data.tenant_domain
-    print("Syncing CrowdStrike Falcon")
-    updateCrowdStrikeDeviceDatabase(getCrowdStrikeDevices(getCrowdStrikeAccessToken(client_id, client_secret, tenant_id)))
-    devices = CrowdStrikeFalconDevice.objects.all()
-    updateMasterList(devices, tenant_domain)
-    data.last_synced_at = datetime.now()
-    data.save()
-    return True
+    try:
+        # Get the CrowdStrike Falcon Integration data
+        data = Integration.objects.get(integration_type = "CrowdStrike Falcon")
+        # Set the variables for the CrowdStrike Falcon Integration
+        client_id = data.client_id
+        client_secret = data.client_secret
+        tenant_id = data.tenant_id
+        tenant_domain = data.tenant_domain
+        # Sync the CrowdStrike Falcon Integration
+        updateCrowdStrikeDeviceDatabase(getCrowdStrikeDevices(getCrowdStrikeAccessToken(client_id, client_secret, tenant_id)))
+        # Update the last synced time
+        data.last_synced_at = datetime.now()
+        # Save the changes
+        data.save()
+        # Return True to indicate the sync was successful
+        return True
+    except Exception as e:
+        # Print the error
+        print(e)
+        # Return False to indicate the sync was unsuccessful
+        return False, e
+######################################## End Sync CrowdStrike Falcon ########################################

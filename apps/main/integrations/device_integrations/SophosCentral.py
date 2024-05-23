@@ -22,9 +22,7 @@ def getSophosAccessToken(client_id, client_secret):
         response = requests.post(auth_url, data=auth_payload)
         # Check if the request was successful (status code 200)
         if response.status_code == 200:
-            # Extract the access token from the response
-            # access_token = response.json()['access_token']
-            # Print the access token (or use it for further API requests)
+            # Return the access token
             return 'Bearer ' + response.json()['access_token']
         else:
             print("Failed to authenticate. Status code:", response.status_code)
@@ -59,7 +57,7 @@ def updateSophosDeviceDatabase(json_data):
         clean_data = cleanAPIData(os_platform)
         # Prepare data for updating/creating device
         defaults={
-            'hostname': hostname.lower(),
+            'hostname': hostname,
             'osPlatform': clean_data[0],
             'endpointType': clean_data[1],
         }
