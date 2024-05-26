@@ -32,7 +32,6 @@ def getCrowdStrikeAccessToken(client_id, client_secret, tenant_id):
 ######################################## Start Get CrowdStrike Falcon Devices ########################################
 def getCrowdStrikeDevices(access_token):
     # Set the URL for the request
-    # url = 'https://api.crowdstrike.com/devices/queries/devices/v1?limit=20'
     url = 'https://api.crowdstrike.com/devices/queries/devices-scroll/v1'
     # Set the headers for the request
     headers = {

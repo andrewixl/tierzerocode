@@ -2,7 +2,7 @@
 import msal, requests
 from datetime import datetime
 # Import Models
-from ...models import Integration, Device
+from ...models import Integration, Device, MicrosoftIntuneDeviceData
 # Import Function Scripts
 from .DataCleaner import *
 
@@ -61,29 +61,106 @@ def updateIntuneDeviceDatabase(json_data):
         obj, created = Device.objects.update_or_create(hostname=hostname, defaults=defaults)
         # Add the Microsoft Intune Integration to the Device object
         obj.integration.add(Integration.objects.get(integration_type = "Microsoft Intune"))
+
+        defaults_all = {
+            "id": device_data['id'],
+            "userId": device_data['userId'],
+            "deviceName": hostname,
+            "managedDeviceOwnerType": device_data['managedDeviceOwnerType'],
+            "enrolledDateTime": device_data['enrolledDateTime'],
+            "lastSyncDateTime": device_data['lastSyncDateTime'],
+            "operatingSystem": device_data['operatingSystem'],
+            "complianceState": device_data['complianceState'],
+            "jailBroken": device_data['jailBroken'],
+            "managementAgent": device_data['managementAgent'],
+            "osVersion": device_data['osVersion'],
+            "easActivated": device_data['easActivated'],
+            "easDeviceId": device_data['easDeviceId'],
+            "easActivationDateTime": device_data['easActivationDateTime'],
+            "azureADRegistered": device_data['azureADRegistered'],
+            "deviceEnrollmentType": device_data['deviceEnrollmentType'],
+            "activationLockBypassCode": device_data['activationLockBypassCode'],
+            "emailAddress": device_data['emailAddress'],
+            "azureADDeviceId": device_data['azureADDeviceId'],
+            "deviceRegistrationState": device_data['deviceRegistrationState'],
+            "deviceCategoryDisplayName": device_data['deviceCategoryDisplayName'],
+            "isSupervised": device_data['isSupervised'],
+            "exchangeLastSuccessfulSyncDateTime": device_data['exchangeLastSuccessfulSyncDateTime'],
+            "exchangeAccessState": device_data['exchangeAccessState'],
+            "exchangeAccessStateReason": device_data['exchangeAccessStateReason'],
+            "remoteAssistanceSessionUrl": device_data['remoteAssistanceSessionUrl'],
+            "remoteAssistanceSessionErrorDetails": device_data['remoteAssistanceSessionErrorDetails'],
+            "isEncrypted": device_data['isEncrypted'],
+            "userPrincipalName": device_data['userPrincipalName'],
+            "model": device_data['model'],
+            "manufacturer": device_data['manufacturer'],
+            "imei": device_data['imei'],
+            "complianceGracePeriodExpirationDateTime": device_data['complianceGracePeriodExpirationDateTime'],
+            "serialNumber": device_data['serialNumber'],
+            "phoneNumber": device_data['phoneNumber'],
+            "androidSecurityPatchLevel": device_data['androidSecurityPatchLevel'],
+            "userDisplayName": device_data['userDisplayName'],
+            "configurationManagerClientEnabledFeatures": device_data['configurationManagerClientEnabledFeatures'],
+            "wiFiMacAddress": device_data['wiFiMacAddress'],
+            "deviceHealthAttestationState": device_data['deviceHealthAttestationState'],
+            "subscriberCarrier": device_data['subscriberCarrier'],
+            "meid": device_data['meid'],
+            "totalStorageSpaceInBytes": device_data['totalStorageSpaceInBytes'],
+            "freeStorageSpaceInBytes": device_data['freeStorageSpaceInBytes'],
+            "managedDeviceName": device_data['managedDeviceName'],
+            "partnerReportedThreatState": device_data['partnerReportedThreatState'],
+            "requireUserEnrollmentApproval": device_data['requireUserEnrollmentApproval'],
+            "managementCertificateExpirationDate": device_data['managementCertificateExpirationDate'],
+            "iccid": device_data['iccid'],
+            "udid": device_data['udid'],
+            "notes": device_data['notes'],
+            "ethernetMacAddress": device_data['ethernetMacAddress'],
+            "physicalMemoryInBytes": device_data['physicalMemoryInBytes'],
+            "enrollmentProfileName": device_data['enrollmentProfileName'],
+            "parentDevice": obj
+        }
+        # Update or Create the Device object
+        # obj2, created = MicrosoftIntuneDeviceData.objects.update_or_create(deviceName=device_data['deviceName'], defaults=defaults_all)
+        obj2, created = MicrosoftIntuneDeviceData.objects.update_or_create(id=device_data['id'], defaults=defaults_all)
+        
 ######################################## End Update/Create Microsoft Intune Devices ########################################
 
 ######################################## Start Sync Microsoft Intune ########################################
 def syncIntune():
-    try:
-        # Get the Microsoft Intune Integration data
-        data = Integration.objects.get(integration_type = "Microsoft Intune")
-        # Set the variables for the Microsoft Intune Integration
-        client_id = data.client_id
-        client_secret = data.client_secret
-        tenant_id = data.tenant_id
-        tenant_domain = data.tenant_domain
-        # Sync the Microsoft Intune Integration
-        updateIntuneDeviceDatabase(getIntuneDevices(getIntuneAccessToken(client_id, client_secret, tenant_id)))
-        # Update the last synced time
-        data.last_synced_at = datetime.now()
-        # Save the changes
-        data.save()
-        # Return True to indicate the sync was successful
-        return True
-    except Exception as e:
-        # Print the error
-        print(e)
-        # Return False to indicate the sync was unsuccessful
-        return False, e
+    # Get the Microsoft Intune Integration data
+    data = Integration.objects.get(integration_type = "Microsoft Intune")
+    # Set the variables for the Microsoft Intune Integration
+    client_id = data.client_id
+    client_secret = data.client_secret
+    tenant_id = data.tenant_id
+    tenant_domain = data.tenant_domain
+    # Sync the Microsoft Intune Integration
+    updateIntuneDeviceDatabase(getIntuneDevices(getIntuneAccessToken(client_id, client_secret, tenant_id)))
+    # Update the last synced time
+    data.last_synced_at = datetime.now()
+    # Save the changes
+    data.save()
+    # Return True to indicate the sync was successful
+    return True
+    # try:
+    #     # Get the Microsoft Intune Integration data
+    #     data = Integration.objects.get(integration_type = "Microsoft Intune")
+    #     # Set the variables for the Microsoft Intune Integration
+    #     client_id = data.client_id
+    #     client_secret = data.client_secret
+    #     tenant_id = data.tenant_id
+    #     tenant_domain = data.tenant_domain
+    #     # Sync the Microsoft Intune Integration
+    #     updateIntuneDeviceDatabase(getIntuneDevices(getIntuneAccessToken(client_id, client_secret, tenant_id)))
+    #     # Update the last synced time
+    #     data.last_synced_at = datetime.now()
+    #     # Save the changes
+    #     data.save()
+    #     # Return True to indicate the sync was successful
+    #     return True
+    # except Exception as e:
+    #     # Print the error
+    #     print(e)
+    #     # Return False to indicate the sync was unsuccessful
+    #     return False, e
 ######################################## End Sync Microsoft Intune ########################################

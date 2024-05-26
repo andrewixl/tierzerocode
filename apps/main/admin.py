@@ -1,6 +1,6 @@
 from django.contrib import admin
 # from .models import Device, Integration, DeviceComplianceSettings, CrowdStrikeFalconDevice, MicrosoftEntraIDDevice, IntuneDevice, SophosDevice, DefenderDevice, QualysDevice
-from .models import Device, Integration, DeviceComplianceSettings, MicrosoftEntraIDDeviceData, MicrosoftIntuneDeviceData, UserData
+from .models import Device, Integration, DeviceComplianceSettings, MicrosoftEntraIDDeviceData, MicrosoftIntuneDeviceData, UserData, MicrosoftDefenderforEndpointDeviceData
 
 
 # Integration Models
@@ -11,6 +11,7 @@ admin.site.register(DeviceComplianceSettings)
 admin.site.register(Device)
 
 # admin.site.register(CrowdStrikeFalconDevice)
+admin.site.register(MicrosoftDefenderforEndpointDeviceData)
 admin.site.register(MicrosoftEntraIDDeviceData)
 admin.site.register(MicrosoftIntuneDeviceData)
 # admin.site.register(SophosDevice)

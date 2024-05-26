@@ -268,24 +268,72 @@ def update_compliance(request, id):
 	return redirect ('/profile-settings')
 
 ############################################################################################
+from django.forms.models import model_to_dict
+import re
 
 def deviceData(request, id):
 	# Checks User Permissions and Required Models
 	redirect_url = loginChecks(request)
 	if redirect_url:
 		return redirect(redirect_url)
-	
-	device = Device.objects.get(id=id)
+	# X6969
+	# Creates the device object with related data preloaded from each integration
+	devices = Device.objects.filter(id=id).prefetch_related('integrationCloudflareZeroTrust', 'integrationCrowdStrikeFalcon', 'integrationMicrosoftDefenderForEndpoint', 'integrationMicrosoftEntraID', 'integrationIntune', 'integrationSophos', 'integrationQualys')
+	# Selects the 1st and only device since prefetch_related required a filter
+	device = devices[0]
+	# Gets current integrations for the device
 	integrations = device.integration.all()
+	# Creates a list of the integration types for the device
 	integration_list = []
 	for integration in integrations:
 		integration_list.append(integration.integration_type)
+	
+	cloudflare_device = None
+	crowdstrike_device = None
+	defender_device = None
+	entra_device = None
+	intune_device = None
+	sophos_device = None
+	qualys_device = None
+	for integration in integration_list:
+		# X6969
+		# if integration == 'Cloudflare Zero Trust':
+		# 	device.integrationCloudflareZeroTrust.get(deviceName=device.hostname.upper())
+		# elif integration == 'CrowdStrike Falcon':
+		# 	device.integrationCrowdStrikeFalcon.get(deviceName=device.hostname.upper())
+		if integration == 'Microsoft Defender for Endpoint':
+			# defender_integration = device.integrationMicrosoftDefenderForEndpoint.get(computerDnsName=device.hostname)
+			defender_device_list = model_to_dict((device.integrationMicrosoftDefenderForEndpoint.filter(computerDnsName=device.hostname))[0])
+			defender_device = {}
+			for key in defender_device_list:
+				defender_device[re.sub(r'([a-z])([A-Z])', r'\1 \2', key).title()] = defender_device_list[key]
+		elif integration == 'Microsoft Entra ID':
+			entra_device_list = model_to_dict((device.integrationMicrosoftEntraID.filter(displayName=device.hostname))[0])
+			entra_device = {}
+			for key in entra_device_list:
+				entra_device[re.sub(r'([a-z])([A-Z])', r'\1 \2', key).title()] = entra_device_list[key]
+		elif integration == 'Microsoft Intune':
+			intune_device_list = model_to_dict((device.integrationIntune.filter(deviceName=device.hostname))[0])
+			intune_device = {}
+			for key in intune_device_list:
+				intune_device[re.sub(r'([a-z])([A-Z])', r'\1 \2', key).title()] = intune_device_list[key]
+		# elif integration == 'Sophos Central':
+		# 	device.integrationSophos.get(deviceName=device.hostname.upper())
+		# elif integration == 'Qualys':
+		# 	device.integrationQualys.get(deviceName=device.hostname.upper())
+
+	integrations = device.integration.all()
+	print(integrations)
 	
 	context = {
 		'page':"device-data",
 		'enabled_integrations': getEnabledIntegrations(),
 		'device':device,
-		'integrations':integration_list,
+		'ints' : integrations,
+		# X6969
+		"defender_device":defender_device,
+		'entra_device':entra_device,
+		'intune_device':intune_device,
 	}
 	return render( request, 'main/device-data.html', context)
 
@@ -335,9 +383,6 @@ def masterList(request):
 				endpoint_data.append(False)
 
 		endpoint_list.append(endpoint_data)
-
-		print (endpoint.hostname + " - " + str(endpoint.osPlatform))
-		print (endpoint_data)
 
 	context = {
 		'page':"master-list",

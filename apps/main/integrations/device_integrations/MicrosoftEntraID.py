@@ -2,7 +2,7 @@
 import msal, requests
 from datetime import datetime
 # Import Models
-from ...models import Integration, Device
+from ...models import Integration, Device, MicrosoftEntraIDDeviceData
 # Import Function Scripts
 from .DataCleaner import *
 
@@ -61,29 +61,83 @@ def updateMicrosoftEntraIDDeviceDatabase(json_data):
         obj, created = Device.objects.update_or_create(hostname=hostname, defaults=defaults)
         # Add the Microsoft Intune Integration to the Device object
         obj.integration.add(Integration.objects.get(integration_type = "Microsoft Entra ID"))
+
+        defaults_all = {
+            "id": device_data['id'],
+            "deletedDateTime": device_data['deletedDateTime'],
+            "accountEnabled": device_data['accountEnabled'],
+            "approximateLastSignInDateTime": device_data['approximateLastSignInDateTime'],
+            "complianceExpirationDateTime": device_data['complianceExpirationDateTime'],
+            "createdDateTime": device_data['createdDateTime'],
+            "deviceCategory": device_data['deviceCategory'],
+            "deviceId": device_data['deviceId'],
+            "deviceMetadata": device_data['deviceMetadata'],
+            "deviceOwnership": device_data['deviceOwnership'],
+            "deviceVersion": device_data['deviceVersion'],
+            "displayName": hostname,
+            "domainName": device_data['domainName'],
+            "enrollmentProfileName": device_data['enrollmentProfileName'],
+            "enrollmentType": device_data['enrollmentType'],
+            "externalSourceName": device_data['externalSourceName'],
+            "isCompliant": device_data['isCompliant'],
+            "isManaged": device_data['isManaged'],
+            "isRooted": device_data['isRooted'],
+            "managementType": device_data['managementType'],
+            "manufacturer": device_data['manufacturer'],
+            "mdmAppId": device_data['mdmAppId'],
+            "model": device_data['model'],
+            "onPremisesLastSyncDateTime": device_data['onPremisesLastSyncDateTime'],
+            "onPremisesSyncEnabled": device_data['onPremisesSyncEnabled'],
+            "operatingSystem": device_data['operatingSystem'],
+            "operatingSystemVersion": device_data['operatingSystemVersion'],
+            "profileType": device_data['profileType'],
+            "registrationDateTime": device_data['registrationDateTime'],
+            "sourceType": device_data['sourceType'],
+            "trustType": device_data['trustType'],
+            "parentDevice": obj
+        }
+        # Update or Create the Device object
+        # obj2, created = MicrosoftEntraIDDeviceData.objects.update_or_create(displayName=device_data['displayName'], defaults=defaults_all)
+        obj2, created = MicrosoftEntraIDDeviceData.objects.update_or_create(id=device_data['id'], defaults=defaults_all)
+
 ######################################## End Update/Create Microsoft Entra ID Devices ########################################
 
 ######################################## Start Sync Microsoft Entra ID ########################################
 def syncMicrosoftEntraID():
-    try:
-        # Get the Microsoft Entra ID Integration data
-        data = Integration.objects.get(integration_type = "Microsoft Entra ID")
-        # Set the variables for the Microsoft Entra ID Integration
-        client_id = data.client_id
-        client_secret = data.client_secret
-        tenant_id = data.tenant_id
-        tenant_domain = data.tenant_domain
-        # Sync the Microsoft Entra ID Integration
-        updateMicrosoftEntraIDDeviceDatabase(getMicrosoftEntraIDDevices(getMicrosoftEntraIDAccessToken(client_id, client_secret, tenant_id)))
-        # Update the last synced time
-        data.last_synced_at = datetime.now()
-        # Save the changes
-        data.save()
-        # Return True to indicate the sync was successful
-        return True
-    except Exception as e:
-        # Print the error
-        print(e)
-        # Return False to indicate the sync was unsuccessful
-        return False, e
+    # Get the Microsoft Entra ID Integration data
+    data = Integration.objects.get(integration_type = "Microsoft Entra ID")
+    # Set the variables for the Microsoft Entra ID Integration
+    client_id = data.client_id
+    client_secret = data.client_secret
+    tenant_id = data.tenant_id
+    tenant_domain = data.tenant_domain
+    # Sync the Microsoft Entra ID Integration
+    updateMicrosoftEntraIDDeviceDatabase(getMicrosoftEntraIDDevices(getMicrosoftEntraIDAccessToken(client_id, client_secret, tenant_id)))
+    # Update the last synced time
+    data.last_synced_at = datetime.now()
+    # Save the changes
+    data.save()
+    # Return True to indicate the sync was successful
+    return True
+    # try:
+    #     # Get the Microsoft Entra ID Integration data
+    #     data = Integration.objects.get(integration_type = "Microsoft Entra ID")
+    #     # Set the variables for the Microsoft Entra ID Integration
+    #     client_id = data.client_id
+    #     client_secret = data.client_secret
+    #     tenant_id = data.tenant_id
+    #     tenant_domain = data.tenant_domain
+    #     # Sync the Microsoft Entra ID Integration
+    #     updateMicrosoftEntraIDDeviceDatabase(getMicrosoftEntraIDDevices(getMicrosoftEntraIDAccessToken(client_id, client_secret, tenant_id)))
+    #     # Update the last synced time
+    #     data.last_synced_at = datetime.now()
+    #     # Save the changes
+    #     data.save()
+    #     # Return True to indicate the sync was successful
+    #     return True
+    # except Exception as e:
+    #     # Print the error
+    #     print(e)
+    #     # Return False to indicate the sync was unsuccessful
+    #     return False, e
 ######################################## End Sync Microsoft Entra ID ########################################

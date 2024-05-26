@@ -12,30 +12,124 @@
 						<div class="col-12">
 							<div class="card">
 								<div class="card-body">
-									<!-- <table id="datatables-reponsive" class="table table-striped" style="width:100%">
-										<thead>
-											<tr>
-												<th>Hostname</th>
-												<th>OS Platform</th>
-												<th>Endpoint Type</th>
-												<th>Created At</th>
-											</tr>
-										</thead>
-										<tbody>
-											{% for endpoint in endpoint_list %}
-											<tr>
-												{% for data in endpoint %}
-													<td>{{data}}</td>
-												{% endfor %}
-											</tr>
-											{% endfor %}
-										</tbody>
-									</table> -->
-								</div>
+									<h4>C.O.D.E Details</h4>
+									<div class="row">
+										<div class="col-md-3">
+											<div class="row">
+												<div class="col-md-4">
+													<h5>Hostname:</h5>
+													<h5>TZC ID:</h5>
+												</div>
+												<div class="col-md-8">
+													<h5>{{device.hostname}}</h5>
+													<h5>{{device.id}}</h5>
+												</div>
+											</div>
+										</div>
+										<div class="col-md-3">
+											<div class="row">
+												<div class="col-md-4">
+													<h5>OS Platform:</h5>
+													<h5>Endpoint Type:</h5>
+												</div>
+												<div class="col-md-8">
+													<h5>{{device.osPlatform}}</h5>
+													<h5>{{device.endpointType}}</h5>
+												</div>
+											</div>
+										</div>
+										<div class="col-md-3">
+											<div class="row">
+												<div class="col-md-4">
+													<h5>Created At:</h5>
+													<h5>Updated At:</h5>
+												</div>
+												<div class="col-md-8">
+													<h5>{{device.created_at}}</h5>
+													<h5>{{device.updated_at}}</h5>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>		
 							</div>
 						</div>
 					</div>
-
+					{% for inty in ints %}
+					{% if 'Microsoft Defender for Endpoint' in inty.integration_type %}
+					<div class="row">
+						<div class="col-12">
+							<div class="card">
+								<div class="card-body">
+									<h4>Microsoft Defender for Endpoint Details</h4>
+									<div class="row">
+										{% for key, value in defender_device.items %}
+										<div class="col-md-4">
+											<div class="row">
+												<div class="col-md-4">
+													<h5>{{key.title}}:</h5>
+												</div>
+												<div class="col-md-8">
+													<h5>{{value}}</h5>
+												</div>
+											</div>
+										</div>
+										{% endfor %}
+									</div>
+								</div>		
+							</div>
+						</div>
+					</div>
+					{% elif 'Microsoft Entra ID' in inty.integration_type %}
+					<div class="row">
+						<div class="col-12">
+							<div class="card">
+								<div class="card-body">
+									<h4>Microsoft Entra ID Details</h4>
+									<div class="row">
+										{% for key, value in entra_device.items %}
+										<div class="col-md-4">
+											<div class="row">
+												<div class="col-md-4">
+													<h5>{{key.title}}:</h5>
+												</div>
+												<div class="col-md-8">
+													<h5>{{value}}</h5>
+												</div>
+											</div>
+										</div>
+										{% endfor %}
+									</div>
+								</div>		
+							</div>
+						</div>
+					</div>
+					{% elif 'Microsoft Intune' in inty.integration_type %}
+					<div class="row">
+						<div class="col-12">
+							<div class="card">
+								<div class="card-body">
+									<h4>Microsoft Intune Details</h4>
+									<div class="row">
+										{% for key, value in intune_device.items %}
+										<div class="col-md-4">
+											<div class="row">
+												<div class="col-md-4">
+													<h5>{{key.title}}:</h5>
+												</div>
+												<div class="col-md-8">
+													<h5>{{value}}</h5>
+												</div>
+											</div>
+										</div>
+										{% endfor %}
+									</div>
+								</div>		
+							</div>
+						</div>
+					</div>
+					{% endif %}
+					{% endfor %}
 				</div>
 			</main>
 			{% endblock %}

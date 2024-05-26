@@ -2,7 +2,7 @@
 import msal, requests
 from datetime import datetime
 # Import Models
-from ...models import Integration, Device
+from ...models import Integration, Device, MicrosoftDefenderforEndpointDeviceData
 # Import Function Scripts
 from .DataCleaner import *
 
@@ -63,29 +63,82 @@ def updateDefenderDeviceDatabase(json_data):
             obj, created = Device.objects.update_or_create(hostname=hostname, defaults=defaults)
             # Add the Microsoft Defender for Endpoint Integration to the Device object
             obj.integration.add(Integration.objects.get(integration_type = "Microsoft Defender for Endpoint"))
+
+            defaults_all = {
+                "id": device_data['id'],
+                "mergedIntoMachineId": device_data['mergedIntoMachineId'],
+                "isPotentialDuplication": device_data['isPotentialDuplication'],
+                "isExcluded": device_data['isExcluded'],
+                "exclusionReason": device_data['exclusionReason'],
+                "computerDnsName": hostname,
+                "firstSeen": device_data['firstSeen'],
+                "lastSeen": device_data['lastSeen'],
+                "osPlatform": device_data['osPlatform'],
+                "osVersion": device_data['osVersion'],
+                "osProcessor": device_data['osProcessor'],
+                "version": device_data['version'],
+                "lastIpAddress": device_data['lastIpAddress'],
+                "lastExternalIpAddress": device_data['lastExternalIpAddress'],
+                "agentVersion": device_data['agentVersion'],
+                "osBuild": device_data['osBuild'],
+                "healthStatus": device_data['healthStatus'],
+                "deviceValue": device_data['deviceValue'],
+                "rbacGroupId": device_data['rbacGroupId'],
+                "rbacGroupName": device_data['rbacGroupName'],
+                "riskScore": device_data['riskScore'],
+                "exposureLevel": device_data['exposureLevel'],
+                "isAadJoined": device_data['isAadJoined'],
+                "aadDeviceId": device_data['aadDeviceId'],
+                "defenderAvStatus": device_data['defenderAvStatus'],
+                "onboardingStatus": device_data['onboardingStatus'],
+                "osArchitecture": device_data['osArchitecture'],
+                "managedBy": device_data['managedBy'],
+                "managedByStatus": device_data['managedByStatus'],
+                "vmMetadata": device_data['vmMetadata'],
+                "parentDevice": obj
+            }
+            # Update or Create the Device object
+            # obj2, created = MicrosoftDefenderforEndpointDeviceData.objects.update_or_create(computerDnsName=device_data['computerDnsName'], defaults=defaults_all)
+            obj2, created = MicrosoftDefenderforEndpointDeviceData.objects.update_or_create(id=device_data['id'], defaults=defaults_all)
+
 ######################################## End Update/Create Microsoft Defender for Endpoint Devices ########################################
 
 ######################################## Start Sync Microsoft Defender for Endpoint ########################################
 def syncDefender():
-    try:
-        # Get the Microsoft Defender for Endpoint Integration data
-        data = Integration.objects.get(integration_type = "Microsoft Defender for Endpoint")
-        # Set the variables for the Microsoft Defender for Endpoint Integration
-        client_id = data.client_id
-        client_secret = data.client_secret
-        tenant_id = data.tenant_id
-        tenant_domain = data.tenant_domain
-        # Sync the Microsoft Defender for Endpoint Integration
-        updateDefenderDeviceDatabase(getDefenderDevices(getDefenderAccessToken(client_id, client_secret, tenant_id)))
-        # Update the last synced time
-        data.last_synced_at = datetime.now()
-        # Save the changes
-        data.save()
-        # Return True to indicate the sync was successful
-        return True
-    except Exception as e:
-        # Print the error
-        print(e)
-        # Return False to indicate the sync was unsuccessful
-        return False, e
+    # Get the Microsoft Defender for Endpoint Integration data
+    data = Integration.objects.get(integration_type = "Microsoft Defender for Endpoint")
+    # Set the variables for the Microsoft Defender for Endpoint Integration
+    client_id = data.client_id
+    client_secret = data.client_secret
+    tenant_id = data.tenant_id
+    tenant_domain = data.tenant_domain
+    # Sync the Microsoft Defender for Endpoint Integration
+    updateDefenderDeviceDatabase(getDefenderDevices(getDefenderAccessToken(client_id, client_secret, tenant_id)))
+    # Update the last synced time
+    data.last_synced_at = datetime.now()
+    # Save the changes
+    data.save()
+    # Return True to indicate the sync was successful
+    return True
+    # try:
+    #     # Get the Microsoft Defender for Endpoint Integration data
+    #     data = Integration.objects.get(integration_type = "Microsoft Defender for Endpoint")
+    #     # Set the variables for the Microsoft Defender for Endpoint Integration
+    #     client_id = data.client_id
+    #     client_secret = data.client_secret
+    #     tenant_id = data.tenant_id
+    #     tenant_domain = data.tenant_domain
+    #     # Sync the Microsoft Defender for Endpoint Integration
+    #     updateDefenderDeviceDatabase(getDefenderDevices(getDefenderAccessToken(client_id, client_secret, tenant_id)))
+    #     # Update the last synced time
+    #     data.last_synced_at = datetime.now()
+    #     # Save the changes
+    #     data.save()
+    #     # Return True to indicate the sync was successful
+    #     return True
+    # except Exception as e:
+    #     # Print the error
+    #     print(e)
+    #     # Return False to indicate the sync was unsuccessful
+    #     return False, e
 ######################################## End Sync Microsoft Defender for Endpoint ########################################
