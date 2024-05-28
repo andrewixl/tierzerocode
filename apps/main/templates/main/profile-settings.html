@@ -58,16 +58,16 @@
 												<div class="row">
 													<div class="mb-3 col-md-6">
 														<label class="form-label" for="inputFirstName">First name</label>
-														<input type="text" class="form-control" id="inputFirstName" name=first_name placeholder="First name" value="{{request.session.firstName}}" disabled>
+														<input type="text" class="form-control" id="inputFirstName" name=first_name placeholder="First name" value="{{request.user.first_name}}" disabled>
 													</div>
 													<div class="mb-3 col-md-6">
 														<label class="form-label" for="inputLastName">Last name</label>
-														<input type="text" class="form-control" id="inputLastName" name="last_name" placeholder="Last name" value="{{request.session.lastName}}" disabled>
+														<input type="text" class="form-control" id="inputLastName" name="last_name" placeholder="Last name" value="{{request.user.last_name}}" disabled>
 													</div>
 												</div>
 												<div class="mb-3">
 													<label class="form-label" for="inputEmail4">Email</label>
-													<input type="email" class="form-control" id="inputEmail4" name="email_address" placeholder="Email" value="{{request.session.email}}" disabled>
+													<input type="email" class="form-control" id="inputEmail4" name="email_address" placeholder="Email" value="{{request.user.email}}" disabled>
 												</div>
 												<button type="submit" class="btn btn-primary" disabled>Save Changes</button>
 											</form>

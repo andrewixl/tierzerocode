@@ -78,22 +78,26 @@
 										<tbody>
 											{% for user in users %}
 											<tr>
-												<td>{{user.firstName}} {{user.lastName}}</td>
+												<td>{{user.first_name}} {{user.last_name}}</td>
 												<td>{{user.email}}</td>
-												{% if user.active == False %}
+												{% if user.is_active == False %}
 												<td>Suspended</td>
 												{% else %}
-												<td>{{user.permission|capfirst}}</td>
+													{% if user.is_superuser %}
+													<td>Administrator</td>
+													{% else %}
+													<td>User</td>
+													{% endif %}
 												{% endif %}
-												<td>NULL</td>
+												<td>{{user.last_login}}</td>
 												<td>
 
-												{% if user.active == False %}
+												{% if user.is_active == False %}
 													<!-- Modal Start -->
-													<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-backdrop="static" data-bs-keyboard="false" data-bs-target="#sizedModalActivate">
+													<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-backdrop="static" data-bs-keyboard="false" data-bs-target="#modal-activate-{{user.id}}">
 														Activate 
 													</button>
-													<div class="modal fade" id="sizedModalActivate" tabindex="-1" role="dialog" aria-hidden="true">
+													<div class="modal fade" id="modal-activate-{{user.id}}" tabindex="-1" role="dialog" aria-hidden="true">
 														<div class="modal-dialog modal-sm" role="document">
 															<div class="modal-content">
 																<div class="modal-header">
@@ -101,7 +105,7 @@
 																	<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 																</div>
 																<div class="modal-body m-3">
-																	<h4 class="mb-0" style="text-align: center;">You are about to Activate <strong>{{user.firstName}} {{user.lastName}}'s</strong> Account</h4>
+																	<h4 class="mb-0" style="text-align: center;">You are about to Activate <strong>{{user.first_name}} {{user.last_name}}'s</strong> Account</h4>
 																</div>
 																<div class="modal-footer">
 																	<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -113,10 +117,10 @@
 													<!-- Modal End -->
 												{% else %}
 													<!-- Modal Start -->
-													<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-backdrop="static" data-bs-keyboard="false" data-bs-target="#sizedModalSuspend">
+													<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-backdrop="static" data-bs-keyboard="false" data-bs-target="#modal-suspend-{{user.id}}">
 														Suspend
 													</button>
-													<div class="modal fade" id="sizedModalSuspend" tabindex="-1" role="dialog" aria-hidden="true">
+													<div class="modal fade" id="modal-suspend-{{user.id}}" tabindex="-1" role="dialog" aria-hidden="true">
 														<div class="modal-dialog modal-sm" role="document">
 															<div class="modal-content">
 																<div class="modal-header">
@@ -124,7 +128,7 @@
 																	<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 																</div>
 																<div class="modal-body m-3">
-																	<h4 class="mb-0" style="text-align: center;">You are about to Suspend <strong>{{user.firstName}} {{user.lastName}}'s</strong> Account</h4>
+																	<h4 class="mb-0" style="text-align: center;">You are about to Suspend <strong>{{user.first_name}} {{user.last_name}}'s</strong> Account</h4>
 																</div>
 																<div class="modal-footer">
 																	<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -136,10 +140,10 @@
 													<!-- Modal End -->
 												{% endif %}
 													<!-- Modal Start -->
-													<button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-backdrop="static" data-bs-keyboard="false" data-bs-target="#sizedModalDelete">
+													<button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-backdrop="static" data-bs-keyboard="false" data-bs-target="#modal-delete-{{user.id}}">
 														Delete
 													</button>
-													<div class="modal fade" id="sizedModalDelete" tabindex="-1" role="dialog" aria-hidden="true">
+													<div class="modal fade" id="modal-delete-{{user.id}}" tabindex="-1" role="dialog" aria-hidden="true">
 														<div class="modal-dialog modal-sm" role="document">
 															<div class="modal-content">
 																<div class="modal-header">
@@ -147,7 +151,7 @@
 																	<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 																</div>
 																<div class="modal-body m-3">
-																	<h4 class="mb-0" style="text-align: center;">You are about to Delete <strong>{{user.firstName}} {{user.lastName}}'s</strong> Account</h4>
+																	<h4 class="mb-0" style="text-align: center;">You are about to Delete <strong>{{user.first_name}} {{user.last_name}}'s</strong> Account</h4>
 																</div>
 																<div class="modal-footer">
 																	<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>

@@ -1,8 +1,10 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from .integrations.device_integrations.masterlist import *
-
-# Import Integration API Scripts
+# from .integrations.device_integrations.masterlist import *
+from django.contrib.auth.decorators import login_required
+from django.forms.models import model_to_dict
+import re
+# Import Device Integration API Scripts
 #X6969
 from .integrations.device_integrations.CloudflareZeroTrust import *
 from .integrations.device_integrations.CrowdStrikeFalcon import *
@@ -11,13 +13,11 @@ from .integrations.device_integrations.MicrosoftEntraID import *
 from .integrations.device_integrations.MicrosoftIntune import *
 from .integrations.device_integrations.SophosCentral import *
 from .integrations.device_integrations.Qualys import *
-
+# Import User Integration API Scripts
 from .integrations.user_integrations.MicrosoftEntraID import *
-
 # Import Integrations Models
 from .models import Integration, Device, DeviceComplianceSettings
 # from .models import CrowdStrikeFalconDevice, DefenderDevice, MicrosoftEntraIDDevice, IntuneDevice, SophosDevice, QualysDevice
-from ..login_app.models import User
 
 ############################################################################################
 
@@ -35,14 +35,6 @@ def genErrors(request, Emessages):
 	for message in Emessages:
 		messages.warning(request, message)
 
-def checkLogin(request):
-	try:
-		if request.session['email']:
-			return True
-		else:
-			return False
-	except:
-		return False
 def checkActive(request):
 	try:
 		if request.session['active']:
@@ -65,18 +57,15 @@ def checkDeviceComplianceSettings(request):
 			return True
 def loginChecks(request):
 	results = []
-	results.append(checkLogin(request))
 	results.append(checkActive(request))
 	results.append(checkIntegrations(request))
 	results.append(checkDeviceComplianceSettings(request))
 	if results[0] == False:
-		return '/identity/login'
-	elif results[1] == False:
 		return '/identity/accountsuspended'
-	elif results[2] == False:
+	elif results[1] == False:
 		print("Entering Initial Setup")
 		return '/initial-setup'
-	elif results[3] == False:
+	elif results[2] == False:
 		return '/initial-setup'
 	else:
 		return None
@@ -121,7 +110,7 @@ def initialSetup(request):
 
 ############################################################################################
 
-from django.db.models import Count
+@login_required
 def index(request):
 	# Checks User Permissions and Required Models
 	redirect_url = loginChecks(request)
@@ -163,9 +152,6 @@ def index(request):
 			except:
 				endpoint_data.append(False)
 
-		# print(endpoint.hostname)
-		# print(endpoint_data)
-
 		endpoint_compliance = DeviceComplianceSettings.objects.get(os_platform = endpoint.osPlatform)
 		endpoint_match = []
 		for integration in enabled_integrations:
@@ -193,9 +179,6 @@ def index(request):
 	count_all_true = endpoint_list.count(True)
 	count_any_false = endpoint_list.count(False)
 
-	# print("Compliant: " + str(count_all_true))
-	# print("Non-Compliant: " + str(count_any_false))
-
 	context = {
 		'page':'dashboard',
 		'enabled_integrations': enabled_integrations,
@@ -213,6 +196,7 @@ def index(request):
 
 ############################################################################################
 
+@login_required
 def profileSettings(request):
 	# Checks User Permissions and Required Models
 	redirect_url = loginChecks(request)
@@ -228,7 +212,6 @@ def profileSettings(request):
 	for setting in settings:
 		mini_list = []
 		for config in setting._meta.get_fields():
-			# print(config)
 			if str(config) == 'main.DeviceComplianceSettings.id' or str(config) == 'main.DeviceComplianceSettings.os_platform':
 				vals = str(config).split(".")[2]
 			else:
@@ -246,6 +229,7 @@ def profileSettings(request):
 	}
 	return render( request, 'main/profile-settings.html', context)
 
+@login_required
 def update_compliance(request, id):
 	# Checks User Permissions and Required Models
 	redirect_url = loginChecks(request)
@@ -268,9 +252,8 @@ def update_compliance(request, id):
 	return redirect ('/profile-settings')
 
 ############################################################################################
-from django.forms.models import model_to_dict
-import re
 
+@login_required
 def deviceData(request, id):
 	# Checks User Permissions and Required Models
 	redirect_url = loginChecks(request)
@@ -339,6 +322,7 @@ def deviceData(request, id):
 
 ############################################################################################
 
+@login_required
 def complianceSettings(os_platform, integration):
 	#X6969
 	if integration == 'Cloudflare Zero Trust':
@@ -356,6 +340,7 @@ def complianceSettings(os_platform, integration):
 	elif integration == 'Qualys':
 		return DeviceComplianceSettings.objects.get(os_platform = os_platform).qualys
 
+@login_required
 def masterList(request):
 	# Checks User Permissions and Required Models
 	redirect_url = loginChecks(request)
@@ -393,6 +378,7 @@ def masterList(request):
 
 ############################################################################################
 
+@login_required
 def endpointList(request, integration):
 	# Checks User Permissions and Required Models
 	redirect_url = loginChecks(request)
@@ -416,6 +402,7 @@ def endpointList(request, integration):
 
 ############################################################################################
 
+@login_required
 def integrations(request):
 	# Checks User Permissions and Required Models
 	redirect_url = loginChecks(request)
@@ -440,6 +427,7 @@ def integrations(request):
 
 ############################################################################################
 
+@login_required
 def enableIntegration(request, id):
 	# Checks User Permissions and Required Models
 	redirect_url = loginChecks(request)
@@ -454,6 +442,7 @@ def enableIntegration(request, id):
 
 ############################################################################################
 
+@login_required
 def disableIntegration(request, id):
 	# Checks User Permissions and Required Models
 	redirect_url = loginChecks(request)
@@ -468,6 +457,7 @@ def disableIntegration(request, id):
 
 ############################################################################################
 
+@login_required
 def updateIntegration(request, id):
 	# Checks User Permissions and Required Models
 	redirect_url = loginChecks(request)
@@ -485,6 +475,7 @@ def updateIntegration(request, id):
 
 ############################################################################################
 
+@login_required
 def error500(request):
 	# Checks User Permissions and Required Models
 	redirect_url = loginChecks(request)
@@ -495,6 +486,7 @@ def error500(request):
 
 ############################################################################################
 
+@login_required
 def syncDevices(request, integration):
 	# Checks User Permissions and Required Models
 	redirect_url = loginChecks(request)

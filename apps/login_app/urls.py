@@ -8,17 +8,17 @@ from django.urls import path
 
 urlpatterns = [   
     re_path(r'^unclaimed$', views.unclaimed),
-    re_path(r'^login$', views.login),
+    re_path(r'^login$', views.login_page),
     re_path(r'^accountcreation$', views.accountcreation),
     re_path(r'^accountsuspended$', views.accountsuspended),
     re_path(r'^checklogin$', views.checklogin),
-    re_path(r'^logout$', views.logout),
+    re_path(r'^logout$', views.logout_page),
 
     # User Management
     re_path(r'^identity$', views.identity),
-    # re_path(r'^suspenduser/(?P<id>\d+)$', views.suspendUser),
-    # re_path(r'^activateuser/(?P<id>\d+)$', views.activateUser),
-    # re_path (r'^deleteuser/(?P<id>\d+)$', views.deleteUser),
+    re_path(r'^suspenduser/(?P<id>\d+)$', views.suspendUser),
+    re_path(r'^activateuser/(?P<id>\d+)$', views.activateUser),
+    re_path (r'^deleteuser/(?P<id>\d+)$', views.deleteUser),
 ]
 # urlpatterns += staticfiles_urlpatterns()
 # urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -1,50 +1,28 @@
+# Import Django Modules
 from django.shortcuts import render, redirect
-from .models import User
 from django.contrib import messages
-from django.views.decorators.csrf import csrf_exempt
-
-# Create your views here.
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+# Import Django User Model
+from django.contrib.auth.models import User
 
 def genErrors(request, Emessages):
 	for message in Emessages:
 		messages.error(request, message)
-
-def checkUser(request):
-	try:
-		if request.session['email']:
-			return True
-		else:
-			return False
-	except:
-		return False
-
-def checkAdmin(request):
-	try:
-		user = User.objects.get(id = request.session['user_id'])
-		if user.permission == 'administrator':
-			return True
-		else:
-			return False
-	except:
-		return False
-
-
 
 def unclaimed(request):
 	if User.objects.all().count() > 0:
 		return redirect('/identity/login')
 	else:
 		return render(request, 'login_app/unclaimed.html')
-	
 
 def accountsuspended(request):
-	request.session.flush()
+	logout(request)
 	messages.warning(request, 'Account Suspended.')
 	return redirect('/identity/login')
 
-def login(request):
-	results = checkUser(request)
-	if results == True:
+def login_page(request):
+	if request.user.is_authenticated:
 		return redirect('/')
 	if User.objects.all().count() == 0:
 		return redirect('/identity/unclaimed')
@@ -52,50 +30,50 @@ def login(request):
 		return render( request, 'login_app/login.html')
 
 def accountcreation(request):
-	results = User.objects.registerVal(request.POST)
-	if results['status'] == True:
+	# results = User.objects.registerVal(request.POST)
+	# if results['status'] == True:
 
-		if request.POST.get('active') != 'on':
-			request.POST.get('active', 'off')
-		if request.POST.get('disableSignUp') != 'on':
-			request.POST.get('disableSignUp', 'off')
+	# 	if request.POST.get('active') != 'on':
+	# 		request.POST.get('active', 'off')
+	# 	if request.POST.get('disableSignUp') != 'on':
+	# 		request.POST.get('disableSignUp', 'off')
 
-		user = User.objects.createUser(request.POST)
-		messages.success(request, 'User was Created.')
-	else: 
-		genErrors(request, results['errors'])
+	# 	user = User.objects.createUser(request.POST)
+	# 	messages.success(request, 'User was Created.')
+	# else: 
+	# 	genErrors(request, results['errors'])
+	# return redirect('/identity/identity')
+	user_email = request.POST.get('email').lower()
+	user_password = request.POST.get('password')
+	user_c_password = request.POST.get('c_password')
+	user_first_name = request.POST.get('firstName')
+	user_last_name = request.POST.get('lastName')
+	user = User.objects.create_superuser(user_email, user_email, user_password)
+	user.first_name = user_first_name
+	user.last_name = user_last_name
+	user.save()
 	return redirect('/identity/identity')
 
-from django.views.decorators.csrf import ensure_csrf_cookie
- 
-@ensure_csrf_cookie
 def checklogin(request):
-	results = User.objects.loginVal(request.POST)
-	if results['status'] == False:
-	# if results == False:
-		print("THERE IS AN ERROR")
-		genErrors(request, results['errors'])
-		# genErrors(request, 'Password Incorrect')
-
-		return redirect('/identity')
-	request.session['active'] = results['user'][0].active
-	request.session['permission'] = results['user'][0].permission
-	request.session['firstName'] = results['user'][0].firstName
-	request.session['lastName'] = results['user'][0].lastName
-	request.session['email'] = results['user'][0].email
-	request.session['user_id'] = results['user'][0].id
-	return redirect('/')
-
-def logout(request):
-	request.session.flush()
-	return redirect('/')
-
-def identity(request):
-	results = checkUser(request)
-	if results == False:
+	user_email = request.POST.get('email').lower()
+	user_password = request.POST.get('password')
+	user = authenticate(request, username=user_email, password=user_password)
+	if user is not None:
+		login(request, user)
+		request.session['active'] = user.is_active
+		request.session['user_id'] = user.id
+		return redirect('/')
+	else:
+		messages.error(request, 'Invalid Credentials')
 		return redirect('/identity/login')
-	resultsAdmin = checkAdmin(request)
-	if resultsAdmin == False:
+
+def logout_page(request):
+	logout(request)
+	return redirect('/')
+
+@login_required
+def identity(request):
+	if request.user.is_superuser == False:
 		messages.error(request, "You do not have Permission to Access this Resource")
 		return redirect('/')
 	users = User.objects.all()
@@ -104,15 +82,32 @@ def identity(request):
 	}
 	return render(request, 'login_app/identity.html', context)
 
+@login_required
 def suspendUser(request, id):
-	results = checkUser(request)
-	if results == False:
-		return redirect('/identity/login')
-	resultsAdmin = checkAdmin(request)
-	if resultsAdmin == False:
+	if request.user.is_superuser == False:
 		messages.error(request, "You do not have Permission to Access this Resource")
 		return redirect('/')
-	users = User.objects.get(id = id)
+	user = User.objects.get(id = id)
+	user.is_active = False
+	user.save()
+	return redirect('/identity/identity')
 
+@login_required
+def activateUser(request, id):
+	if request.user.is_superuser == False:
+		messages.error(request, "You do not have Permission to Access this Resource")
+		return redirect('/')
+	user = User.objects.get(id = id)
+	user.is_active = True
+	user.save()
+	return redirect('/identity/identity')
+
+@login_required
+def deleteUser(request, id):
+	if request.user.is_superuser == False:
+		messages.error(request, "You do not have Permission to Access this Resource")
+		return redirect('/')
+	user = User.objects.get(id = id)
+	user.delete()
 	return redirect('/identity/identity')
 
