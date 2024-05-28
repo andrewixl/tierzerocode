@@ -85,11 +85,19 @@ def updateCrowdStrikeDeviceDatabase(total_crowdstrike_results):
     for crowdstrike_results in total_crowdstrike_results:
         for device_data in crowdstrike_results['resources']:
             # Set the hostname and osPlatform variables
-            try:
+            # try:
+            if device_data.get('hostname') == None or device_data.get('os_version') == None:
+                print("Device Data is None")
+                continue
+            else:
                 hostname = device_data.get('hostname').lower()
-            except:
-                print(device_data)
-            os_platform = device_data.get('os_version')
+                os_platform = device_data.get('os_version')
+            # except:
+            #     # print(device_data)
+            #     continue
+            # os_platform = device_data.get('os_version')
+            # print(os_platform)
+
             # [osPlatform_clean, endpointType]
             clean_data = cleanAPIData(os_platform)
             # Prepare data for updating/creating device
@@ -98,6 +106,11 @@ def updateCrowdStrikeDeviceDatabase(total_crowdstrike_results):
                 'osPlatform': clean_data[0],
                 'endpointType': clean_data[1],
             }
+            # Test If Statement to Only Import Mobile Devices
+            if not clean_data[1] == 'Mobile':
+                if clean_data[1] == 'Other':
+                    print(device_data.get('hostname'))
+                continue
             # Update or Create the Device object
             obj, created = Device.objects.update_or_create(hostname=hostname, defaults=defaults)
             # Add the Microsoft Intune Integration to the Device object
@@ -107,25 +120,40 @@ def updateCrowdStrikeDeviceDatabase(total_crowdstrike_results):
 
 ######################################## Start Sync CrowdStrike Falcon ########################################
 def syncCrowdStrikeFalcon():
-    try:
-        # Get the CrowdStrike Falcon Integration data
-        data = Integration.objects.get(integration_type = "CrowdStrike Falcon")
-        # Set the variables for the CrowdStrike Falcon Integration
-        client_id = data.client_id
-        client_secret = data.client_secret
-        tenant_id = data.tenant_id
-        tenant_domain = data.tenant_domain
-        # Sync the CrowdStrike Falcon Integration
-        updateCrowdStrikeDeviceDatabase(getCrowdStrikeDevices(getCrowdStrikeAccessToken(client_id, client_secret, tenant_id)))
-        # Update the last synced time
-        data.last_synced_at = datetime.now()
-        # Save the changes
-        data.save()
-        # Return True to indicate the sync was successful
-        return True
-    except Exception as e:
-        # Print the error
-        print(e)
-        # Return False to indicate the sync was unsuccessful
-        return False, e
+    # Get the CrowdStrike Falcon Integration data
+    data = Integration.objects.get(integration_type = "CrowdStrike Falcon")
+    # Set the variables for the CrowdStrike Falcon Integration
+    client_id = data.client_id
+    client_secret = data.client_secret
+    tenant_id = data.tenant_id
+    tenant_domain = data.tenant_domain
+    # Sync the CrowdStrike Falcon Integration
+    updateCrowdStrikeDeviceDatabase(getCrowdStrikeDevices(getCrowdStrikeAccessToken(client_id, client_secret, tenant_id)))
+    # Update the last synced time
+    data.last_synced_at = datetime.now()
+    # Save the changes
+    data.save()
+    # Return True to indicate the sync was successful
+    return True
+    # try:
+    #     # Get the CrowdStrike Falcon Integration data
+    #     data = Integration.objects.get(integration_type = "CrowdStrike Falcon")
+    #     # Set the variables for the CrowdStrike Falcon Integration
+    #     client_id = data.client_id
+    #     client_secret = data.client_secret
+    #     tenant_id = data.tenant_id
+    #     tenant_domain = data.tenant_domain
+    #     # Sync the CrowdStrike Falcon Integration
+    #     updateCrowdStrikeDeviceDatabase(getCrowdStrikeDevices(getCrowdStrikeAccessToken(client_id, client_secret, tenant_id)))
+    #     # Update the last synced time
+    #     data.last_synced_at = datetime.now()
+    #     # Save the changes
+    #     data.save()
+    #     # Return True to indicate the sync was successful
+    #     return True
+    # except Exception as e:
+    #     # Print the error
+    #     print(e)
+    #     # Return False to indicate the sync was unsuccessful
+    #     return False, e
 ######################################## End Sync CrowdStrike Falcon ########################################

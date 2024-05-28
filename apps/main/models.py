@@ -6,12 +6,14 @@ class Device(models.Model):
         ("Android", "Android"),
         ("iOS/iPadOS", "iOS/iPadOS"),
         ("MacOS", "MacOS"),
+        ("Red Hat Enterprise Linux", "Red Hat Enterprise Linux"),
+        ("CentOS", "CentOS"),
         ("Ubuntu", "Ubuntu"),
         ("Windows", "Windows"),
         ("Windows Server", "Windows Server"),
         ("Other", "Other"),
     )
-    osPlatform = models.CharField(max_length = 20, choices=OS_PLATFORM_CHOICES, null=True)
+    osPlatform = models.CharField(max_length = 25, choices=OS_PLATFORM_CHOICES, null=True)
     ENDPOINT_TYPE_CHOICES = (
         ("Client", "Client"),
         ("Server", "Server"),

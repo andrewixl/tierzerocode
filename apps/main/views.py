@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.forms.models import model_to_dict
 import re
+from django.db.models import Prefetch
 # Import Device Integration API Scripts
 #X6969
 from .integrations.device_integrations.CloudflareZeroTrust import *
@@ -69,12 +70,14 @@ def loginChecks(request):
 		return '/initial-setup'
 	else:
 		return None
+# def getEnabledIntegrations():
+# 	enabledIntegrations = []
+# 	for integration in Integration.objects.all():
+# 		if integration.enabled == True:
+# 			enabledIntegrations.append(integration)
+# 	return enabledIntegrations
 def getEnabledIntegrations():
-	enabledIntegrations = []
-	for integration in Integration.objects.all():
-		if integration.enabled == True:
-			enabledIntegrations.append(integration)
-	return enabledIntegrations
+    return Integration.objects.filter(enabled=True)
 
 ############################################################################################	
 
@@ -322,23 +325,20 @@ def deviceData(request, id):
 
 ############################################################################################
 
-@login_required
-def complianceSettings(os_platform, integration):
-	#X6969
-	if integration == 'Cloudflare Zero Trust':
-		return DeviceComplianceSettings.objects.get(os_platform = os_platform).cloudflare_zero_trust
-	elif integration == 'CrowdStrike Falcon':
-		return DeviceComplianceSettings.objects.get(os_platform = os_platform).crowdstrike_falcon
-	elif integration == 'Microsoft Defender for Endpoint':
-		return DeviceComplianceSettings.objects.get(os_platform = os_platform).microsoft_defender_for_endpoint
-	elif integration == 'Microsoft Entra ID':
-		return DeviceComplianceSettings.objects.get(os_platform = os_platform).microsoft_entra_id
-	elif integration == 'Microsoft Intune':
-		return DeviceComplianceSettings.objects.get(os_platform = os_platform).microsoft_intune
-	elif integration == 'Sophos Central':
-		return DeviceComplianceSettings.objects.get(os_platform = os_platform).sophos_central
-	elif integration == 'Qualys':
-		return DeviceComplianceSettings.objects.get(os_platform = os_platform).qualys
+def complianceSettings(os_platform):
+	try:
+		settings = DeviceComplianceSettings.objects.get(os_platform=os_platform)
+		return {
+            'Cloudflare Zero Trust': settings.cloudflare_zero_trust,
+            'CrowdStrike Falcon': settings.crowdstrike_falcon,
+            'Microsoft Defender for Endpoint': settings.microsoft_defender_for_endpoint,
+            'Microsoft Entra ID': settings.microsoft_entra_id,
+            'Microsoft Intune': settings.microsoft_intune,
+            'Sophos Central': settings.sophos_central,
+            'Qualys': settings.qualys,
+        }
+	except DeviceComplianceSettings.DoesNotExist:
+		return {}
 
 @login_required
 def masterList(request):
@@ -350,23 +350,21 @@ def masterList(request):
 	enabled_integrations = getEnabledIntegrations()
 	endpoint_list = []
 
-	endpoints = Device.objects.all()
+	endpoints = Device.objects.prefetch_related(Prefetch('integration', queryset=Integration.objects.filter(enabled=True))).all()
 	for endpoint in endpoints:
 		endpoint_data = [endpoint]
-		compliant_settings = DeviceComplianceSettings.objects.get(os_platform = endpoint.osPlatform)
-
+		os_platform = endpoint.osPlatform
+		compliance_settings = complianceSettings(os_platform)
+	
 		for integration in enabled_integrations:
-			try:
-				if complianceSettings(endpoint.osPlatform, integration.integration_type):
-					if endpoint.integration.filter(integration_type = integration):
-						endpoint_data.append(True)
-					else:
-						endpoint_data.append(False)
-				else:
-					endpoint_data.append(None)
-			except:
-				endpoint_data.append(False)
-
+			integration_type = integration.integration_type
+			compliance_setting = compliance_settings.get(integration_type)
+			if compliance_setting is None:
+				endpoint_data.append(None)
+			else:
+				is_enabled = endpoint.integration.filter(id=integration.id).exists()
+				endpoint_data.append(is_enabled)
+		
 		endpoint_list.append(endpoint_data)
 
 	context = {

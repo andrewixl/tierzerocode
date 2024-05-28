@@ -57,6 +57,9 @@ def updateMicrosoftEntraIDDeviceDatabase(json_data):
             'osPlatform': clean_data[0],
             'endpointType': clean_data[1],
         }
+        # Test If Statement to Only Import Mobile Devices
+        if not clean_data[1] == 'Mobile':
+            continue
         # Update or Create the Device object
         obj, created = Device.objects.update_or_create(hostname=hostname, defaults=defaults)
         # Add the Microsoft Intune Integration to the Device object
