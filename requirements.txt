@@ -6,7 +6,7 @@ cffi==1.16.0
 chardet==5.2.0
 charset-normalizer==3.3.2
 configparser==7.0.0
-cryptography==42.0.7
+cryptography==42.0.8
 defusedxml==0.7.1
 Django==5.0.6
 docutils==0.21.2
