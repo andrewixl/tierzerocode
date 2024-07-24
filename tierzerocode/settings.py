@@ -90,11 +90,11 @@ WSGI_APPLICATION = 'tierzerocode.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': "tzcdb",
-        'USER': "awbadmin",
-        'PASSWORD': "Macujuthetrath4383$",
-        'HOST': "localhost",
-        'PORT': 5433,
+        'NAME': os.environ['DATABASE_NAME'],
+        'USER': os.environ['DATABASE_USER'],
+        'PASSWORD': os.environ['DATABASE_PASSWORD'],
+        'HOST': os.environ['DATABASE_HOST'],
+        'PORT': os.environ['DATABASE_PORT'],
     }
 }
 
