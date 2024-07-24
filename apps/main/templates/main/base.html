@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<meta name="description" content="Responsive Admin &amp; Dashboard Template based on Bootstrap 5">
+	<meta name="author" content="AdminKit">
+	<meta name="keywords" content="adminkit, bootstrap, bootstrap 5, admin, dashboard, template, responsive, css, sass, html, theme, front-end, ui kit, web">
+
+	<link rel="preconnect" href="https://fonts.gstatic.com">
+	<link rel="shortcut icon" href="{% static 'main/img/icons/icon-48x48.png' %}" />
+
+	<link rel="canonical" href="https://demo.adminkit.io/" />
+
+	<title>Tier Zero C.O.D.E</title>
+
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+	<link href="{% static 'main/css/light.css' %}" rel="stylesheet">
+
+</head>
+
+<body data-theme="default" data-layout="fluid" data-sidebar-position="left" data-sidebar-layout="default">
+	<div class="wrapper">
+		<nav id="sidebar" class="sidebar js-sidebar">
+			<div class="sidebar-content js-simplebar">
+				<a class="sidebar-brand" href="/">
+					<span class="sidebar-brand-text align-middle">
+						C.O.D.E
+						<sup><small class="badge bg-primary text-uppercase">Enterprise</small></sup>
+					</span>
+					<svg class="sidebar-brand-icon align-middle" width="32px" height="32px" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="1.5"
+						stroke-linecap="square" stroke-linejoin="miter" color="#FFFFFF" style="margin-left: -3px">
+						<path d="M12 4L20 8.00004L12 12L4 8.00004L12 4Z"></path>
+						<path d="M20 12L12 16L4 12"></path>
+						<path d="M20 16L12 20L4 16"></path>
+					</svg>
+				</a>
+
+				<div class="sidebar-user">
+					<div class="d-flex justify-content-center">
+						<div class="flex-shrink-0">
+							<img src="{% static 'main/img/avatars/avatar-blank.webp' %}" class="avatar img-fluid rounded me-1" alt="Charles Hall" />
+						</div>
+						<div class="flex-grow-1 ps-2">
+							<a class="sidebar-user-title dropdown-toggle" href="#" data-bs-toggle="dropdown">
+								{{request.user.first_name}} {{request.user.last_name}}
+							</a>
+							<div class="dropdown-menu dropdown-menu-start">
+								<a class="dropdown-item" href="/profile-settings"><i class="align-middle me-1" data-feather="settings"></i> Profile Settings</a>
+								<a class="dropdown-item" href="/identity/identity"><i class="align-middle me-1" data-feather="settings"></i> Identity Settings</a>
+								<a class="dropdown-item" href="#"><i class="align-middle me-1" data-feather="help-circle"></i> Help Center</a>
+								<div class="dropdown-divider"></div>
+								<a class="dropdown-item" href="/identity/logout">Log out</a>
+							</div>
+
+							<div class="sidebar-user-subtitle">Administrator</div>
+						</div>
+					</div>
+				</div>
+
+				<ul class="sidebar-nav">
+					{% if page == 'dashboard' %}
+					<li class="sidebar-item active">
+					{% else %}
+					<li class="sidebar-item">
+					{% endif %}
+						<a class="sidebar-link" href="/">
+							<i class="align-middle" data-feather="sliders"></i> <span class="align-middle">Dashboard</span>
+						</a>
+					</li>
+					<li class="sidebar-header">
+						Endpoints
+					</li>
+					{% if page == 'master-list' %}
+					<li class="sidebar-item active">
+					{% else %}
+					<li class="sidebar-item">
+					{% endif %}
+						<a class="sidebar-link" href="/endpoints/master-list">
+							<i class="align-middle" data-feather="smartphone"></i> <span class="align-middle">Master List</span>
+						</a>
+					</li>
+
+					{% for enabled_integration in enabled_integrations %}
+
+					{% if page == enabled_integration.integration_type %}
+					<li class="sidebar-item active">
+					{% else %}
+					<li class="sidebar-item">
+					{% endif %}
+
+						<a class="sidebar-link" href="/endpoints/{{enabled_integration.integration_type.split|join:'-'}}">
+							<img src="{% static enabled_integration.image_navbar_path %}" class="align-middle" width="24" height="24" style="margin-right: 5px;" alt="{{enabled_integration.integration_type}}"> <span class="align-middle">{{enabled_integration.integration_type}}</span>
+						</a>
+					</li>
+
+					{% endfor %}
+					
+
+					<li class="sidebar-header">
+						Users
+					</li>
+					{% if page == 'user-master-list' %}
+					<li class="sidebar-item active">
+					{% else %}
+					<li class="sidebar-item">
+					{% endif %}
+						<a class="sidebar-link" href="/users/master-list">
+							<i class="align-middle" data-feather="user"></i> <span class="align-middle">Master List</span>
+						</a>
+					</li>
+					{% for enabled_user_integration in enabled_user_integrations %}
+
+					{% if page == enabled_user_integration.integration_type %}
+					<li class="sidebar-item active">
+					{% else %}
+					<li class="sidebar-item">
+					{% endif %}
+
+						<a class="sidebar-link" href="/endpoints/{{enabled_user_integration.integration_type.split|join:'-'}}">
+							<img src="{% static enabled_user_integration.image_navbar_path %}" class="align-middle" width="24" height="24" style="margin-right: 5px;" alt="{{enabled_user_integration.integration_type}}"> <span class="align-middle">{{enabled_user_integration.integration_type}}</span>
+						</a>
+					</li>
+
+					{% endfor %}
+
+					<li class="sidebar-header">
+						Configurations
+					</li>
+					{% if page == 'integrations' %}
+					<li class="sidebar-item active">
+					{% else %}
+					<li class="sidebar-item">
+					{% endif %}
+						<a class="sidebar-link" href="/integrations">
+							<i class="align-middle" data-feather="link"></i> <span class="align-middle">Integrations</span>
+						</a>
+					</li>
+				</ul> 
+			</div>
+		</nav>
+
+		<div class="main">
+			<nav class="navbar navbar-expand navbar-light navbar-bg">
+				<a class="sidebar-toggle js-sidebar-toggle">
+					<i class="hamburger align-self-center"></i>
+				</a>
+
+				<div class="navbar-collapse collapse">
+					<ul class="navbar-nav navbar-align">
+						<li class="nav-item dropdown">
+							<a class="nav-icon dropdown-toggle" href="#" id="alertsDropdown" data-bs-toggle="dropdown">
+								<div class="position-relative">
+									<i class="align-middle" data-feather="bell"></i>
+								</div>
+							</a>
+							<div class="dropdown-menu dropdown-menu-lg dropdown-menu-end py-0" aria-labelledby="alertsDropdown">
+								<div class="dropdown-menu-header">
+									0 New Notifications
+								</div>
+								<div class="list-group">
+									<a href="" class="list-group-item">
+										<div class="row g-0 align-items-center">
+											<div class="col-2">
+												<i class="text-info" data-feather="mail"></i>
+											</div>
+											<div class="col-10">
+												<div class="text-dark">No New Notifications</div>
+												<div class="text-muted small mt-1">Now</div>
+											</div>
+										</div>
+									</a>
+								</div>
+								<div class="dropdown-menu-footer">
+									<a href="/error500" class="text-muted">Show all notifications</a>
+								</div>
+							</div>
+						</li>
+						<li class="nav-item dropdown">
+							<a class="nav-flag dropdown-toggle" href="#" id="languageDropdown" data-bs-toggle="dropdown">
+								<img src="{% static 'main/img/flags/us.png' %}" alt="English" />
+							</a>
+							<div class="dropdown-menu dropdown-menu-end" aria-labelledby="languageDropdown">
+								<a class="dropdown-item" href="">
+									<img src="{% static 'main/img/flags/us.png' %}" alt="English" width="20" class="align-middle me-1" />
+									<span class="align-middle">English</span>
+								</a>
+							</div>
+						</li>
+						<li class="nav-item">
+							<a class="nav-icon js-fullscreen d-none d-lg-block" href="#">
+								<div class="position-relative">
+									<i class="align-middle" data-feather="maximize"></i>
+								</div>
+							</a>
+						</li>
+						<li class="nav-item dropdown">
+							<a class="nav-icon pe-md-0 dropdown-toggle" href="#" data-bs-toggle="dropdown">
+								<img src="{% static 'main/img/avatars/avatar-blank.webp' %}" class="avatar img-fluid rounded" alt="Charles Hall" />
+							</a>
+							<div class="dropdown-menu dropdown-menu-end">
+								<a class="dropdown-item" href="/profile-settings"><i class="align-middle me-1" data-feather="settings"></i> Profile Settings</a>
+								<a class="dropdown-item" href="/identity/identity"><i class="align-middle me-1" data-feather="settings"></i> Identity Settings</a>
+								<a class="dropdown-item" href="#"><i class="align-middle me-1" data-feather="help-circle"></i> Help Center</a>
+								<div class="dropdown-divider"></div>
+								<a class="dropdown-item" href="/identity/logout">Log out</a>
+							</div>
+						</li>
+					</ul>
+				</div>
+			</nav>
+
+			{% block content %}
+			{% endblock %}
+
+			<footer class="footer">
+				<div class="container-fluid">
+					<div class="row text-muted">
+						<div class="col-6 text-start">
+							<p class="mb-0">
+								<a href="https://awbtech.org/" target="_blank" class="text-muted"><strong>AwB Tech LLC.</strong></a> &copy;
+							</p>
+						</div>
+					</div>
+				</div>
+			</footer>
+		</div>
+	</div>
+
+	<script src="{% static 'main/js/app.js' %}"></script>
+	<!-- <script src="{% static 'main/js/datatables.js' %}"></script>
+
+	<script>
+		document.addEventListener("DOMContentLoaded", function() {
+			// Datatables Responsive
+			$("#datatables-reponsive").DataTable({
+				responsive: true
+			});
+		});
+	</script> -->
+
+	{% block extra_js %}
+	{% endblock %}
+
+</body>
+
+</html>

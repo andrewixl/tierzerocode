@@ -1,0 +1,169 @@
+{% extends 'main/base.html' %}
+{% load static %}
+{% block content %}
+<main class="content">
+    <div class="container-fluid p-0">
+
+        <!-- Device Integrations Section -->
+        <div class="mb-3">
+            <h1 class="h3 d-inline align-middle">Device Integrations</h1>
+            <a class="badge bg-primary ms-2" href="https://docs.tierzerocode.com/" target="_blank">
+                Documentation<i class="fas fa-fw fa-external-link-alt"></i>
+            </a>
+        </div>
+
+        <div class="row">
+            <!-- Integration Cards -->
+            {% for deviceIntegrationStatus in deviceIntegrationStatuses %}
+            <div class="col-12 col-md-6 col-lg-3">
+                <div class="card">
+                    <img class="card-img-top" src="{% static deviceIntegrationStatus.1 %}" alt="{{deviceIntegrationStatus.0}}">
+                    <div class="card-header px-4 pt-4">
+                        <div class="card-actions float-end">
+                            <div class="dropdown position-relative">
+                                <a href="#" data-bs-toggle="dropdown" data-bs-display="static">
+                                    <i class="align-middle" data-feather="more-horizontal"></i>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-end">
+                                    {% if deviceIntegrationStatus.2 %}
+                                    <a class="dropdown-item" href="/disable-integration/{{deviceIntegrationStatus.4}}">Disable Integration</a>
+                                    <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#{{deviceIntegrationStatus.0|slugify}}_modal_device" href="#">Configure Integration</a>
+                                    {% if deviceIntegrationStatus.3 %}
+                                    <a class="dropdown-item" href="/sync-{{deviceIntegrationStatus.0|slugify}}-devices">Sync Integration</a>
+                                    {% endif %}
+                                    {% else %}
+                                    <a class="dropdown-item" href="/enable-integration/{{deviceIntegrationStatus.4}}">Enable Integration</a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <h5 class="card-title mb-0">{{deviceIntegrationStatus.0}}</h5>
+                        <div class="badge bg-{{ deviceIntegrationStatus.2|yesno:"success,danger" }} my-2">{{ deviceIntegrationStatus.2|yesno:"Enabled,Disabled" }}</div>
+                        <div class="badge bg-{{ deviceIntegrationStatus.3|yesno:"success,danger" }} my-2">{{ deviceIntegrationStatus.3|yesno:"Configured,Not Configured" }}</div>
+                        <p>Last Sync: {{deviceIntegrationStatus.8}}</p>
+                    </div>
+                    <!-- Configure Integration Modal -->
+                    <div class="modal fade" id="{{deviceIntegrationStatus.0|slugify}}_modal_device" tabindex="-1" role="dialog" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Configure {{deviceIntegrationStatus.0}} Integration</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body m-3">
+                                    <form action="/update-integration/{{deviceIntegrationStatus.4}}" method="post">
+                                        {% csrf_token %}
+                                        <div class="mb-3">
+                                            <label class="form-label">Client ID <span style="color: red;">*</span></label>
+                                            <input type="text" class="form-control" name="client_id" placeholder="Client ID" value="{{deviceIntegrationStatus.5}}">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Client Secret <span style="color: red;">*</span></label>
+                                            <input type="password" class="form-control" name="client_secret" placeholder="Client Secret" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Tenant ID <span style="color: red;">*</span></label>
+                                            <input type="text" class="form-control" name="tenant_id" placeholder="Tenant ID" value="{{deviceIntegrationStatus.6}}">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Tenant Domain <span style="color: red;">*</span></label>
+                                            <input type="text" class="form-control" name="tenant_domain" placeholder="example.com" value="{{deviceIntegrationStatus.7}}">
+                                        </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <button type="submit" class="btn btn-primary">Save changes</button>
+                                </div>
+                                    </form>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- End Configure Integration Modal -->
+                </div>
+            </div>
+            {% endfor %}
+            <!-- End Integration Cards -->
+        </div>
+
+        <!-- User Integrations Section -->
+        <div class="mb-3">
+            <h1 class="h3 d-inline align-middle">User Integrations</h1>
+            <a class="badge bg-primary ms-2" href="https://docs.tierzerocode.com/" target="_blank">
+                Documentation<i class="fas fa-fw fa-external-link-alt"></i>
+            </a>
+        </div>
+        <div class="row">
+            <!-- User Integration Cards -->
+            {% for userIntegrationStatus in userIntegrationStatuses %}
+            <div class="col-12 col-md-6 col-lg-3">
+                <div class="card">
+                    <img class="card-img-top" src="{% static userIntegrationStatus.1 %}" alt="{{userIntegrationStatus.0}}">
+                    <div class="card-header px-4 pt-4">
+                        <div class="card-actions float-end">
+                            <div class="dropdown position-relative">
+                                <a href="#" data-bs-toggle="dropdown" data-bs-display="static">
+                                    <i class="align-middle" data-feather="more-horizontal"></i>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-end">
+                                    {% if userIntegrationStatus.2 %}
+                                    <a class="dropdown-item" href="/disable-integration/{{userIntegrationStatus.4}}">Disable Integration</a>
+                                    <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#{{userIntegrationStatus.0|slugify}}_modal_user" href="#">Configure Integration</a>
+                                    {% if userIntegrationStatus.3 %}
+                                    <a class="dropdown-item" href="/sync-{{userIntegrationStatus.0|slugify}}-users">Sync Integration</a>
+                                    {% endif %}
+                                    {% else %}
+                                    <a class="dropdown-item" href="/enable-integration/{{userIntegrationStatus.4}}">Enable Integration</a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <h5 class="card-title mb-0">{{userIntegrationStatus.0}}</h5>
+                        <div class="badge bg-{{ userIntegrationStatus.2|yesno:"success,danger" }} my-2">{{ userIntegrationStatus.2|yesno:"Enabled,Disabled" }}</div>
+                        <div class="badge bg-{{ userIntegrationStatus.3|yesno:"success,danger" }} my-2">{{ userIntegrationStatus.3|yesno:"Configured,Not Configured" }}</div>
+                        <p>Last Sync: {{userIntegrationStatus.8}}</p>
+                    </div>
+                    <!-- Configure Integration Modal -->
+                    <div class="modal fade" id="{{userIntegrationStatus.0|slugify}}_modal_user" tabindex="-1" role="dialog" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Configure {{userIntegrationStatus.0}} Integration</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body m-3">
+                                    <form action="/update-integration/{{userIntegrationStatus.4}}" method="post">
+                                        {% csrf_token %}
+                                        <div class="mb-3">
+                                            <label class="form-label">Client ID <span style="color: red;">*</span></label>
+                                            <input type="text" class="form-control" name="client_id" placeholder="Client ID" value="{{userIntegrationStatus.5}}">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Client Secret <span style="color: red;">*</span></label>
+                                            <input type="password" class="form-control" name="client_secret" placeholder="Client Secret" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Tenant ID <span style="color: red;">*</span></label>
+                                            <input type="text" class="form-control" name="tenant_id" placeholder="Tenant ID" value="{{userIntegrationStatus.6}}">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Tenant Domain <span style="color: red;">*</span></label>
+                                            <input type="text" class="form-control" name="tenant_domain" placeholder="example.com" value="{{userIntegrationStatus.7}}">
+                                        </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <button type="submit" class="btn btn-primary">Save changes</button>
+                                </div>
+                                    </form>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- End Configure Integration Modal -->
+                </div>
+            </div>
+            {% endfor %}
+            <!-- End User Integration Cards -->
+        </div>
+    </div>
+</main>
+{% endblock %}

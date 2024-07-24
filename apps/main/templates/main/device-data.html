@@ -1,0 +1,205 @@
+{% extends 'main/base.html' %}
+{% load static %}
+  {% block content %}
+			<main class="content">
+				<div class="container-fluid p-0">
+
+					<div class="mb-3">
+						<h1 class="h3 d-inline align-middle">{{device.hostname}}</h1>
+					</div>
+
+					<div class="row">
+						<div class="col-12">
+							<div class="card">
+								<div class="card-body">
+									<h4>C.O.D.E Details</h4>
+									<div class="row">
+										<div class="col-md-3">
+											<div class="row">
+												<div class="col-md-4">
+													<h5>Hostname:</h5>
+													<h5>TZC ID:</h5>
+												</div>
+												<div class="col-md-8">
+													<h5>{{device.hostname}}</h5>
+													<h5>{{device.id}}</h5>
+												</div>
+											</div>
+										</div>
+										<div class="col-md-3">
+											<div class="row">
+												<div class="col-md-4">
+													<h5>OS Platform:</h5>
+													<h5>Endpoint Type:</h5>
+												</div>
+												<div class="col-md-8">
+													<h5>{{device.osPlatform}}</h5>
+													<h5>{{device.endpointType}}</h5>
+												</div>
+											</div>
+										</div>
+										<div class="col-md-3">
+											<div class="row">
+												<div class="col-md-4">
+													<h5>Manufacturer:</h5>
+													<!-- <h5>Endpoint Type:</h5> -->
+												</div>
+												<div class="col-md-8">
+													<h5>{{device.manufacturer}}</h5>
+													<!-- <h5>{{device.endpointType}}</h5> -->
+												</div>
+											</div>
+										</div>
+										<div class="col-md-3">
+											<div class="row">
+												<div class="col-md-4">
+													<h5>Created At:</h5>
+													<h5>Updated At:</h5>
+												</div>
+												<div class="col-md-8">
+													<h5>{{device.created_at}}</h5>
+													<h5>{{device.updated_at}}</h5>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>		
+							</div>
+						</div>
+					</div>
+					{% for inty in ints %}
+					{% if 'CrowdStrike Falcon' in inty.integration_type %}
+					<div class="row">
+						<div class="col-12">
+							<div class="card">
+								<div class="card-body">
+									<h4>CrowdStrike Falcon Details</h4>
+									<div class="row">
+										{% for key, value in crowdstrike_device.items %}
+										{% if not value == None %}
+										<div class="col-md-4">
+											<div class="row">
+												<div class="col-md-4">
+													<h5>{{key.title}}:</h5>
+												</div>
+												<div class="col-md-8">
+													<h5>{{value}}</h5>
+												</div>
+											</div>
+										</div>
+										{% endif %}
+										{% endfor %}
+									</div>
+								</div>		
+							</div>
+						</div>
+					{% elif 'Microsoft Defender for Endpoint' in inty.integration_type %}
+					<div class="row">
+						<div class="col-12">
+							<div class="card">
+								<div class="card-body">
+									<h4>Microsoft Defender for Endpoint Details</h4>
+									<div class="row">
+										{% for key, value in defender_device.items %}
+										{% if not value == None %}
+										<div class="col-md-4">
+											<div class="row">
+												<div class="col-md-4">
+													<h5>{{key.title}}:</h5>
+												</div>
+												<div class="col-md-8">
+													<h5>{{value}}</h5>
+												</div>
+											</div>
+										</div>
+										{% endif %}
+										{% endfor %}
+									</div>
+								</div>		
+							</div>
+						</div>
+					</div>
+					{% elif 'Microsoft Entra ID' in inty.integration_type %}
+					<div class="row">
+						<div class="col-12">
+							<div class="card">
+								<div class="card-body">
+									<h4>Microsoft Entra ID Details</h4>
+									<div class="row">
+										{% for key, value in entra_device.items %}
+										{% if not value == None %}
+										<div class="col-md-4">
+											<div class="row">
+												<div class="col-md-4">
+													<h5>{{key.title}}:</h5>
+												</div>
+												<div class="col-md-8">
+													<h5>{{value}}</h5>
+												</div>
+											</div>
+										</div>
+										{% endif %}
+										{% endfor %}
+									</div>
+								</div>		
+							</div>
+						</div>
+					</div>
+					{% elif 'Microsoft Intune' in inty.integration_type %}
+					<div class="row">
+						<div class="col-12">
+							<div class="card">
+								<div class="card-body">
+									<h4>Microsoft Intune Details</h4>
+									<div class="row">
+										{% for key, value in intune_device.items %}
+										{% if not value == None %}
+										<div class="col-md-4">
+											<div class="row">
+												<div class="col-md-4">
+													<h5>{{key.title}}:</h5>
+												</div>
+												<div class="col-md-8">
+													<h5>{{value}}</h5>
+												</div>
+											</div>
+										</div>
+										{% endif %}
+										{% endfor %}
+									</div>
+								</div>		
+							</div>
+						</div>
+					</div>
+					{% elif "Sophos Central" in inty.integration_type %}
+					<div class="row">
+						<div class="col-12">
+							<div class="card">
+								<div class="card-body">
+									<h4>Sophos Central Details</h4>
+									<div class="row">
+										{% for key, value in sophos_device.items %}
+										{% if not value == None %}
+										<div class="col-md-4">
+											<div class="row">
+												<div class="col-md-4">
+													<h5>{{key.title}}:</h5>
+												</div>
+												<div class="col-md-8">
+													<h5>{{value}}</h5>
+												</div>
+											</div>
+										</div>
+										{% endif %}
+										{% endfor %}
+									</div>
+								</div>		
+							</div>
+						</div>
+					{% endif %}
+					{% endfor %}
+				</div>
+			</main>
+			{% endblock %}
+</body>
+</html>
