@@ -121,9 +121,12 @@ def initialSetup(request):
 
 ############################################################################################
 
+from .integrations.cs_health_check import *
+
 @login_required
 def index(request):
 	# test()
+	syncCrowdStrikeFalconHealthCheckBackground()
 	# Checks User Permissions and Required Models
 	redirect_url = initialChecks(request)
 	if redirect_url:
