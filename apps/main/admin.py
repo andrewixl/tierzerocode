@@ -9,6 +9,8 @@ from .models import (
     MicrosoftDefenderforEndpointDeviceData,
     CrowdStrikeFalconDeviceData,
     SophosCentralDeviceData,
+    CrowdStrikeFalconPreventionPolicy,
+    CrowdStrikeFalconPreventionPolicySetting,
 )
 
 # Integration Models
@@ -23,3 +25,7 @@ admin.site.register(MicrosoftEntraIDDeviceData)
 admin.site.register(MicrosoftIntuneDeviceData)
 admin.site.register(SophosCentralDeviceData)
 admin.site.register(UserData)
+
+# CS Health Check
+admin.site.register(CrowdStrikeFalconPreventionPolicy)
+admin.site.register(CrowdStrikeFalconPreventionPolicySetting)
