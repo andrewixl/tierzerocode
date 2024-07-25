@@ -345,64 +345,64 @@ def deleteUser(request, id):
 	user.delete()
 	return redirect('/identity/identity')
 
-import requests
-from django.conf import settings
-from django.contrib.auth import login
-from django.contrib.auth.models import User
-from django.shortcuts import redirect
-from django.http import HttpResponse
-from urllib.parse import urlencode, quote_plus
+# import requests
+# from django.conf import settings
+# from django.contrib.auth import login
+# from django.contrib.auth.models import User
+# from django.shortcuts import redirect
+# from django.http import HttpResponse
+# from urllib.parse import urlencode, quote_plus
 
-AZURE_AD_REDIRECT_URI = 'http://localhost:8000/identity/azure/callback/'
-AZURE_AD_REDIRECT_URI_LOGOUT= 'http://localhost:8000/'
+# AZURE_AD_REDIRECT_URI = 'http://localhost:8000/identity/azure/callback/'
+# AZURE_AD_REDIRECT_URI_LOGOUT= 'http://localhost:8000/'
 
-def azure_login(request):
-    params = {
-        'client_id': AZURE_AD_CLIENT_ID,
-        'response_type': 'code',
-        'redirect_uri': AZURE_AD_REDIRECT_URI,
-        'response_mode': 'query',
-        'scope': 'openid email profile',
-        'state': 'random_state_string'
-    }
-    auth_url = 'https://login.microsoftonline.com/{}/oauth2/v2.0/authorize?login_hint={}&{}'.format(
-        AZURE_AD_TENANT_ID,
-		request.POST.get('email'),
-        urlencode(params, quote_via=quote_plus)
-    )
-    return redirect(auth_url)
+# def azure_login(request):
+#     params = {
+#         'client_id': AZURE_AD_CLIENT_ID,
+#         'response_type': 'code',
+#         'redirect_uri': AZURE_AD_REDIRECT_URI,
+#         'response_mode': 'query',
+#         'scope': 'openid email profile',
+#         'state': 'random_state_string'
+#     }
+#     auth_url = 'https://login.microsoftonline.com/{}/oauth2/v2.0/authorize?login_hint={}&{}'.format(
+#         AZURE_AD_TENANT_ID,
+# 		request.POST.get('email'),
+#         urlencode(params, quote_via=quote_plus)
+#     )
+#     return redirect(auth_url)
 
-def azure_callback(request):
-    code = request.GET.get('code')
-    token_url = 'https://login.microsoftonline.com/{}/oauth2/v2.0/token'.format(AZURE_AD_TENANT_ID)
-    token_data = {
-        'grant_type': 'authorization_code',
-        'code': code,
-        'redirect_uri': AZURE_AD_REDIRECT_URI,
-        'client_id': AZURE_AD_CLIENT_ID,
-        'client_secret': AZURE_AD_CLIENT_SECRET
-    }
-    token_response = requests.post(token_url, data=token_data)
-    token_json = token_response.json()
-    access_token = token_json.get('access_token')
+# def azure_callback(request):
+#     code = request.GET.get('code')
+#     token_url = 'https://login.microsoftonline.com/{}/oauth2/v2.0/token'.format(AZURE_AD_TENANT_ID)
+#     token_data = {
+#         'grant_type': 'authorization_code',
+#         'code': code,
+#         'redirect_uri': AZURE_AD_REDIRECT_URI,
+#         'client_id': AZURE_AD_CLIENT_ID,
+#         'client_secret': AZURE_AD_CLIENT_SECRET
+#     }
+#     token_response = requests.post(token_url, data=token_data)
+#     token_json = token_response.json()
+#     access_token = token_json.get('access_token')
 
-    user_info_url = 'https://graph.microsoft.com/v1.0/me'
-    user_info_headers = {
-        'Authorization': f'Bearer {access_token}'
-    }
-    user_info_response = requests.get(user_info_url, headers=user_info_headers)
-    user_info = user_info_response.json()
+#     user_info_url = 'https://graph.microsoft.com/v1.0/me'
+#     user_info_headers = {
+#         'Authorization': f'Bearer {access_token}'
+#     }
+#     user_info_response = requests.get(user_info_url, headers=user_info_headers)
+#     user_info = user_info_response.json()
 
-    email = user_info.get('mail')
-    print (user_info)
-    # user, _ = User.objects.get_or_create(username=email, defaults={'email': email})
-    # login(request, user)
-    return redirect('/')
+#     email = user_info.get('mail')
+#     print (user_info)
+#     # user, _ = User.objects.get_or_create(username=email, defaults={'email': email})
+#     # login(request, user)
+#     return redirect('/')
 
-def azure_logout(request):
-    logout(request)
-    logout_url = 'https://login.microsoftonline.com/{}/oauth2/v2.0/logout?post_logout_redirect_uri={}'.format(
-        AZURE_AD_TENANT_ID,
-        AZURE_AD_REDIRECT_URI_LOGOUT
-    )
-    return redirect(logout_url)
+# def azure_logout(request):
+#     logout(request)
+#     logout_url = 'https://login.microsoftonline.com/{}/oauth2/v2.0/logout?post_logout_redirect_uri={}'.format(
+#         AZURE_AD_TENANT_ID,
+#         AZURE_AD_REDIRECT_URI_LOGOUT
+#     )
+#     return redirect(logout_url)
