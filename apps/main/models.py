@@ -374,3 +374,26 @@ class UserData(models.Model):
 
     def __str__(self):
         return self.upn
+
+class CrowdStrikeFalconPreventionPolicy(models.Model):
+    id = models.CharField(max_length=200, primary_key=True)
+    name = models.CharField(max_length=200, null=True)
+    platform_name = models.CharField(max_length=200, null=True)
+    enabled = models.BooleanField(null=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
+
+    def __str__(self):
+        return self.name
+
+class CrowdStrikeFalconPreventionPolicySetting(models.Model):
+    id = models.CharField(max_length=200, primary_key=True)
+    name = models.CharField(max_length=200, null=True)
+    description = models.CharField(max_length=500, null=True)
+    value = models.CharField(max_length=200, null=True)
+    prevention_policy = models.ForeignKey("CrowdStrikeFalconPreventionPolicy", on_delete=models.CASCADE, null=True, related_name='settings')
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
+
+    def __str__(self):
+        return self.name

@@ -3,7 +3,7 @@ import requests, logging
 from django.utils import timezone
 # Import Models
 # from ...models import Integration, Device, CrowdStrikeFalconDeviceData, DeviceComplianceSettings
-from ..models import Integration, Device
+from ..models import Integration, CrowdStrikeFalconPreventionPolicy, CrowdStrikeFalconPreventionPolicySetting
 # Import Function Scripts
 # from .ReusedFunctions import *
 
@@ -25,53 +25,22 @@ def getCrowdStrikeAccessToken(client_id, client_secret, tenant_id):
         print("An error occurred:", str(e))
 ######################################## End Get CrowdStrike Falcon Access Token ########################################
 
-######################################## Start Get CrowdStrike Falcon Devices ########################################
+######################################## Start Get CrowdStrike Falcon Prevention Policies ########################################
 def getCrowdStrikeDevices(access_token):
     print("Querying CrowdStrike Falcon Policies")
     url = 'https://api.crowdstrike.com/policy/combined/prevention/v1'
     headers = {'Authorization': access_token}
-    # crowdstrike_aids = ((requests.get(url=url, headers=headers)).json())['resources']
-    crowdstrike_aids = ((requests.get(url=url, headers=headers)).json())
+    prevention_policies = ((requests.get(url=url, headers=headers)).json())['resources']
+    # crowdstrike_aids = ((requests.get(url=url, headers=headers)).json())
 
+    # with open("output.txt", "a") as f:
+    #     print(crowdstrike_aids, file=f)
 
+    # for policy in prevention_policies:
+    #     print(policy.get('name'))
 
-    print(crowdstrike_aids)
-
-    # total_devices = len(crowdstrike_aids)
-    # total_devices_count = total_devices
-    # device_pagination_arr = [0]
-    # while total_devices_count > 0:
-    #     if total_devices_count > 5000 and len(device_pagination_arr) == 0:
-    #         device_pagination_arr.append(5000)
-    #         total_devices_count -= 5000
-    #     elif total_devices_count < 5000 and len(device_pagination_arr) == 0:
-    #         device_pagination_arr.append(total_devices_count)
-    #         total_devices_count = 0
-    #     elif total_devices_count > 5000:
-    #         device_pagination_arr.append(5000 + device_pagination_arr[-1])
-    #         total_devices_count -= 5000
-    #     elif total_devices_count < 5000:
-    #         device_pagination_arr.append(total_devices_count + device_pagination_arr[-1])
-    #         total_devices_count = 0
-            
-    # total_crowdstrike_results = []
-    # for pagination_arr in range(len(device_pagination_arr)):
-    #     print(device_pagination_arr[pagination_arr])
-    #     if pagination_arr == 0:
-    #         pass
-    #     else:
-    #         url = 'https://api.crowdstrike.com/devices/entities/devices/v2'
-    #         headers = {
-    #             'accept': 'application/json',
-    #             'Authorization': access_token,
-    #             'Content-Type': 'application/json',
-    #         }
-    #         body = {'ids': crowdstrike_aids[device_pagination_arr[pagination_arr-1]:device_pagination_arr[pagination_arr]]}
-    #         crowdstrike_result = requests.post(url=url, headers=headers, json=body)
-    #         total_crowdstrike_results.append(crowdstrike_result.json())
-
-    # return total_crowdstrike_results
-######################################## End Get CrowdStrike Falcon Devices ########################################
+    return prevention_policies
+######################################## End Get CrowdStrike Falcon Prevention Policies ########################################
 
 ######################################## Start Update/Create CrowdStrike Falcon Devices ########################################
 # def complianceSettings(os_platform):
@@ -89,7 +58,31 @@ def getCrowdStrikeDevices(access_token):
 #     except DeviceComplianceSettings.DoesNotExist:
 #         return {}
 
-# def updateCrowdStrikeDeviceDatabase(total_crowdstrike_results):
+def updateCrowdStrikePreventionPolicyDatabase(prevention_policies):
+    for prevention_policy in prevention_policies:
+        defaults = {
+            'id': prevention_policy.get('id'),
+            'name': prevention_policy.get('name'),
+            'platform_name': prevention_policy.get('platform_name'),
+            'enabled': prevention_policy.get('enabled'),
+        }
+        obj, created = CrowdStrikeFalconPreventionPolicy.objects.update_or_create(id=prevention_policy.get('id'), defaults=defaults)
+        obj.save()
+
+        for prevention_policy_setting in prevention_policy.get('prevention_settings'):
+            setting = prevention_policy_setting['settings']
+            defaults_settings = {
+                'id': setting.get('id'),
+                'name': setting.get('name'),
+                'description': setting.get('description'),
+                'value': setting.get('value'),
+                'prevention_policy': obj
+            }
+            obj2, created = CrowdStrikeFalconPreventionPolicySetting.objects.update_or_create(id=prevention_policy_setting.get('id'), defaults=defaults_settings)
+            obj2.save()
+
+
+
 #     for crowdstrike_results in total_crowdstrike_results:
 #         for device_data in crowdstrike_results['resources']:
 #             if device_data.get('hostname') is None or device_data.get('os_version') is None:
