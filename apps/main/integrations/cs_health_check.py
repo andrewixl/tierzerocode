@@ -49,6 +49,12 @@ def updateCrowdStrikePreventionPolicyDatabase(prevention_policies):
         for prevention_policy_setting in prevention_policy.get('prevention_settings'):
             settings = prevention_policy_setting['settings']
             for setting in settings:
+                if setting.get('value') == {'enabled': True}:
+                    setting['value'] = True
+                elif setting.get('value') == {'configured': False, 'enabled': False}:
+                    setting['value'] = False                
+                
+                
                 defaults_settings = {
                     'id': prevention_policy.get('id') + "--" + setting.get('id'),
                     'name': setting.get('name'),
@@ -68,7 +74,6 @@ def syncCrowdStrikeFalconHealthCheck():
     tenant_id = data.tenant_id
     tenant_domain = data.tenant_domain
     updateCrowdStrikePreventionPolicyDatabase(getCrowdStrikeFalconPreventionPolicies(getCrowdStrikeAccessToken(client_id, client_secret, tenant_id)))
-    # updateCrowdStrikeDeviceDatabase(getCrowdStrikeDevices(getCrowdStrikeAccessToken(client_id, client_secret, tenant_id)))
     # data.last_synced_at = timezone.now()
     # data.save()
 

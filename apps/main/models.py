@@ -397,3 +397,63 @@ class CrowdStrikeFalconPreventionPolicySetting(models.Model):
 
     def __str__(self):
         return self.name
+
+
+    # EndUserNotifications
+    # UnknownDetectionRelatedExecutables
+    # UnknownExecutables
+    # SensorTamperingProtection
+    # AdditionalUserModeData
+    # InterpreterProtection
+    # EngineProtectionV2
+    # ScriptBasedExecutionMonitoring
+    # HTTPDetections
+    # RedactHTTPDetectionDetails
+    # HardwareEnhancedExploitProtection
+    # EnhancedExploitVisibility
+    # ExtendedUserModeDataSlider
+    # MemoryScan
+    # CPUMemoryScan
+    # FirmwareAnalysisExtraction
+    # CloudAntiMalware
+    # AdwarePUP
+    # OnSensorMLSlider
+    # ML_Large_File_Handling
+    # OnSensorMLSliderForSensorEndUserScans
+    # OnSensorMLSliderForCloudEndUserScans
+    # USBInsertionTriggeredScan
+    # DetectOnWrite
+    # QuarantineOnWrite
+    # OnWriteScriptFileVisibility
+    # NextGenAV
+    # NextGenAVQuarantineOnRemovableMedia
+    # CloudAntiMalwareForMicrosoftOfficeFiles
+    # Clean Infected Microsoft Office Files
+    # MicrosoftOfficeFileSuspiciousMacroRemoval
+    # CustomBlacklisting
+    # PreventSuspiciousProcesses
+    # SuspiciousRegistryOperations
+    # MaliciousPowershell
+    # IntelPrevention
+    # SuspiciousKernelDrivers
+    # VulnerableDriverProtection
+    # ForceASLR
+    # ForceDEP
+    # HeapSprayPreallocation
+    # NullPageAllocation
+    # SEHOverwriteProtection
+    # BackupDeletion
+    # Cryptowall
+    # FileEncryption
+    # Locky
+    # FileSystemAccess
+    # VolumeShadowCopyAudit
+    # VolumeShadowCopyProtect
+    # ApplicationExploitationActivity
+    # ChopperWebshell
+    # DriveByDownload
+    # Code Injection
+    # JavaScriptViaRundll32
+    # WindowsLogonBypassStickyKeys
+    # CredentialDumping
+    # AutomatedRemediation
