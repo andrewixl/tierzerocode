@@ -34,12 +34,14 @@
                             <thead>
                                 <tr>
                                     <th>UPN</th>
+                                    <th>Created At</th>
+                                    <th>Last Sign-on</th>
                                     <th>Auth Strength (Most/Least)</th>
                                     <th>Highest Authentication Strength</th>
                                     <th>Lowest Authentication Strength</th>
                                     <th>FIDO2</th>
                                     <th>MS Auth</th>
-                                    <th>Windows Hello</th>
+                                    <th>WHfB</th>
                                     <th>OTP</th>
                                     <th>TAP</th>
                                     <th>Phone</th>
@@ -57,6 +59,9 @@
                                     <td class="text-danger">&#10060;</td>
                                     {% else %}
                                     <td><a href="/device/{{check.id}}">{{check.upn}}</a></td>
+                                    <td>{{check.created_at_timestamp}}</td>
+                                    <td>{{check.last_logon_timestamp}}</td>
+
                                     <td>{{check.highest_authentication_strength}} / {{check.lowest_authentication_strength}}</td>
                                     <td>{{check.highest_authentication_strength}}</td>
                                     <td>{{check.lowest_authentication_strength}}</td>
@@ -115,7 +120,7 @@
             ],
             columnDefs: [
                 {
-                    targets: [2, 3], // Index of the hidden column
+                    targets: [3, 4, 5], // Index of the hidden column
                     visible: false
                 }
             ]

@@ -86,9 +86,9 @@ def complianceSettings(os_platform):
 		return {}
 
 def test():
-	Device.objects.all().delete()
+	# Device.objects.all().delete()
 	# Integration.objects.all().delete()
-	# UserData.objects.all().delete()
+	UserData.objects.all().delete()
 	return redirect('/')
 
 ############################################################################################	
@@ -126,7 +126,7 @@ from .integrations.cs_health_check import *
 @login_required
 def index(request):
 	# test()
-	syncCrowdStrikeFalconHealthCheckBackground()
+	# syncCrowdStrikeFalconHealthCheckBackground()
 	# Checks User Permissions and Required Models
 	redirect_url = initialChecks(request)
 	if redirect_url:
@@ -559,33 +559,27 @@ def error500(request):
 
 @login_required
 def syncDevices(request, integration):
-	# Checks User Permissions and Required Models
-	redirect_url = initialChecks(request)
-	if redirect_url:
-		return redirect(redirect_url)
+    # Checks User Permissions and Required Models
+    redirect_url = initialChecks(request)
+    if redirect_url:
+        return redirect(redirect_url)
 	#X6969
-	if integration == 'Cloudflare-Zero-Trust':
-		# logger.info("Calling Sync Cloudflare Zero Trust")
-		syncCloudflareZeroTrust()
-	elif integration == 'CrowdStrike-Falcon':
-		# logger.info("Calling Sync CrowdStrike Falcon")
-		syncCrowdStrikeFalconBackground()
-	elif integration == 'Microsoft-Defender-for-Endpoint':
-		# logger.info("Calling Sync Microsoft Defender for Endpoint")
-		syncDefender()
-	elif integration == 'Microsoft-Entra-ID':
-		# logger.info("Calling Sync Microsoft Entra ID")
-		syncMicrosoftEntraID()
-	elif integration == 'Microsoft-Intune':
-		# logger.info("Calling Sync Microsoft Intune")
-		syncMicrosoftIntuneBackground()  # Run the task in the background
-	elif integration == 'Sophos-Central':
-		# logger.info("Calling Sync Sophos Central")
-		syncSophos()
-	elif integration == 'Qualys':
-		# logger.info("Calling Sync Qualys")
-		syncQualys()
-	return redirect('/integrations')
+    if integration == 'Cloudflare-Zero-Trust':
+        syncCloudflareZeroTrust()
+    elif integration == 'CrowdStrike-Falcon':
+        syncCrowdStrikeFalconBackground()
+    elif integration == 'microsoft-defender-for-endpoint':
+        syncMicrosoftDefenderBackground()
+    elif integration == 'Microsoft-Entra-ID':
+        syncMicrosoftEntraID()
+    elif integration == 'microsoft-intune':
+        print ("Syncing Microsoft Intune")
+        syncMicrosoftIntuneBackground()  # Run the task in the background
+    elif integration == 'Sophos-Central':
+        syncSophos()
+    elif integration == 'Qualys':
+        syncQualys()
+    return redirect('/integrations')
 
 @login_required
 def syncUsers(request, integration):
@@ -594,7 +588,7 @@ def syncUsers(request, integration):
 	if redirect_url:
 		return redirect(redirect_url)
 	#X6969
-	if integration == 'Microsoft-Entra-ID':
+	if integration == 'microsoft-entra-id':
 		syncMicrosoftEntraIDUserBackground()
 	print("Redirecting to Integrations")
 	return redirect('/integrations')

@@ -356,8 +356,11 @@ class QualysDevice(models.Model):
 class UserData(models.Model):
     upn = models.EmailField(max_length=200, null=True)
     uid = models.CharField(max_length=200, null=True)
+    network_id = models.CharField(max_length=200, null=True)
     given_name = models.CharField(max_length=200, null=True)
     surname = models.CharField(max_length=200, null=True)
+    job_title = models.CharField(max_length=200, null=True)
+    department = models.CharField(max_length=200, null=True)
     highest_authentication_strength = models.CharField(max_length=200, null=True)
     lowest_authentication_strength = models.CharField(max_length=200, null=True)
     email_authentication_method = models.BooleanField(null=True)
@@ -369,6 +372,8 @@ class UserData(models.Model):
     temporary_access_pass_authentication_method = models.BooleanField(null=True)
     windows_hello_for_business_authentication_method = models.BooleanField(null=True)
     integration = models.ManyToManyField("Integration", related_name='users')
+    created_at_timestamp = models.DateTimeField(null=True)
+    last_logon_timestamp = models.DateTimeField(null=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
 

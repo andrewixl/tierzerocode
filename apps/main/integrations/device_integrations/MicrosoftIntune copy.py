@@ -6,21 +6,22 @@ from ...models import Integration, Device, MicrosoftIntuneDeviceData, DeviceComp
 # Import Function Scripts
 from .ReusedFunctions import *
 
+# Set the logger
+# logger = logging.getLogger('custom_logger')
+
 ######################################## Start Get Microsoft Intune Access Token ########################################
 def getIntuneAccessToken(client_id, client_secret, tenant_id):
-    authority = f'https://login.microsoftonline.com/{tenant_id}'
+    authority = 'https://login.microsoftonline.com/' + tenant_id
     scope = ['https://graph.microsoft.com/.default']
     client = msal.ConfidentialClientApplication(client_id, authority=authority, client_credential=client_secret)
-
     token_result = client.acquire_token_silent(scope, account=None)
+    if token_result:
+        access_token = 'Bearer ' + token_result['access_token']
+        print ('Access token was loaded from cache')
     if not token_result:
         token_result = client.acquire_token_for_client(scopes=scope)
-
-    if not token_result or 'access_token' not in token_result:
-        raise Exception("Failed to acquire access token")
-
-    access_token = 'Bearer ' + token_result['access_token']
-    print("Access token acquired successfully")
+        access_token = 'Bearer ' + token_result['access_token']
+        print ('New access token was acquired from Azure AD')
     return access_token
 ######################################## End Get Microsoft Intune Access Token ########################################
 
@@ -29,21 +30,17 @@ def getIntuneDevices(access_token):
     url = 'https://graph.microsoft.com/v1.0/deviceManagement/managedDevices'
     headers = {'Authorization': access_token}
     graph_results_original = []
+    graph_results_clean = []
+    graph_results_original.append(requests.get(url=url, headers=headers).json())
 
-    response = requests.get(url, headers=headers)
-    if response.status_code != 200:
-        raise Exception(f"Failed to fetch devices: {response.status_code} - {response.text}")
-
-    graph_results_original.append(response.json())
-
-    while '@odata.nextLink' in graph_results_original[-1]:
-        next_link = graph_results_original[-1]['@odata.nextLink']
-        response = requests.get(next_link, headers=headers)
-        if response.status_code != 200:
-            raise Exception(f"Failed to fetch next page: {response.status_code} - {response.text}")
-        graph_results_original.append(response.json())
-
-    graph_results_clean = [graph_result.get('value', []) for graph_result in graph_results_original]
+    if '@odata.nextLink' in graph_results_original[0]:
+        while '@odata.nextLink' in graph_results_original[-1]:
+            next_link = graph_results_original[-1]['@odata.nextLink']
+            graph_results_original.append(requests.get(url=next_link, headers=headers).json())
+    
+    for graph_result in graph_results_original:
+        graph_results_clean.append(graph_result['value'])
+    print(graph_results_clean)
     return graph_results_clean
 ######################################## End Get Microsoft Intune Devices ########################################
 
@@ -81,6 +78,8 @@ def updateIntuneDeviceDatabase(json_data):
                 'endpointType': clean_data[1],
                 'manufacturer': (manufacturer.lower()).title()
             }
+            if not clean_data[1] == 'Mobile' or not device_data['managedDeviceOwnerType'] == 'company':
+                continue
             obj, created = Device.objects.update_or_create(hostname=hostname, defaults=defaults)
             obj.integration.add(Integration.objects.get(integration_type="Microsoft Intune"))
 
@@ -155,14 +154,18 @@ def updateIntuneDeviceDatabase(json_data):
                 "parentDevice": obj
             }
             MicrosoftIntuneDeviceData.objects.update_or_create(id=device_data['id'], defaults=defaults_all)
-    print('Microsoft Intune Devices Updated')
+    # logger.info('Microsoft Intune Devices Updated')
 ######################################## End Update/Create Microsoft Intune Devices ########################################
 
 ######################################## Start Sync Microsoft Intune ########################################
 def syncIntune():
     print("Starting Sync Microsoft Intune")
     data = Integration.objects.get(integration_type="Microsoft Intune")
-    updateIntuneDeviceDatabase(getIntuneDevices(getIntuneAccessToken(data.client_id, data.client_secret, data.tenant_id)))
+    client_id = data.client_id
+    client_secret = data.client_secret
+    tenant_id = data.tenant_id
+    tenant_domain = data.tenant_domain
+    updateIntuneDeviceDatabase(getIntuneDevices(getIntuneAccessToken(client_id, client_secret, tenant_id)))
     data.last_synced_at = timezone.now()
     data.save()
 
@@ -173,10 +176,5 @@ def syncIntune():
 import threading
 
 def syncMicrosoftIntuneBackground():
-    def run():
-        try:
-            syncIntune()
-        except Exception as e:
-            print(f"Intune sync failed: {e}")
-    thread = threading.Thread(target=run)
+    thread = threading.Thread(target=syncIntune)
     thread.start()
