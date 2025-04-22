@@ -1,27 +1,25 @@
 # Import Dependencies
-import msal, requests, logging
+import msal, requests, threading
 from django.utils import timezone
 # Import Models
 from ...models import Integration, Device, MicrosoftEntraIDDeviceData, DeviceComplianceSettings
 # Import Function Scripts
 from .ReusedFunctions import *
-
-# Set the logger
-# logger = logging.getLogger('custom_logger')
+from ....logger.views import createLog
 
 ######################################## Start Get Microsoft Entra ID Access Token ########################################
 def getMicrosoftEntraIDAccessToken(client_id, client_secret, tenant_id):
     authority = 'https://login.microsoftonline.com/' + tenant_id
     scope = ['https://graph.microsoft.com/.default']
     client = msal.ConfidentialClientApplication(client_id, authority=authority, client_credential=client_secret)
+    
     token_result = client.acquire_token_silent(scope, account=None)
-    if token_result:
-        access_token = 'Bearer ' + token_result['access_token']
-        logger.info('Access token was loaded from cache')
     if not token_result:
         token_result = client.acquire_token_for_client(scopes=scope)
-        access_token = 'Bearer ' + token_result['access_token']
-        logger.info('New access token was acquired from Azure AD')
+    if not token_result or 'access_token' not in token_result:
+        raise Exception("Failed to acquire access token")
+
+    access_token = 'Bearer ' + token_result['access_token']
     return access_token
 ######################################## End Get Microsoft Entra ID Access Token ########################################
 
@@ -29,8 +27,17 @@ def getMicrosoftEntraIDAccessToken(client_id, client_secret, tenant_id):
 def getMicrosoftEntraIDDevices(access_token):
     url = 'https://graph.microsoft.com/v1.0/devices'
     headers = {'Authorization': access_token}
-    graph_result = requests.get(url=url, headers=headers)
-    return graph_result.json()
+    graph_results_clean = []
+
+    while url:
+        response = requests.get(url, headers=headers)
+        if response.status_code != 200:
+            raise Exception(f"Failed to fetch devices: {response.status_code} - {response.text}")
+        data = response.json()
+        graph_results_clean.extend(data.get('value', []))
+        url = data.get('@odata.nextLink')
+
+    return graph_results_clean
 ######################################## End Get Microsoft Entra ID Devices ########################################
 
 ######################################## Start Update/Create Microsoft Entra ID Devices ########################################
@@ -50,13 +57,12 @@ def complianceSettings(os_platform):
         return {}
 
 def updateMicrosoftEntraIDDeviceDatabase(json_data):
-    for device_data in json_data['value']:
+    for device_data in json_data:
         hostname = device_data['displayName'].lower()
         os_platform = device_data['operatingSystem']
         try:
             manufacturer = (device_data['manufacturer'].lower()).title()
         except:
-            print(hostname + " does not have a manufacturer")
             manufacturer = None
 
         clean_data = cleanAPIData(os_platform)
@@ -67,11 +73,8 @@ def updateMicrosoftEntraIDDeviceDatabase(json_data):
             'endpointType': clean_data[1],
             'manufacturer': manufacturer,
         }
-        if not clean_data[1] == 'Mobile' and not device_data['deviceOwnership'] == 'Company':
-            continue
-
         obj, created = Device.objects.update_or_create(hostname=hostname, defaults=defaults)
-        obj.integration.add(Integration.objects.get(integration_type="Microsoft Entra ID"))
+        obj.integration.add(Integration.objects.get(integration_type="Microsoft Entra ID", integration_context="Device"))
 
         enabled_integrations = Integration.objects.filter(enabled=True)
         compliance_settings = complianceSettings(clean_data[0])
@@ -119,14 +122,22 @@ def updateMicrosoftEntraIDDeviceDatabase(json_data):
 
 ######################################## Start Sync Microsoft Entra ID ########################################
 def syncMicrosoftEntraID():
-    data = Integration.objects.get(integration_type="Microsoft Entra ID")
-    client_id = data.client_id
-    client_secret = data.client_secret
-    tenant_id = data.tenant_id
-    tenant_domain = data.tenant_domain
-    updateMicrosoftEntraIDDeviceDatabase(getMicrosoftEntraIDDevices(getMicrosoftEntraIDAccessToken(client_id, client_secret, tenant_id)))
+    data = Integration.objects.get(integration_type="Microsoft Entra ID", integration_context="Device")
+    updateMicrosoftEntraIDDeviceDatabase(getMicrosoftEntraIDDevices(getMicrosoftEntraIDAccessToken(data.client_id, data.client_secret, data.tenant_id)))
     data.last_synced_at = timezone.now()
     data.save()
-    print("Microsoft Entra ID Synced Successfully")
     return True
 ######################################## End Sync Microsoft Entra ID ########################################
+
+######################################## Start Background Sync Microsoft Intune ########################################
+def syncMicrosoftEntraIDBackground(request):
+    syncMicrosoftEntraID()
+    def run():
+        try:
+            syncMicrosoftEntraID()
+            createLog(1505,"System Integration","System Integration Event","Superuser",True,"System Integration Sync","Success","Microsoft Entra ID",request.session['user_email'])
+        except Exception as e:
+            createLog(1505,"System Integration","System Integration Event","Superuser",True,"System Integration Sync","Failure",f"Microsoft Entra ID - {e}",request.session['user_email'])
+    thread = threading.Thread(target=run)
+    thread.start()
+######################################## End Background Sync Microsoft Intune ########################################

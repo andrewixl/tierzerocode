@@ -361,16 +361,29 @@ class UserData(models.Model):
     surname = models.CharField(max_length=200, null=True)
     job_title = models.CharField(max_length=200, null=True)
     department = models.CharField(max_length=200, null=True)
+    # Start Auth Capabilities
+    isAdmin = models.BooleanField(null=True)
+    isMfaCapable = models.BooleanField(null=True)
+    isMfaRegistered = models.BooleanField(null=True)
+    isPasswordlessCapable = models.BooleanField(null=True)
+    isSsprEnabled = models.BooleanField(null=True)
+    isSsprRegistered = models.BooleanField(null=True)
+    isSystemPreferredAuthenticationMethodEnabled = models.BooleanField(null=True)
     highest_authentication_strength = models.CharField(max_length=200, null=True)
     lowest_authentication_strength = models.CharField(max_length=200, null=True)
+    # End Auth Capabilities
+    # Start Authentication methods
+    passKeyDeviceBound_authentication_method = models.BooleanField(null=True)
+    passKeyDeviceBoundAuthenticator_authentication_method = models.BooleanField(null=True)
+    windowsHelloforBusiness_authentication_method = models.BooleanField(null=True)
+    microsoftAuthenticatorPasswordless_authentication_method = models.BooleanField(null=True)
+    microsoftAuthenticatorPush_authentication_method = models.BooleanField(null=True)
+    softwareOneTimePasscode_authentication_method = models.BooleanField(null=True)
+    temporaryAccessPass_authentication_method = models.BooleanField(null=True)
+    mobilePhone_authentication_method = models.BooleanField(null=True)
     email_authentication_method = models.BooleanField(null=True)
-    fido2_authentication_method = models.BooleanField(null=True)
-    microsoft_authenticator_authentication_method = models.BooleanField(null=True)
-    password_authentication_method = models.BooleanField(null=True)
-    phone_authentication_method = models.BooleanField(null=True)
-    software_oath_authentication_method = models.BooleanField(null=True)
-    temporary_access_pass_authentication_method = models.BooleanField(null=True)
-    windows_hello_for_business_authentication_method = models.BooleanField(null=True)
+    securityQuestion_authentication_method = models.BooleanField(null=True)
+    # End Authentication methods
     integration = models.ManyToManyField("Integration", related_name='users')
     created_at_timestamp = models.DateTimeField(null=True)
     last_logon_timestamp = models.DateTimeField(null=True)
@@ -402,63 +415,3 @@ class CrowdStrikeFalconPreventionPolicySetting(models.Model):
 
     def __str__(self):
         return self.name
-
-
-    # EndUserNotifications
-    # UnknownDetectionRelatedExecutables
-    # UnknownExecutables
-    # SensorTamperingProtection
-    # AdditionalUserModeData
-    # InterpreterProtection
-    # EngineProtectionV2
-    # ScriptBasedExecutionMonitoring
-    # HTTPDetections
-    # RedactHTTPDetectionDetails
-    # HardwareEnhancedExploitProtection
-    # EnhancedExploitVisibility
-    # ExtendedUserModeDataSlider
-    # MemoryScan
-    # CPUMemoryScan
-    # FirmwareAnalysisExtraction
-    # CloudAntiMalware
-    # AdwarePUP
-    # OnSensorMLSlider
-    # ML_Large_File_Handling
-    # OnSensorMLSliderForSensorEndUserScans
-    # OnSensorMLSliderForCloudEndUserScans
-    # USBInsertionTriggeredScan
-    # DetectOnWrite
-    # QuarantineOnWrite
-    # OnWriteScriptFileVisibility
-    # NextGenAV
-    # NextGenAVQuarantineOnRemovableMedia
-    # CloudAntiMalwareForMicrosoftOfficeFiles
-    # Clean Infected Microsoft Office Files
-    # MicrosoftOfficeFileSuspiciousMacroRemoval
-    # CustomBlacklisting
-    # PreventSuspiciousProcesses
-    # SuspiciousRegistryOperations
-    # MaliciousPowershell
-    # IntelPrevention
-    # SuspiciousKernelDrivers
-    # VulnerableDriverProtection
-    # ForceASLR
-    # ForceDEP
-    # HeapSprayPreallocation
-    # NullPageAllocation
-    # SEHOverwriteProtection
-    # BackupDeletion
-    # Cryptowall
-    # FileEncryption
-    # Locky
-    # FileSystemAccess
-    # VolumeShadowCopyAudit
-    # VolumeShadowCopyProtect
-    # ApplicationExploitationActivity
-    # ChopperWebshell
-    # DriveByDownload
-    # Code Injection
-    # JavaScriptViaRundll32
-    # WindowsLogonBypassStickyKeys
-    # CredentialDumping
-    # AutomatedRemediation

@@ -126,7 +126,6 @@ from .integrations.cs_health_check import *
 @login_required
 def index(request):
 	# test()
-	# syncCrowdStrikeFalconHealthCheckBackground()
 	# Checks User Permissions and Required Models
 	redirect_url = initialChecks(request)
 	if redirect_url:
@@ -401,30 +400,8 @@ def userMasterList(request):
 	
 	user_data_list = UserData.objects.all()
 	user_list = []
-	for user_data in user_data_list:
-		highest_auth = None
-		lowest_auth = None
-		if user_data.fido2_authentication_method or user_data.windows_hello_for_business_authentication_method:
-			highest_auth = "Phishing Resistant"
-		elif user_data.microsoft_authenticator_authentication_method:
-			highest_auth = "Passwordless"
-		elif user_data.temporary_access_pass_authentication_method or user_data.software_oath_authentication_method:
-			highest_auth = "MFA"
-		elif user_data.phone_authentication_method:
-			highest_auth = "Deprecated"
-		else:
-			highest_auth = "None"
-
-		if user_data.phone_authentication_method:
-			lowest_auth = "Deprecated"
-		elif user_data.temporary_access_pass_authentication_method or user_data.software_oath_authentication_method:
-			lowest_auth = "MFA"
-		elif user_data.microsoft_authenticator_authentication_method:
-			lowest_auth = "Passwordless"
-		elif user_data.fido2_authentication_method or user_data.windows_hello_for_business_authentication_method:
-			lowest_auth = "Phishing Resistant"
-		
-		user_list.append([user_data, user_data.fido2_authentication_method, user_data.microsoft_authenticator_authentication_method, user_data.windows_hello_for_business_authentication_method, user_data.software_oath_authentication_method, user_data.temporary_access_pass_authentication_method, user_data.phone_authentication_method])
+	for user_data in user_data_list:		
+		user_list.append([user_data, user_data.passKeyDeviceBound_authentication_method, user_data.passKeyDeviceBoundAuthenticator_authentication_method, user_data.windowsHelloforBusiness_authentication_method, user_data.microsoftAuthenticatorPasswordless_authentication_method, user_data.microsoftAuthenticatorPush_authentication_method, user_data.softwareOneTimePasscode_authentication_method, user_data.temporaryAccessPass_authentication_method, user_data.mobilePhone_authentication_method, user_data.email_authentication_method, user_data.securityQuestion_authentication_method])
 
 	context = {
 		'page':"master-list-user",
@@ -556,7 +533,6 @@ def error500(request):
 	return render( request, 'main/pages-500.html')
 
 ############################################################################################
-
 @login_required
 def syncDevices(request, integration):
     # Checks User Permissions and Required Models
@@ -569,12 +545,12 @@ def syncDevices(request, integration):
     elif integration == 'CrowdStrike-Falcon':
         syncCrowdStrikeFalconBackground()
     elif integration == 'microsoft-defender-for-endpoint':
-        syncMicrosoftDefenderBackground()
-    elif integration == 'Microsoft-Entra-ID':
-        syncMicrosoftEntraID()
+        syncMicrosoftDefenderforEndpointBackground(request)
+    elif integration == 'microsoft-entra-id':
+        syncMicrosoftEntraIDBackground(request)
     elif integration == 'microsoft-intune':
         print ("Syncing Microsoft Intune")
-        syncMicrosoftIntuneBackground()  # Run the task in the background
+        syncMicrosoftIntuneBackground(request)  # Run the task in the background
     elif integration == 'Sophos-Central':
         syncSophos()
     elif integration == 'Qualys':
@@ -589,159 +565,8 @@ def syncUsers(request, integration):
 		return redirect(redirect_url)
 	#X6969
 	if integration == 'microsoft-entra-id':
-		syncMicrosoftEntraIDUserBackground()
+		syncMicrosoftEntraIDUserBackground(request)
 	print("Redirecting to Integrations")
 	return redirect('/integrations')
 
 ############################################################################################
-
-@login_required
-def csHealthCheck(request):
-    policies = CrowdStrikeFalconPreventionPolicy.objects.all().prefetch_related('settings')
-    setting_names = [
-    "Notify End Users",
-    "Unknown Detection-Related Executables",
-    "Unknown Executables",
-    "Sensor Tampering Protection",
-    "Additional User Mode Data",
-    "Interpreter-Only",
-    "Engine (Full Visibility)",
-    "Script-Based Execution Monitoring",
-    "HTTP Detections",
-    "Redact HTTP Detection Details",
-    "Hardware-Enhanced Exploit Detection",
-    "Enhanced Exploitation Visibility",
-    "Extended User Mode Data",
-    "Memory Scanning",
-    "Scan with CPU",
-    "BIOS Deep Visibility",
-    "Cloud Anti-malware",
-    "Adware & PUP",
-    "Sensor Anti-malware",
-    "Enhanced ML for larger files",
-    "Sensor Anti-malware for End-User Initiated Scans",
-    "Cloud Anti-malware for End-User Initiated Scans",
-    "USB Insertion Triggered Scan",
-    "Detect on Write",
-    "Quarantine on Write",
-    "On Write Script File Visibility",
-    "Quarantine & Security Center Registration",
-    "Quarantine on Removable Media",
-    "Cloud Anti-malware For Microsoft Office Files",
-    "Microsoft Office File Malicious Macro Removal",
-    "Custom Blocking",
-    "Suspicious Processes",
-    "Suspicious Registry Operations",
-    "Suspicious Scripts and Commands",
-    "Intelligence-Sourced Threats",
-    "Driver Load Prevention",
-    "Vulnerable Driver Protection",
-    "Force ASLR",
-    "Force DEP",
-    "Heap Spray Preallocation",
-    "NULL Page Allocation",
-    "SEH Overwrite Protection",
-    "Backup Deletion",
-    "Cryptowall",
-    "File Encryption",
-    "Locky",
-    "File System Access",
-    "Volume Shadow Copy - Audit",
-    "Volume Shadow Copy - Protect",
-    "Application Exploitation Activity",
-    "Chopper Webshell",
-    "Drive-by Download",
-    "Code Injection",
-    "JavaScript Execution Via Rundll32",
-    "Windows Logon Bypass (\"Sticky Keys\")",
-    "Credential Dumping",
-    "Advanced Remediation"
-]
-    settings_recommendations = {
-    "Notify End Users": "Customer preference",
-    "Unknown Executables": "Enabled",
-    "Unknown Detection-Related Executables": "Enabled",
-    "Sensor Tampering Protection": "Enabled",
-    "Additional User Mode Data": "Enabled",
-    "Interpreter-Only": "Enabled",
-    "Engine (Full Visibility)": "Enabled",
-    "Script-Based Execution Monitoring": "Enabled",
-    "HTTP Detections": "Enabled",
-    "Redact HTTP Detection Details": "Customer preference",
-    "Hardware-Enhanced Exploit Detection": "Enabled",
-    "Enhanced Exploitation Visibility": "Enabled",
-    "Extended User Mode Data (XUMD)": "Moderate",
-    "Memory Scanning": "Enabled",
-    "Scan with CPU": "Enabled",
-    "BIOS Deep Visibility": "Enabled",
-    "Cloud Anti-malware - Detection": "Aggressive",
-    "Cloud Anti-malware - Prevention": "Moderate+",
-    "Cloud Anti-malware for Microsoft Office Files- Detection": "Aggressive",
-    "Cloud Anti-malware for Microsoft Office Files - Prevention": "Moderate+",
-    "Microsoft Office File Malicious Macro Removal": "Customer preference",
-    "Cloud Adware & PUP - Detection": "Aggressive",
-    "Cloud Adware & PUP - Prevention": "Moderate+",
-    "Sensor Anti-malware - Detection": "Aggressive",
-    "Sensor Anti-malware - Prevention": "Moderate+",
-    "Enhanced ML for larger files": "Enabled",
-    "Cloud Anti-malware for End-User Initiated Scans - Detection": "Aggressive",
-    "Cloud Anti-malware for End-User Initiated Scans - Prevention": "Moderate+",
-    "Sensor Anti-malware for End-User Initiated Scans - Detection": "Aggressive",
-    "Sensor Anti-malware for End-User Initiated Scans - Prevention": "Moderate+",
-    "USB Insertion Triggered Scan": "Enabled",
-    "Detect on Write": "Enabled",
-    "Quarantine on Write": "Enabled",
-    "On Write Script File Visibility": "Enabled",
-    "Quarantine & Security Center Registration": "Enabled",
-    "Quarantine on Removable Media": "Enabled",
-    "Custom Blocking": "Enabled",
-    "Suspicious Processes": "Enabled",
-    "Suspicious Registry Operations": "Enabled",
-    "Suspicious Scripts and Commands": "Enabled",
-    "Intelligence-Sourced Threats": "Enabled",
-    "Driver Load Prevention": "Enabled",
-    "Vulnerable Driver Protection": "Enabled",
-    "Force ASLR": "Enabled",
-    "Force DEP": "Disabled",
-    "Heap Spray Preallocation": "Enabled",
-    "NULL Page Allocation": "Enabled",
-    "SEH Overwrite Protection": "Enabled",
-    "Backup Deletion": "Enabled",
-    "Cryptowall": "Enabled",
-    "File Encryption": "Enabled",
-    "Locky": "Enabled",
-    "File System Access": "Enabled",
-    "Volume Shadow Copy - Audit": "Enabled",
-    "Volume Shadow Copy - Protect": "Enabled",
-    "Application Exploitation Activity": "Enabled",
-    "Chopper Webshell": "Enabled",
-    "Drive-by Download": "Enabled",
-    "Code Injection": "Enabled",
-    "JavaScript Execution Via Rundll32": "Enabled",
-    'Windows Logon Bypass ("Sticky Keys")': "Enabled",
-    "Credential Dumping": "Enabled",
-    "Advanced Remediation": "Enabled"
-}
-    context = {
-		'policies': policies,
-		'setting_names': setting_names,
-		'settings_recommendations': settings_recommendations,
-	}
-    return render(request, 'main/cs-health-check-new.html', context)
-
-	# # Checks User Permissions and Required Models
-	# redirect_url = initialChecks(request)
-	# if redirect_url:
-	# 	return redirect(redirect_url)
-	# prevention_policies = CrowdStrikeFalconPreventionPolicy.objects.all()
-	# prevention_policy_settings = CrowdStrikeFalconPreventionPolicySetting.objects.all()
-	# context = {
-	# 	'page':'cs-health-check',
-	# 	'enabled_integrations': getEnabledIntegrations(),
-	# 	'enabled_user_integrations': getEnabledUserIntegrations(),
-	# 	'prevention_policies': prevention_policies,
-	# 	'prevention_policy_settings': prevention_policy_settings,
-	# }
-	# return render( request, 'main/cs-health-check.html', context)
- 
-#  setting_names=["NotifyEndUsers","UnknownDetection-RelatedExecutables","UnknownExecutables","SensorTamperingProtection","AdditionalUserModeData","Interpreter-Only","Engine(FullVisibility)","Script-BasedExecutionMonitoring","HTTPDetections","RedactHTTPDetectionDetails","Hardware-EnhancedExploitDetection","EnhancedExploitationVisibility","ExtendedUserModeData","MemoryScanning","ScanwithCPU","BIOSDeepVisibility","CloudAnti-malware","Adware&PUP","SensorAnti-malware","EnhancedMLforlargerfiles","SensorAnti-malwareforEnd-UserInitiatedScans","CloudAnti-malwareforEnd-UserInitiatedScans","USBInsertionTriggeredScan","DetectonWrite","QuarantineonWrite","OnWriteScriptFileVisibility","Quarantine&SecurityCenterRegistration","QuarantineonRemovableMedia","CloudAnti-malwareForMicrosoftOfficeFiles","MicrosoftOfficeFileMaliciousMacroRemoval","CustomBlocking","SuspiciousProcesses","SuspiciousRegistryOperations","SuspiciousScriptsandCommands","Intelligence-SourcedThreats","DriverLoadPrevention","VulnerableDriverProtection","ForceASLR","ForceDEP","HeapSprayPreallocation","NULLPageAllocation","SEHOverwriteProtection","BackupDeletion","Cryptowall","FileEncryption","Locky","FileSystemAccess","VolumeShadowCopy-Audit","VolumeShadowCopy-Protect","ApplicationExploitationActivity","ChopperWebshell","Drive-byDownload","CodeInjection","JavaScriptExecutionViaRundll32","WindowsLogonBypass(\"StickyKeys\")","CredentialDumping","AdvancedRemediation"]

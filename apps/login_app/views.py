@@ -185,6 +185,7 @@ def checklogin(request):
 		login(request, user)
 		request.session['active'] = user.is_active
 		request.session['user_id'] = user.id
+		request.session['user_email'] = user.email
 		return redirect('/')
 	else:
 		messages.error(request, 'Invalid Credentials')

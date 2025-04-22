@@ -39,12 +39,16 @@
                                     <th>Auth Strength (Most/Least)</th>
                                     <th>Highest Authentication Strength</th>
                                     <th>Lowest Authentication Strength</th>
-                                    <th>FIDO2</th>
-                                    <th>MS Auth</th>
+                                    <th>Passkey</th>
+                                    <th>MS Auth Passkey</th>
                                     <th>WHfB</th>
+                                    <th>MS Auth Phone Sign-in</th>
+                                    <th>MS Auth</th>
                                     <th>OTP</th>
                                     <th>TAP</th>
                                     <th>Phone</th>
+                                    <th>Email</th>
+                                    <th>Sec. Qs</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -135,8 +139,8 @@
             var lowestAuthStrengthRegex = selectedLowestAuthStrengths ? selectedLowestAuthStrengths.join('|') : '';
 
             table
-                .column(2).search(highestAuthStrengthRegex, true, false)
-                .column(3).search(lowestAuthStrengthRegex, true, false)
+                .column(4).search(highestAuthStrengthRegex, true, false)
+                .column(5).search(lowestAuthStrengthRegex, true, false)
                 .draw();
         }
 
