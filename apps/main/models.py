@@ -357,6 +357,7 @@ class UserData(models.Model):
     upn = models.EmailField(max_length=200, null=True)
     uid = models.CharField(max_length=200, null=True)
     network_id = models.CharField(max_length=200, null=True)
+    persona = models.CharField(max_length=200, null=True)
     given_name = models.CharField(max_length=200, null=True)
     surname = models.CharField(max_length=200, null=True)
     job_title = models.CharField(max_length=200, null=True)

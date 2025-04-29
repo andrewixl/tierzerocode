@@ -124,8 +124,7 @@ def initialSetup(request):
 from .integrations.cs_health_check import *
 
 @login_required
-def index(request):
-	# test()
+def indexDevice(request):
 	# Checks User Permissions and Required Models
 	redirect_url = initialChecks(request)
 	if redirect_url:
@@ -149,56 +148,9 @@ def index(request):
 
 	count_all_true = Device.objects.filter(compliant=True).count()
 	count_any_false = Device.objects.filter(compliant=False).count()
-
-	# of Users that have adopted each authentication method
-	users = UserData.objects.all()
-	count_phishing_resistant = 0
-	count_passwordless = 0
-	count_mfa = 0
-	count_deprecated = 0
-	count_none = 0
-
-	for user in users:
-		if user.highest_authentication_strength == 'Phishing Resistant':
-			count_phishing_resistant += 1
-		elif user.highest_authentication_strength == 'Passwordless':
-			count_passwordless += 1
-		elif user.highest_authentication_strength == 'MFA':
-			count_mfa += 1
-		elif user.highest_authentication_strength == 'Deprecated':
-			count_deprecated += 1
-		elif user.highest_authentication_strength == 'None':
-			count_none += 1
-	
-	count_low_phishing_resistant = 0
-	count_low_passwordless = 0
-	count_low_mfa = 0
-	count_low_deprecated = 0
-	count_low_none = 0
-
-	for user in users:
-		if user.lowest_authentication_strength == 'Phishing Resistant':
-			count_low_phishing_resistant += 1
-		elif user.lowest_authentication_strength == 'Passwordless':
-			count_low_passwordless += 1
-		elif user.lowest_authentication_strength == 'MFA':
-			count_low_mfa += 1
-		elif user.lowest_authentication_strength == 'Deprecated':
-			count_low_deprecated += 1
-		elif user.lowest_authentication_strength == 'None':
-			count_low_none += 1
-	
-	passwordless_count = 0
-	non_passwordless_count = 0
-
-	for user in users:
-		if user.lowest_authentication_strength == 'Passwordless' or user.lowest_authentication_strength == 'Phishing Resistant':
-			passwordless_count += 1
-		else:
-			non_passwordless_count += 1
-		
+ 
 	context = {
-		'page': 'dashboard',
+		'page': 'device-dashboard',
 		'enabled_integrations': enabled_integrations,
 		'enabled_user_integrations': getEnabledUserIntegrations(),
 		'endpoint_device_counts': integration_device_counts,
@@ -208,14 +160,94 @@ def index(request):
 		'endpointTypeData': endpointTypeData,
 		'compliantLabels': ['Compliant', 'Non-Compliant'],
 		'compliantData': [count_all_true, count_any_false],
-		'auth_method_labels': ['Phishing Resistant', 'Passwordless', 'MFA', 'Deprecated', 'None'],
-		'auth_method_data': [count_phishing_resistant, count_passwordless, count_mfa, count_deprecated, count_none],
-		'auth_method_low_labels': ['Phishing Resistant', 'Passwordless', 'MFA', 'Deprecated', 'None'],
-		'auth_method_low_data': [count_low_phishing_resistant, count_low_passwordless, count_low_mfa, count_low_deprecated, count_low_none],
-		'count_passwordless_labels': ['Passwordless', 'Non-Passwordless'],
-		'count_passwordless_data': [passwordless_count, non_passwordless_count],
     }
-	return render(request, 'main/index.html', context)
+	return render(request, 'main/index-device.html', context)
+
+from django.db.models import Q
+@login_required
+def indexUser(request):
+	# Checks User Permissions and Required Models
+	redirect_url = initialChecks(request)
+	if redirect_url:
+		return redirect(redirect_url)
+
+	# of Users that have adopted each authentication method
+	users = UserData.objects.all()
+ 
+   # Aggregate counts for highest and lowest authentication strengths
+	auth_strength_counts = UserData.objects.aggregate(
+        count_phishing_resistant=Count('id', filter=Q(highest_authentication_strength='Phishing Resistant')),
+        count_passwordless=Count('id', filter=Q(highest_authentication_strength='Passwordless')),
+        count_mfa=Count('id', filter=Q(highest_authentication_strength='MFA')),
+        count_deprecated=Count('id', filter=Q(highest_authentication_strength='Deprecated')),
+        count_none=Count('id', filter=Q(highest_authentication_strength='None')),
+        count_low_phishing_resistant=Count('id', filter=Q(lowest_authentication_strength='Phishing Resistant')),
+        count_low_passwordless=Count('id', filter=Q(lowest_authentication_strength='Passwordless')),
+        count_low_mfa=Count('id', filter=Q(lowest_authentication_strength='MFA')),
+        count_low_deprecated=Count('id', filter=Q(lowest_authentication_strength='Deprecated')),
+        count_low_none=Count('id', filter=Q(lowest_authentication_strength='None')),
+    )
+   
+   # Count passwordless and non-passwordless users
+	passwordless_count = UserData.objects.filter(
+        Q(lowest_authentication_strength__in=['Passwordless', 'Phishing Resistant'])
+    ).count()
+	non_passwordless_count = UserData.objects.exclude(
+        lowest_authentication_strength__in=['Passwordless', 'Phishing Resistant']
+    ).count()
+
+	passwordless_capable_count = UserData.objects.filter(
+        Q(highest_authentication_strength__in=['Passwordless', 'Phishing Resistant'])
+    ).count()
+	non_passwordless_capable_count = UserData.objects.exclude(
+        highest_authentication_strength__in=['Passwordless', 'Phishing Resistant']
+    ).count()
+ 
+	persona_counts = UserData.objects.values('persona').annotate(count=Count('id'))
+	persona_map = {item['persona']: item['count'] for item in persona_counts}
+ 
+	context = {
+		'page': 'user-dashboard',
+		'enabled_integrations': getEnabledIntegrations(),
+        'auth_method_labels': ['Phishing Resistant', 'Passwordless', 'MFA', 'Deprecated', 'None'],
+        'auth_method_data': [
+            auth_strength_counts['count_phishing_resistant'],
+            auth_strength_counts['count_passwordless'],
+            auth_strength_counts['count_mfa'],
+            auth_strength_counts['count_deprecated'],
+            auth_strength_counts['count_none'],
+        ],
+        'auth_method_low_labels': ['Phishing Resistant', 'Passwordless', 'MFA', 'Deprecated', 'None'],
+        'auth_method_low_data': [
+            auth_strength_counts['count_low_phishing_resistant'],
+            auth_strength_counts['count_low_passwordless'],
+            auth_strength_counts['count_low_mfa'],
+            auth_strength_counts['count_low_deprecated'],
+            auth_strength_counts['count_low_none'],
+        ],
+        'count_passwordless_labels': ['Passwordless', 'Non-Passwordless'],
+        'count_passwordless_data': [passwordless_count, non_passwordless_count],
+        'count_passwordless_capable_labels': ['Passwordless', 'Non-Passwordless'],
+        'count_passwordless_capable_data': [passwordless_capable_count, non_passwordless_capable_count],
+        'count_internal_worker': persona_map.get('Internal Worker', 0),
+        'count_internal_admin': persona_map.get('Internal Admin', 0),
+        'count_external_worker': persona_map.get('External Worker', 0),
+        'count_external_admin': persona_map.get('External Admin', 0),
+        'count_hourly_worker': persona_map.get('Hourly Worker', 0),
+        'count_test_account': persona_map.get('Test Account', 0),
+        'count_robot_account': persona_map.get('Robot Account', 0),
+        'count_shared_admin': persona_map.get('Shared Admin', 0),
+        'count_onprem_admin': persona_map.get('OnPrem Internal Admin', 0) + persona_map.get('OnPrem External Admin', 0),
+        'count_service_account': (
+            persona_map.get('Service Account Non-Interactive', 0)
+            + persona_map.get('Service Account Interactive', 0)
+            + persona_map.get('OnPrem Service Account Non-Interactive', 0)
+            + persona_map.get('OnPrem Service Account Interactive', 0)
+        ),
+        'count_unknown_account': persona_map.get('Unknown', 0),
+        'count_duplicate_account': persona_map.get('DUPLICATE', 0),
+    }
+	return render(request, 'main/index-user.html', context)
 
 ############################################################################################
 
@@ -396,8 +428,6 @@ def userMasterList(request):
 	if redirect_url:
 		return redirect(redirect_url)
 	
-	auth_strengths = ['None', 'MFA', 'Passwordless', 'Phishing Resistant', 'Deprecated']
-	
 	user_data_list = UserData.objects.all()
 	user_list = []
 	for user_data in user_data_list:		
@@ -406,8 +436,8 @@ def userMasterList(request):
 	context = {
 		'page':"master-list-user",
 		'enabled_integrations': getEnabledIntegrations(),
-		'enabled_user_integrations': getEnabledUserIntegrations(),
-		'auth_strengths': auth_strengths,
+		'auth_strengths': ['None', 'MFA', 'Passwordless', 'Phishing Resistant', 'Deprecated'],
+        'personas': ['Internal Worker', 'Internal Admin', 'External Worker', 'External Admin', 'Hourly Worker', 'Test Account', 'Robot Account', 'Shared Admin', 'OnPrem Internal Admin', 'OnPrem External Admin', 'Service Account Non-Interactive', 'Service Account Interactive', 'OnPrem Service Account Non-Interactive', 'OnPrem Service Account Interactive', 'Unknown', 'DUPLICATE'],
 		'user_list':user_list,
 	}
 	return render( request, 'main/user-master-list.html', context)

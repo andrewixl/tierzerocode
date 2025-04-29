@@ -13,6 +13,13 @@ from .models import (
     CrowdStrikeFalconPreventionPolicySetting,
 )
 
+class UserDataAdmin(admin.ModelAdmin):
+    list_display = ('upn', 'uid', 'network_id', 'persona', 'job_title', 'department', 'isAdmin', 'isMfaCapable', 'created_at', 'updated_at')
+    list_filter = ('isAdmin', 'isMfaCapable', 'isMfaRegistered', 'isPasswordlessCapable', 'isSsprEnabled', 'department', 'job_title')
+    search_fields = ('upn', 'uid', 'network_id', 'persona', 'given_name', 'surname', 'job_title', 'department')
+    ordering = ('-created_at',)
+    readonly_fields = ('created_at', 'updated_at')
+
 # Integration Models
 admin.site.register(Integration)
 admin.site.register(DeviceComplianceSettings)
@@ -24,7 +31,7 @@ admin.site.register(MicrosoftDefenderforEndpointDeviceData)
 admin.site.register(MicrosoftEntraIDDeviceData)
 admin.site.register(MicrosoftIntuneDeviceData)
 admin.site.register(SophosCentralDeviceData)
-admin.site.register(UserData)
+admin.site.register(UserData, UserDataAdmin)
 
 # CS Health Check
 admin.site.register(CrowdStrikeFalconPreventionPolicy)

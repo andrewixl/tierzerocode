@@ -62,17 +62,17 @@
 				</div>
 
 				<ul class="sidebar-nav">
-					{% if page == 'dashboard' %}
+					<li class="sidebar-header">
+						Endpoints
+					</li>
+					{% if page == 'device-dashboard' %}
 					<li class="sidebar-item active">
 					{% else %}
 					<li class="sidebar-item">
 					{% endif %}
 						<a class="sidebar-link" href="/">
-							<i class="align-middle" data-feather="sliders"></i> <span class="align-middle">Dashboard</span>
+							<i class="align-middle" data-feather="sliders"></i> <span class="align-middle">Endpoint Dashboard</span>
 						</a>
-					</li>
-					<li class="sidebar-header">
-						Endpoints
 					</li>
 					{% if page == 'master-list' %}
 					<li class="sidebar-item active">
@@ -80,7 +80,7 @@
 					<li class="sidebar-item">
 					{% endif %}
 						<a class="sidebar-link" href="/endpoints/master-list">
-							<i class="align-middle" data-feather="smartphone"></i> <span class="align-middle">Master List</span>
+							<i class="align-middle" data-feather="smartphone"></i> <span class="align-middle">Endpoint List</span>
 						</a>
 					</li>
 
@@ -103,16 +103,25 @@
 					<li class="sidebar-header">
 						Users
 					</li>
+					{% if page == 'user-dashboard' %}
+					<li class="sidebar-item active">
+					{% else %}
+					<li class="sidebar-item">
+					{% endif %}
+						<a class="sidebar-link" href="/user-dashboard">
+							<i class="align-middle" data-feather="sliders"></i> <span class="align-middle">User Dashboard</span>
+						</a>
+					</li>
 					{% if page == 'user-master-list' %}
 					<li class="sidebar-item active">
 					{% else %}
 					<li class="sidebar-item">
 					{% endif %}
 						<a class="sidebar-link" href="/users/master-list">
-							<i class="align-middle" data-feather="user"></i> <span class="align-middle">Master List</span>
+							<i class="align-middle" data-feather="user"></i> <span class="align-middle">User List</span>
 						</a>
 					</li>
-					{% for enabled_user_integration in enabled_user_integrations %}
+					<!-- {% for enabled_user_integration in enabled_user_integrations %}
 
 					{% if page == enabled_user_integration.integration_type %}
 					<li class="sidebar-item active">
@@ -125,7 +134,7 @@
 						</a>
 					</li>
 
-					{% endfor %}
+					{% endfor %} -->
 
 					<li class="sidebar-header">
 						Configurations
