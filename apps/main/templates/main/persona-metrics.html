@@ -6,7 +6,7 @@
 
 					<div class="row mb-2 mb-xl-3">
 						<div class="col-auto d-none d-sm-block">
-							<h3><strong>User Analytics</strong> Dashboard</h3>
+							<h3><strong>{{ persona }}s Analytics</strong> Dashboard</h3>
 						</div>
 					</div>
 					<div class="row">
@@ -14,147 +14,11 @@
 							<div class="w-100">
 								<div class="row">
 									<div class="col-sm-2">
-										<a href="/user-dashboard/internal-worker"><div class="card">
-											<div class="card-body">
-												<div class="row">
-													<div class="col mt-0">
-														<h5 class="card-title">Internal Workers</h5>
-													</div>
-													<div class="col-auto">
-														<div class="stat text-primary">
-															<i class="align-middle" data-feather="list"></i>
-														</div>
-													</div>
-												</div>
-												<h1 class="mt-1 mb-3">{{ count_internal_worker }} Users</h1>
-											</div>
-										</div></a>
-									</div>
-									<div class="col-sm-2">
-										<a href="/user-dashboard/internal-admin"><div class="card">
-											<div class="card-body">
-												<div class="row">
-													<div class="col mt-0">
-														<h5 class="card-title">Internal Admins</h5>
-													</div>
-													<div class="col-auto">
-														<div class="stat text-primary">
-															<i class="align-middle" data-feather="list"></i>
-														</div>
-													</div>
-												</div>
-												<h1 class="mt-1 mb-3">{{ count_internal_admin }} Users</h1>
-											</div>
-										</div></a>
-									</div>
-									<div class="col-sm-2">
-										<a href="/user-dashboard/external-worker"><div class="card">
-											<div class="card-body">
-												<div class="row">
-													<div class="col mt-0">
-														<h5 class="card-title">External Workers</h5>
-													</div>
-													<div class="col-auto">
-														<div class="stat text-primary">
-															<i class="align-middle" data-feather="list"></i>
-														</div>
-													</div>
-												</div>
-												<h1 class="mt-1 mb-3">{{ count_external_worker }} Users</h1>
-											</div>
-										</div></a>
-									</div>
-									<div class="col-sm-2">
-										<a href="/user-dashboard/external-admin"><div class="card">
-											<div class="card-body">
-												<div class="row">
-													<div class="col mt-0">
-														<h5 class="card-title">External Admins</h5>
-													</div>
-													<div class="col-auto">
-														<div class="stat text-primary">
-															<i class="align-middle" data-feather="list"></i>
-														</div>
-													</div>
-												</div>
-												<h1 class="mt-1 mb-3">{{ count_external_admin }} Users</h1>
-											</div>
-										</div></a>
-									</div>
-									<div class="col-sm-2">
-										<a href="/user-dashboard/hourly-worker"><div class="card">
-											<div class="card-body">
-												<div class="row">
-													<div class="col mt-0">
-														<h5 class="card-title">Hourly Workers</h5>
-													</div>
-													<div class="col-auto">
-														<div class="stat text-primary">
-															<i class="align-middle" data-feather="list"></i>
-														</div>
-													</div>
-												</div>
-												<h1 class="mt-1 mb-3">{{ count_hourly_worker }} Users</h1>
-											</div>
-										</div></a>
-									</div>
-									<div class="col-sm-2">
-										<a href="/user-dashboard/test-account"><div class="card">
-											<div class="card-body">
-												<div class="row">
-													<div class="col mt-0">
-														<h5 class="card-title">Test Accounts</h5>
-													</div>
-													<div class="col-auto">
-														<div class="stat text-primary">
-															<i class="align-middle" data-feather="list"></i>
-														</div>
-													</div>
-												</div>
-												<h1 class="mt-1 mb-3">{{ count_test_account }} Users</h1>
-											</div>
-										</div></a>
-									</div>
-									<div class="col-sm-2">
-										<a href="/user-dashboard/robot-account"><div class="card">
-											<div class="card-body">
-												<div class="row">
-													<div class="col mt-0">
-														<h5 class="card-title">Robot Accounts</h5>
-													</div>
-													<div class="col-auto">
-														<div class="stat text-primary">
-															<i class="align-middle" data-feather="list"></i>
-														</div>
-													</div>
-												</div>
-												<h1 class="mt-1 mb-3">{{ count_robot_account }} Users</h1>
-											</div>
-										</div></a>
-									</div>
-									<div class="col-sm-2">
-										<a href="/user-dashboard/shared-admin"><div class="card">
-											<div class="card-body">
-												<div class="row">
-													<div class="col mt-0">
-														<h5 class="card-title">Shared Admins</h5>
-													</div>
-													<div class="col-auto">
-														<div class="stat text-primary">
-															<i class="align-middle" data-feather="list"></i>
-														</div>
-													</div>
-												</div>
-												<h1 class="mt-1 mb-3">{{ count_shared_admin }} Users</h1>
-											</div>
-										</div></a>
-									</div>
-									<div class="col-sm-2">
 										<div class="card">
 											<div class="card-body">
 												<div class="row">
 													<div class="col mt-0">
-														<h5 class="card-title">On-Prem Admins</h5>
+														<h5 class="card-title">{{ persona }}</h5>
 													</div>
 													<div class="col-auto">
 														<div class="stat text-primary">
@@ -162,60 +26,9 @@
 														</div>
 													</div>
 												</div>
-												<h1 class="mt-1 mb-3">{{ count_onprem_admin }} Users</h1>
+												<h1 class="mt-1 mb-3">{{ persona_count }} Users</h1>
 											</div>
 										</div>
-									</div>
-									<div class="col-sm-2">
-										<div class="card">
-											<div class="card-body">
-												<div class="row">
-													<div class="col mt-0">
-														<h5 class="card-title">Service Accounts</h5>
-													</div>
-													<div class="col-auto">
-														<div class="stat text-primary">
-															<i class="align-middle" data-feather="list"></i>
-														</div>
-													</div>
-												</div>
-												<h1 class="mt-1 mb-3">{{ count_service_account }} Users</h1>
-											</div>
-										</div>
-									</div>
-									<div class="col-sm-2">
-										<a href="/user-dashboard/unknown"><div class="card">
-											<div class="card-body">
-												<div class="row">
-													<div class="col mt-0">
-														<h5 class="card-title">Unknown Persona Accounts</h5>
-													</div>
-													<div class="col-auto">
-														<div class="stat text-primary">
-															<i class="align-middle" data-feather="list"></i>
-														</div>
-													</div>
-												</div>
-												<h1 class="mt-1 mb-3">{{ count_unknown_account }} Users</h1>
-											</div>
-										</div></a>
-									</div>
-									<div class="col-sm-2">
-										<a href="/user-dashboard/duplicate"><div class="card">
-											<div class="card-body">
-												<div class="row">
-													<div class="col mt-0">
-														<h5 class="card-title">Duplicate Persona Accounts</h5>
-													</div>
-													<div class="col-auto">
-														<div class="stat text-primary">
-															<i class="align-middle" data-feather="list"></i>
-														</div>
-													</div>
-												</div>
-												<h1 class="mt-1 mb-3">{{ count_duplicate_account }} Users</h1>
-											</div>
-										</div></a>
 									</div>
 								</div>
 							</div>

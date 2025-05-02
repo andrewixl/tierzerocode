@@ -23,6 +23,7 @@ urlpatterns = [
     re_path(r'^error500$', views.error500),
     re_path(r'^sync-(?P<integration>[-\w]+)-devices$', views.syncDevices),
     re_path(r'^sync-(?P<integration>[-\w]+)-users$', views.syncUsers),
+    re_path(r'^user-dashboard/(?P<persona>[-\w]+)$', views.personaMetrics),
 ] 
 
 # urlpatterns += staticfiles_urlpatterns()

@@ -252,6 +252,76 @@ def indexUser(request):
 ############################################################################################
 
 @login_required
+def personaMetrics(request, persona):
+	# Checks User Permissions and Required Models
+	redirect_url = initialChecks(request)
+	if redirect_url:
+		return redirect(redirect_url)
+
+	# of Users that have adopted each authentication method
+	persona = persona.replace("-", " ").title()
+	users = UserData.objects.filter(persona=persona)
+ 
+   # Aggregate counts for highest and lowest authentication strengths
+	auth_strength_counts = users.aggregate(
+        count_phishing_resistant=Count('id', filter=Q(highest_authentication_strength='Phishing Resistant')),
+        count_passwordless=Count('id', filter=Q(highest_authentication_strength='Passwordless')),
+        count_mfa=Count('id', filter=Q(highest_authentication_strength='MFA')),
+        count_deprecated=Count('id', filter=Q(highest_authentication_strength='Deprecated')),
+        count_none=Count('id', filter=Q(highest_authentication_strength='None')),
+        count_low_phishing_resistant=Count('id', filter=Q(lowest_authentication_strength='Phishing Resistant')),
+        count_low_passwordless=Count('id', filter=Q(lowest_authentication_strength='Passwordless')),
+        count_low_mfa=Count('id', filter=Q(lowest_authentication_strength='MFA')),
+        count_low_deprecated=Count('id', filter=Q(lowest_authentication_strength='Deprecated')),
+        count_low_none=Count('id', filter=Q(lowest_authentication_strength='None')),
+    )
+   
+   # Count passwordless and non-passwordless users
+	passwordless_count = users.filter(
+        Q(lowest_authentication_strength__in=['Passwordless', 'Phishing Resistant'])
+    ).count()
+	non_passwordless_count = users.exclude(
+        lowest_authentication_strength__in=['Passwordless', 'Phishing Resistant']
+    ).count()
+
+	passwordless_capable_count = users.filter(
+        Q(highest_authentication_strength__in=['Passwordless', 'Phishing Resistant'])
+    ).count()
+	non_passwordless_capable_count = users.exclude(
+        highest_authentication_strength__in=['Passwordless', 'Phishing Resistant']
+    ).count()
+ 
+	context = {
+		'page': 'user-dashboard',
+		'enabled_integrations': getEnabledIntegrations(),
+		'persona': persona,
+		'persona_count': users.count(),
+        'auth_method_labels': ['Phishing Resistant', 'Passwordless', 'MFA', 'Deprecated', 'None'],
+        'auth_method_data': [
+            auth_strength_counts['count_phishing_resistant'],
+            auth_strength_counts['count_passwordless'],
+            auth_strength_counts['count_mfa'],
+            auth_strength_counts['count_deprecated'],
+            auth_strength_counts['count_none'],
+        ],
+        'auth_method_low_labels': ['Phishing Resistant', 'Passwordless', 'MFA', 'Deprecated', 'None'],
+        'auth_method_low_data': [
+            auth_strength_counts['count_low_phishing_resistant'],
+            auth_strength_counts['count_low_passwordless'],
+            auth_strength_counts['count_low_mfa'],
+            auth_strength_counts['count_low_deprecated'],
+            auth_strength_counts['count_low_none'],
+        ],
+        'count_passwordless_labels': ['Passwordless', 'Non-Passwordless'],
+        'count_passwordless_data': [passwordless_count, non_passwordless_count],
+        'count_passwordless_capable_labels': ['Passwordless', 'Non-Passwordless'],
+        'count_passwordless_capable_data': [passwordless_capable_count, non_passwordless_capable_count],
+    }
+	return render(request, 'main/persona-metrics.html', context)
+
+############################################################################################
+
+@login_required
 def profileSettings(request):
 	# Checks User Permissions and Required Models
 	redirect_url = initialChecks(request)
