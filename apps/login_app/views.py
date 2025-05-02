@@ -110,7 +110,7 @@ def azure_login(request):
 			params = {
 				'client_id': sso_integration.client_id,
 				'response_type': 'code',
-				'redirect_uri': urlunparse(urlparse(request.build_absolute_uri("/azure/callback/"))._replace(scheme="https")),
+				'redirect_uri': urlunparse(urlparse(request.build_absolute_uri("/identity/azure/callback/"))._replace(scheme="https")),
 				'response_mode': 'query',
 				'scope': 'openid email profile',
 				'state': 'random_state_string'
@@ -202,7 +202,7 @@ def azure_callback(request):
     token_data = {
      	'grant_type': 'authorization_code',
         'code': code,
-        'redirect_uri': urlunparse(urlparse(request.build_absolute_uri("/azure/callback/"))._replace(scheme="https")),
+        'redirect_uri': urlunparse(urlparse(request.build_absolute_uri("/identity/azure/callback/"))._replace(scheme="https")),
         'client_id': sso_integration.client_id,
         'client_secret': sso_integration.client_secret,
     }
