@@ -12,7 +12,7 @@ from urllib.parse import quote_plus, urlencode, urlparse, urlunparse
 from django.contrib.auth.models import User
 # Import Models
 from .models import SSOIntegration
-# Python Modules
+from ..logger.views import *
 
 ############################################################################################
 
