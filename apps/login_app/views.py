@@ -17,9 +17,6 @@ from .models import SSOIntegration
 #X6969
 integration_names = ['Microsoft Entra ID']
 
-AZURE_AD_REDIRECT_URI = 'http://localhost:8000/identity/azure/callback/'
-AZURE_AD_REDIRECT_URI_LOGOUT= 'http://localhost:8000/'
-
 ############################################################################################
 
 def genErrors(request, Emessages):
@@ -100,15 +97,17 @@ def login_page_sso(request):
 		else:
 			return redirect('/identity/login')
 
+@csrf_exempt
 def azure_login(request):
 	try:
-		user = User.objects.get(email=request.POST.get('email'))
+		user = User.objects.get(email=request.POST.get('email').lower())
 		if user and not user.has_usable_password() and user.is_active:
 			sso_integration = SSOIntegration.objects.get(integration_type = 'Microsoft Entra ID')
+            
 			params = {
 				'client_id': sso_integration.client_id,
 				'response_type': 'code',
-				'redirect_uri': AZURE_AD_REDIRECT_URI,
+				'redirect_uri': urlunparse(urlparse(request.build_absolute_uri("/admin/azure/callback/"))._replace(scheme="https")),
 				'response_mode': 'query',
 				'scope': 'openid email profile',
 				'state': 'random_state_string'
@@ -121,10 +120,10 @@ def azure_login(request):
 			return redirect(auth_url)
 		else:
 			messages.error(request, 'Invalid Credentials')
-			return redirect('/identity/login/sso')
+			return redirect('/admin/login/sso')
 	except User.DoesNotExist:
 		messages.error(request, 'Invalid Credentials')
-		return redirect('/identity/login/sso')
+		return redirect('/admin/login/sso')
 		
 ############################################################################################
 
@@ -191,34 +190,48 @@ def checklogin(request):
 		messages.error(request, 'Invalid Credentials')
 		return redirect('/identity/login')
 	
+@csrf_exempt
 def azure_callback(request):
-	sso_integration = SSOIntegration.objects.get(integration_type = 'Microsoft Entra ID')
-	code = request.GET.get('code')
-	token_url = 'https://login.microsoftonline.com/{}/oauth2/v2.0/token'.format(sso_integration.tenant_id)
-	token_data = {
-        'grant_type': 'authorization_code',
+    print("Started Callback")
+    sso_integration = SSOIntegration.objects.get(integration_type = 'Microsoft Entra ID')
+    code = request.GET.get('code')
+    token_url = 'https://login.microsoftonline.com/{}/oauth2/v2.0/token'.format(sso_integration.tenant_id)
+    token_data = {
+     	'grant_type': 'authorization_code',
         'code': code,
-        'redirect_uri': AZURE_AD_REDIRECT_URI,
+        'redirect_uri': urlunparse(urlparse(request.build_absolute_uri("/admin/azure/callback/"))._replace(scheme="https")),
         'client_id': sso_integration.client_id,
         'client_secret': sso_integration.client_secret,
     }
-	token_response = requests.post(token_url, data=token_data)
-	token_json = token_response.json()
-	access_token = token_json.get('access_token')
-
-	user_info_url = 'https://graph.microsoft.com/v1.0/me'
-	user_info_headers = {
-        'Authorization': f'Bearer {access_token}'
+    token_response = requests.post(token_url, data=token_data)
+    token_json = token_response.json()
+    access_token = token_json.get('access_token')
+    
+    user_info_url = 'https://graph.microsoft.com/v1.0/me'
+    user_info_headers = {
+    	'Authorization': f'Bearer {access_token}'
     }
-	user_info_response = requests.get(user_info_url, headers=user_info_headers)
-	user_info = user_info_response.json()
-
-	email = user_info.get('userPrincipalName')
-	print (user_info)
-    # user, _ = User.objects.get_or_create(username=email, defaults={'email': email})
-	if User.objects.filter(email = email):
-		login(request, User.objects.get(email = email))
-	return redirect('/')
+    user_info_response = requests.get(user_info_url, headers=user_info_headers)
+    user_info = user_info_response.json()
+    
+    email = str(user_info.get('userPrincipalName')).lower()
+    print (email)
+    if User.objects.filter(email = email):
+        user = User.objects.get(email = email)
+        login(request, user)
+        request.session['admin_upn'] = user.email
+        request.session['active'] = user.is_active
+        request.session['user_id'] = user.id
+        # START LOG EVENT
+        if user.is_superuser:
+            createLog('1101', 'User Authentication', 'User Login Event', "Superuser", True, 'Superuser User Login Success', 'Success', "SSO - " + request.session['admin_upn'], request.session['user_id'])
+        elif user.is_staff:
+            createLog('1103', 'User Authentication', 'User Login Event', "Staff", True, 'Superuser User Login Success', 'Success', "SSO - " + request.session['admin_upn'], request.session['user_id'])
+        # END LOG EVENT
+    else:
+        messages.add_message(request, messages.ERROR, 'SSO Misconfiguration - Please Contact your Administrator')
+        return redirect('/admin/login')
+    return redirect('/admin')
 
 ############################################################################################
 
@@ -229,12 +242,13 @@ def logout_page(request):
 	else:
 		return redirect('/identity/azure/logout/')
 
+@csrf_exempt
 def azure_logout(request):
 	sso_integration = SSOIntegration.objects.get(integration_type = 'Microsoft Entra ID')
 	logout(request)
 	logout_url = 'https://login.microsoftonline.com/{}/oauth2/v2.0/logout?post_logout_redirect_uri={}'.format(
         sso_integration.tenant_id,
-        AZURE_AD_REDIRECT_URI_LOGOUT
+        urlunparse(urlparse(request.build_absolute_uri("/admin/login"))._replace(scheme="https"))
     )
 	return redirect(logout_url)
 
@@ -345,65 +359,3 @@ def deleteUser(request, id):
 	user = User.objects.get(id = id)
 	user.delete()
 	return redirect('/identity/identity')
-
-# import requests
-# from django.conf import settings
-# from django.contrib.auth import login
-# from django.contrib.auth.models import User
-# from django.shortcuts import redirect
-# from django.http import HttpResponse
-# from urllib.parse import urlencode, quote_plus
-
-# AZURE_AD_REDIRECT_URI = 'http://localhost:8000/identity/azure/callback/'
-# AZURE_AD_REDIRECT_URI_LOGOUT= 'http://localhost:8000/'
-
-# def azure_login(request):
-#     params = {
-#         'client_id': AZURE_AD_CLIENT_ID,
-#         'response_type': 'code',
-#         'redirect_uri': AZURE_AD_REDIRECT_URI,
-#         'response_mode': 'query',
-#         'scope': 'openid email profile',
-#         'state': 'random_state_string'
-#     }
-#     auth_url = 'https://login.microsoftonline.com/{}/oauth2/v2.0/authorize?login_hint={}&{}'.format(
-#         AZURE_AD_TENANT_ID,
-# 		request.POST.get('email'),
-#         urlencode(params, quote_via=quote_plus)
-#     )
-#     return redirect(auth_url)
-
-# def azure_callback(request):
-#     code = request.GET.get('code')
-#     token_url = 'https://login.microsoftonline.com/{}/oauth2/v2.0/token'.format(AZURE_AD_TENANT_ID)
-#     token_data = {
-#         'grant_type': 'authorization_code',
-#         'code': code,
-#         'redirect_uri': AZURE_AD_REDIRECT_URI,
-#         'client_id': AZURE_AD_CLIENT_ID,
-#         'client_secret': AZURE_AD_CLIENT_SECRET
-#     }
-#     token_response = requests.post(token_url, data=token_data)
-#     token_json = token_response.json()
-#     access_token = token_json.get('access_token')
-
-#     user_info_url = 'https://graph.microsoft.com/v1.0/me'
-#     user_info_headers = {
-#         'Authorization': f'Bearer {access_token}'
-#     }
-#     user_info_response = requests.get(user_info_url, headers=user_info_headers)
-#     user_info = user_info_response.json()
-
-#     email = user_info.get('mail')
-#     print (user_info)
-#     # user, _ = User.objects.get_or_create(username=email, defaults={'email': email})
-#     # login(request, user)
-#     return redirect('/')
-
-# def azure_logout(request):
-#     logout(request)
-#     logout_url = 'https://login.microsoftonline.com/{}/oauth2/v2.0/logout?post_logout_redirect_uri={}'.format(
-#         AZURE_AD_TENANT_ID,
-#         AZURE_AD_REDIRECT_URI_LOGOUT
-#     )
-#     return redirect(logout_url)
