@@ -5,12 +5,14 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 # Import Python Modules
-import requests, secrets, string
-from urllib.parse import urlencode, quote_plus
+import json, os, requests, secrets, string
+from datetime import timedelta
+from urllib.parse import quote_plus, urlencode, urlparse, urlunparse
 # Import Django User Model
 from django.contrib.auth.models import User
 # Import Models
 from .models import SSOIntegration
+# Python Modules
 
 ############################################################################################
 
