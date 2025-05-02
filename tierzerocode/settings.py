@@ -16,24 +16,29 @@ import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure--xvxmpo#%!0be#gh466p)4a-v3k56-8#=(^k7%ww@gmhbkuudq'
-# SECRET_KEY = os.environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = False
-DEBUG = True
-# DEBUG = os.environ.get("DEBUG", default=True)
+DEBUG = False
+# DEBUG = True
 
-ALLOWED_HOSTS = ['*']
-# ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
+ALLOWED_HOSTS = ['https://hersheys.tierzerocode.com','10.10.10.45','localhost']
+CSRF_TRUSTED_ORIGINS = ['https://hersheys.tierzerocode.com']
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+
+# DISABLE CSRF FOR LOCALHOST
+# SECURE_SSL_REDIRECT = True
+SECURE_HSTS_SECONDS = 3600
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
 
 # Application definition
-
 INSTALLED_APPS = [
     'apps.main',
     'apps.login_app',
@@ -77,7 +82,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'tierzerocode.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
@@ -87,30 +91,6 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-#         'NAME': "tzcdb",
-#         'USER': "awbadmin",
-#         'PASSWORD': "Macujuthetrath4383$",
-#         'HOST': "localhost",
-#         'PORT': 5433,
-#     }
-# }
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-#         'NAME': os.environ.get('DATABASE_NAME'),
-#         'USER': os.environ.get('DATABASE_USER'),
-#         'PASSWORD': os.environ.get('DATABASE_PASSWORD'),
-#         'HOST': os.environ.get('DATABASE_HOST'),
-#         'PORT': os.environ.get('DATABASE_PORT'),
-#     }
-# }
-
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -155,42 +135,24 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static/")
 
 LOGIN_URL = '/identity/login'
 
-# LOGGING = {
-#     'version': 1,
-#     'disable_existing_loggers': False,
-#     'formatters': {
-#         'verbose': {
-#             'format': '{levelname} {asctime} {module} {message}',
-#             'style': '{',
-#         },
-#         'simple': {
-#             'format': '{levelname} {message}',
-#             'style': '{',
-#         },
-#     },
-#     'handlers': {
-#         'file': {
-#             'level': 'DEBUG',
-#             'class': 'logging.FileHandler',
-#             'filename': 'debug.log',
-#             'formatter': 'verbose',
-#         },
-#         'console': {
-#             'level': 'DEBUG',
-#             'class': 'logging.StreamHandler',
-#             'formatter': 'simple',
-#         },
-#     },
-#     'loggers': {
-#         'django': {
-#             'handlers': ['file', 'console'],
-#             'level': 'DEBUG',
-#             'propagate': True,
-#         },
-#         'custom_logger': {
-#             'handlers': ['file', 'console'],
-#             'level': 'DEBUG',
-#             'propagate': False,
-#         },
-#     },
-# }
+from django.contrib.messages import constants as messages
+MESSAGE_TAGS = {
+    messages.DEBUG: 'secondary',
+    messages.INFO: 'info',
+    messages.SUCCESS: 'success',
+    messages.WARNING: 'warning',
+    messages.ERROR: 'danger',
+}
+
+LANGUAGES = [
+    ('en', 'English'),
+    ('es', 'Spanish'),
+    ('fr', 'French'),
+    ('pt', 'Portuguese'),
+    ('zh-hans', 'Simplified Chinese'),
+]
+
+# django-admin makemessages -l en
+# django-admin compilemessages
+
+LOCALE_PATHS = [os.path.join(BASE_DIR, 'locale')]
