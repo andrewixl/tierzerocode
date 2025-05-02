@@ -123,10 +123,10 @@ def azure_login(request):
 			return redirect(auth_url)
 		else:
 			messages.error(request, 'Invalid Credentials')
-			return redirect('/admin/login/sso')
+			return redirect('/identity/login/sso')
 	except User.DoesNotExist:
 		messages.error(request, 'Invalid Credentials')
-		return redirect('/admin/login/sso')
+		return redirect('/identity/login/sso')
 		
 ############################################################################################
 
@@ -233,8 +233,8 @@ def azure_callback(request):
         # END LOG EVENT
     else:
         messages.add_message(request, messages.ERROR, 'SSO Misconfiguration - Please Contact your Administrator')
-        return redirect('/admin/login')
-    return redirect('/admin')
+        return redirect('/identity/login')
+    return redirect('/')
 
 ############################################################################################
 
@@ -251,7 +251,7 @@ def azure_logout(request):
 	logout(request)
 	logout_url = 'https://login.microsoftonline.com/{}/oauth2/v2.0/logout?post_logout_redirect_uri={}'.format(
         sso_integration.tenant_id,
-        urlunparse(urlparse(request.build_absolute_uri("/admin/login"))._replace(scheme="https"))
+        urlunparse(urlparse(request.build_absolute_uri("/identity/login"))._replace(scheme="https"))
     )
 	return redirect(logout_url)
 
