@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure--xvxmpo#%!0be#gh466p)4a-v3k56-8#=(^k7%ww@gmhbkuudq
 # DEBUG = False
 DEBUG = True
 
-ALLOWED_HOSTS = ['https://hersheys.tierzerocode.com','10.10.10.45','localhost']
+ALLOWED_HOSTS = ['hersheys.tierzerocode.com','10.10.10.45','localhost']
 CSRF_TRUSTED_ORIGINS = ['https://hersheys.tierzerocode.com']
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 CSRF_COOKIE_SECURE = True
