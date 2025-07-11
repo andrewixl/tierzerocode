@@ -121,6 +121,18 @@ def initialSetup(request):
 
 ############################################################################################
 
+from django.core.management import call_command
+from django.http import HttpResponse, HttpResponseForbidden
+
+@login_required
+def migration(request):
+    if not request.user.is_superuser:
+        return HttpResponseForbidden("Unauthorized")
+    call_command('migrate')
+    return HttpResponse("Migrations applied.")
+
+############################################################################################
+
 from .integrations.cs_health_check import *
 
 @login_required

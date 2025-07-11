@@ -37,6 +37,7 @@ urlpatterns = [
     re_path(r'^suspenduser/(?P<id>\d+)$', views.suspendUser),
     re_path(r'^activateuser/(?P<id>\d+)$', views.activateUser),
     re_path (r'^deleteuser/(?P<id>\d+)$', views.deleteUser),
+
 ]
 # urlpatterns += staticfiles_urlpatterns()
 # urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
