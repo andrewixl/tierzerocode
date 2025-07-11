@@ -168,8 +168,25 @@
 							</a>
 							<div class="dropdown-menu dropdown-menu-lg dropdown-menu-end py-0" aria-labelledby="alertsDropdown">
 								<div class="dropdown-menu-header">
-									0 New Notifications
+									0 Notifications
 								</div>
+								{% if notifications %}
+								{% for notification in notifications %}
+								<div class="list-group">
+									<a href="" class="list-group-item">
+										<div class="row g-0 align-items-center">
+											<div class="col-2">
+												<i class="text-info" data-feather="mail"></i>
+											</div>
+											<div class="col-10">
+												<div class="text-dark">{{notification.title}}</div>
+												<div class="text-muted small mt-1">{{notification.updated_at}}</div>
+											</div>
+										</div>
+									</a>
+								</div>
+								{% endfor %}
+								{% else %}
 								<div class="list-group">
 									<a href="" class="list-group-item">
 										<div class="row g-0 align-items-center">
@@ -183,9 +200,10 @@
 										</div>
 									</a>
 								</div>
-								<div class="dropdown-menu-footer">
+								{% endif %}
+								<!-- <div class="dropdown-menu-footer">
 									<a href="/error500" class="text-muted">Show all notifications</a>
-								</div>
+								</div> -->
 							</div>
 						</li>
 						<li class="nav-item dropdown">
@@ -255,5 +273,30 @@
 	{% endblock %}
 
 </body>
+<!-- Start Bootstrap Toast Notifications Div -->
+<div aria-live="polite" aria-atomic="true" class="position-relative">
+	<div class="toast-container position-fixed top-0 end-0 p-3">
+		{% for message in messages %}
+		<div class="toast align-items-center {% if 'custom' in message.tags %} custom-bg-color {% elif message.tags %} text-bg-{{ message.tags }} {% else %} text-bg-primary {% endif %} border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="5000">
+			<div class="d-flex">
+				<div class="toast-body"><h6 class="h6 fw-normal">{{ message }}</h6></div>
+				<button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+			</div>
+		</div>
+		{% endfor %}
+	</div>
+</div>
+<!-- End Bootstrap Toast Notifications Div -->
+<!-- Start Bootstrap Toast Notifications Script -->
+<script>
+	document.addEventListener('DOMContentLoaded', function () {
+		var toastElements = document.querySelectorAll('.toast');
+		toastElements.forEach(function (toastElement) {
+			var toast = new bootstrap.Toast(toastElement);
+			toast.show();
+		});
+	});
+</script>
+<!-- End Bootstrap Toast Notifications Script -->
 
 </html>

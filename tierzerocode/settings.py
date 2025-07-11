@@ -24,7 +24,7 @@ SECRET_KEY = 'django-insecure--xvxmpo#%!0be#gh466p)4a-v3k56-8#=(^k7%ww@gmhbkuudq
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # DEBUG = False
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['hersheys.tierzerocode.com','10.10.10.45','localhost']
 CSRF_TRUSTED_ORIGINS = ['https://hersheys.tierzerocode.com']

@@ -195,46 +195,45 @@ def checklogin(request):
 	
 @csrf_exempt
 def azure_callback(request):
-    print("Started Callback")
-    sso_integration = SSOIntegration.objects.get(integration_type = 'Microsoft Entra ID')
-    code = request.GET.get('code')
-    token_url = 'https://login.microsoftonline.com/{}/oauth2/v2.0/token'.format(sso_integration.tenant_id)
-    token_data = {
-     	'grant_type': 'authorization_code',
-        'code': code,
-        'redirect_uri': urlunparse(urlparse(request.build_absolute_uri("/identity/azure/callback/"))._replace(scheme="https")),
-        'client_id': sso_integration.client_id,
-        'client_secret': sso_integration.client_secret,
-    }
-    token_response = requests.post(token_url, data=token_data)
-    token_json = token_response.json()
-    access_token = token_json.get('access_token')
+	print("Started Callback")
+	sso_integration = SSOIntegration.objects.get(integration_type = 'Microsoft Entra ID')
+	code = request.GET.get('code')
+	token_url = 'https://login.microsoftonline.com/{}/oauth2/v2.0/token'.format(sso_integration.tenant_id)
+	token_data = {
+		'grant_type': 'authorization_code',
+		'code': code,
+		'redirect_uri': urlunparse(urlparse(request.build_absolute_uri("/identity/azure/callback/"))._replace(scheme="https")),
+		'client_id': sso_integration.client_id,
+		'client_secret': sso_integration.client_secret,
+	}
+	token_response = requests.post(token_url, data=token_data)
+	token_json = token_response.json()
+	access_token = token_json.get('access_token')
     
-    user_info_url = 'https://graph.microsoft.com/v1.0/me'
-    user_info_headers = {
-    	'Authorization': f'Bearer {access_token}'
-    }
-    user_info_response = requests.get(user_info_url, headers=user_info_headers)
-    user_info = user_info_response.json()
+	user_info_url = 'https://graph.microsoft.com/v1.0/me'
+	user_info_headers = {'Authorization': f'Bearer {access_token}'}
+	user_info_response = requests.get(user_info_url, headers=user_info_headers)
+	user_info = user_info_response.json()
     
-    email = str(user_info.get('userPrincipalName')).lower()
-    print (email)
-    if User.objects.filter(email = email):
-        user = User.objects.get(email = email)
-        login(request, user)
-        request.session['admin_upn'] = user.email
-        request.session['active'] = user.is_active
-        request.session['user_id'] = user.id
+	email = str(user_info.get('userPrincipalName')).lower()
+	print (email)
+	if User.objects.filter(email = email):
+		user = User.objects.get(email = email)
+		login(request, user)
+		request.session['admin_upn'] = user.email
+		request.session['active'] = user.is_active
+		request.session['user_id'] = user.id
+		request.session['user_email'] = user.email
         # START LOG EVENT
-        if user.is_superuser:
-            createLog('1101', 'User Authentication', 'User Login Event', "Superuser", True, 'Superuser User Login Success', 'Success', "SSO - " + request.session['admin_upn'], request.session['user_id'])
-        elif user.is_staff:
-            createLog('1103', 'User Authentication', 'User Login Event', "Staff", True, 'Superuser User Login Success', 'Success', "SSO - " + request.session['admin_upn'], request.session['user_id'])
+		if user.is_superuser:
+			createLog('1101', 'User Authentication', 'User Login Event', "Superuser", True, 'Superuser User Login Success', 'Success', "SSO - " + request.session['admin_upn'], request.session['user_id'])
+		elif user.is_staff:
+			createLog('1103', 'User Authentication', 'User Login Event', "Staff", True, 'Staff User Login Success', 'Success', "SSO - " + request.session['admin_upn'], request.session['user_id'])
         # END LOG EVENT
-    else:
-        messages.add_message(request, messages.ERROR, 'SSO Misconfiguration - Please Contact your Administrator')
-        return redirect('/identity/login')
-    return redirect('/')
+	else:
+		messages.add_message(request, messages.ERROR, 'SSO Misconfiguration - Please Contact your Administrator')
+		return redirect('/identity/login')
+	return redirect('/')
 
 ############################################################################################
 

@@ -73,7 +73,9 @@
                                     <td><a href="/device/{{check.id}}">{{check.upn}}</a></td>
                                     <td>{{check.persona}}</td>
                                     <td>{{check.created_at_timestamp}}</td>
-                                    <td>{{check.last_logon_timestamp}}</td>
+                                    <td data-order="{{ check.last_logon_timestamp|date:'c' }}">
+                                        {{ check.last_logon_timestamp|date:"Y-m-d H:i:s" }}
+                                    </td>
                                     <td>{{check.highest_authentication_strength}}</td>
                                     <td>{{check.lowest_authentication_strength}}</td>
                                     {% endif %}
@@ -137,6 +139,10 @@
                 {
                     targets: [4, 5], // Index of the hidden column
                     visible: false
+                },
+                {
+                    targets: [3], // The index of your Last Sign-on column
+                    type: 'date'
                 }
             ]
         });

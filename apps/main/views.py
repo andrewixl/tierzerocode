@@ -16,7 +16,7 @@ from .integrations.device_integrations.Qualys import *
 # Import User Integration API Scripts
 from .integrations.user_integrations.MicrosoftEntraID import *
 # Import Integrations Models
-from .models import Integration, Device, DeviceComplianceSettings
+from .models import Integration, Device, DeviceComplianceSettings, Notification
 # Setup Logging
 # logger = logging.getLogger('custom_logger')
 
@@ -166,6 +166,7 @@ def indexDevice(request):
 from django.db.models import Q
 @login_required
 def indexUser(request):
+	# test()
 	# Checks User Permissions and Required Models
 	redirect_url = initialChecks(request)
 	if redirect_url:
@@ -290,6 +291,10 @@ def personaMetrics(request, persona):
 	non_passwordless_capable_count = users.exclude(
         highest_authentication_strength__in=['Passwordless', 'Phishing Resistant']
     ).count()
+
+	user_list = []
+	for user_data in users:		
+		user_list.append([user_data, user_data.passKeyDeviceBound_authentication_method, user_data.passKeyDeviceBoundAuthenticator_authentication_method, user_data.windowsHelloforBusiness_authentication_method, user_data.microsoftAuthenticatorPasswordless_authentication_method, user_data.microsoftAuthenticatorPush_authentication_method, user_data.softwareOneTimePasscode_authentication_method, user_data.temporaryAccessPass_authentication_method, user_data.mobilePhone_authentication_method, user_data.email_authentication_method, user_data.securityQuestion_authentication_method])
  
 	context = {
 		'page': 'user-dashboard',
@@ -301,7 +306,7 @@ def personaMetrics(request, persona):
 		'percent_phishing_resistant': "{:.2f}".format(((auth_strength_counts['count_phishing_resistant']) / users.count()) * 100 if users.count() > 0 else 0),
 		'count_phishing_resistant': auth_strength_counts['count_phishing_resistant'],
 		'percent_passwordless': "{:.2f}".format(((auth_strength_counts['count_phishing_resistant'] + auth_strength_counts['count_passwordless']) / users.count()) * 100 if users.count() > 0 else 0),
-		'count_passwordless': auth_strength_counts['count_passwordless'],
+		'count_passwordless': (auth_strength_counts['count_phishing_resistant'] + auth_strength_counts['count_passwordless']),
 		'auth_method_labels': ['Phishing Resistant', 'Passwordless', 'MFA', 'Deprecated', 'None'],
         'auth_method_data': [
             auth_strength_counts['count_phishing_resistant'],
@@ -318,7 +323,7 @@ def personaMetrics(request, persona):
             auth_strength_counts['count_low_deprecated'],
             auth_strength_counts['count_low_none'],
         ],
-		'auth_method_adoption_labels': ['Windows Hello for Business', 'Passkey Device Bound', 'Passkey Device Bound Authenticator', 'Microsoft Authenticator Passwordless', 'Microsoft Authenticator Push', 'Software One Time Passcode', 'Mobile Phone'],
+		'auth_method_adoption_labels': ['Windows Hello for Business', 'Passkey Device', 'Passkey Authenticator', 'MS Authenticator Passwordless', 'MS Authenticator Push', 'Software OTP', 'Mobile Phone'],
 		'auth_method_adoption_data': [
 			users.filter(windowsHelloforBusiness_authentication_method=True).count(),
 			users.filter(passKeyDeviceBound_authentication_method=True).count(),
@@ -326,15 +331,14 @@ def personaMetrics(request, persona):
 			users.filter(microsoftAuthenticatorPasswordless_authentication_method=True).count(),
 			users.filter(microsoftAuthenticatorPush_authentication_method=True).count(),
 			users.filter(softwareOneTimePasscode_authentication_method=True).count(),
-			# users.filter(temporaryAccessPass_authentication_method=True).count(),
 			users.filter(mobilePhone_authentication_method=True).count(),
-			# users.filter(email_authentication_method=True).count(),
-			# users.filter(securityQuestion_authentication_method=True).count(),
 		],
-		'count_passwordless_labels': ['Passwordless', 'Non-Passwordless'],
-        'count_passwordless_data': [passwordless_count, non_passwordless_count],
         'count_passwordless_capable_labels': ['Passwordless', 'Non-Passwordless'],
         'count_passwordless_capable_data': [passwordless_capable_count, non_passwordless_capable_count],
+
+		'auth_strengths': ['None', 'MFA', 'Passwordless', 'Phishing Resistant', 'Deprecated'],
+        'personas': ['Internal Worker', 'Internal Admin', 'External Worker', 'External Admin', 'Hourly Worker', 'Test Account', 'Robot Account', 'Shared Admin', 'OnPrem Internal Admin', 'OnPrem External Admin', 'Service Account Non-Interactive', 'Service Account Interactive', 'OnPrem Service Account Non-Interactive', 'OnPrem Service Account Interactive', 'Unknown', 'DUPLICATE'],
+		'user_list':user_list,
     }
 	return render(request, 'main/persona-metrics.html', context)
 
@@ -585,6 +589,7 @@ def integrations(request):
 	
 	context = {
 		'page':'integrations',
+		'notifications': Notification.objects.all(),
 		'enabled_integrations': getEnabledIntegrations(),
 		'enabled_user_integrations': getEnabledUserIntegrations(),
 		'deviceIntegrationStatuses':deviceIntegrationStatuses,
@@ -683,7 +688,9 @@ def syncUsers(request, integration):
 	if redirect_url:
 		return redirect(redirect_url)
 	#X6969
+	print (integration)
 	if integration == 'microsoft-entra-id':
+		print ("Syncing Microsoft Entra ID Users")
 		syncMicrosoftEntraIDUserBackground(request)
 	print("Redirecting to Integrations")
 	return redirect('/integrations')

@@ -11,6 +11,7 @@ from .models import (
     SophosCentralDeviceData,
     CrowdStrikeFalconPreventionPolicy,
     CrowdStrikeFalconPreventionPolicySetting,
+    Notification,
 )
 
 class UserDataAdmin(admin.ModelAdmin):
@@ -36,3 +37,5 @@ admin.site.register(UserData, UserDataAdmin)
 # CS Health Check
 admin.site.register(CrowdStrikeFalconPreventionPolicy)
 admin.site.register(CrowdStrikeFalconPreventionPolicySetting)
+
+admin.site.register(Notification)
