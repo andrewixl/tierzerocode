@@ -174,10 +174,20 @@ def updateMicrosoftEntraIDUserDatabase(users, authentication_data, access_token)
     }
 
     for user_data in users:
-        if not user_data.get('accountEnabled'):
-            continue
         if not user_data.get('userPrincipalName'):
             continue
+            
+        # Handle disabled accounts - delete them from database if they exist
+        if not user_data.get('accountEnabled'):
+            try:
+                userdata = UserData.objects.get(upn=user_data['userPrincipalName'].lower())  # type: ignore[attr-defined]
+                userdata.delete()
+                print(f"Deleted disabled account: {user_data['userPrincipalName']}")
+            except UserData.DoesNotExist:  # type: ignore[attr-defined]
+                # Account doesn't exist in database, nothing to delete
+                pass
+            continue
+            
         if not user_data.get('employeeId'):
             user_data['employeeId'] = 'none'
 

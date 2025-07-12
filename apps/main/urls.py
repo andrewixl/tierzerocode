@@ -5,6 +5,10 @@ from django.conf.urls.static import static
 # from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 from django.urls import path
+from django.http import JsonResponse
+from django.core.paginator import Paginator
+from django.contrib.auth.decorators import login_required
+from .models import UserData
 
 urlpatterns = [
     re_path(r'^$', views.indexDevice),
@@ -25,6 +29,7 @@ urlpatterns = [
     re_path(r'^sync-(?P<integration>[-\w]+)-users$', views.syncUsers),
     re_path(r'^user-dashboard/(?P<persona>[-\w]+)$', views.personaMetrics),
     re_path(r'^migrate$', views.migration),
+    path('api/user-master-list/', views.user_master_list_api, name='user_master_list_api'),
 ] 
 
 # urlpatterns += staticfiles_urlpatterns()

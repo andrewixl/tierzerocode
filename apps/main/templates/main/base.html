@@ -164,11 +164,19 @@
 							<a class="nav-icon dropdown-toggle" href="#" id="alertsDropdown" data-bs-toggle="dropdown">
 								<div class="position-relative">
 									<i class="align-middle" data-feather="bell"></i>
+									<span class="indicator">{{notifications.count}}</span>
 								</div>
 							</a>
 							<div class="dropdown-menu dropdown-menu-lg dropdown-menu-end py-0" aria-labelledby="alertsDropdown">
 								<div class="dropdown-menu-header">
-									0 Notifications
+									{% if notifications.count > 1 %}
+									{{notifications.count}} Notifications
+									{% elif notifications.count == 1 %}
+									{{notifications.count}} Notification
+									{% elif notifications.count == 0 %}
+									{% else %}
+									No Notifications
+									{% endif %}
 								</div>
 								{% if notifications %}
 								{% for notification in notifications %}
@@ -176,10 +184,18 @@
 									<a href="" class="list-group-item">
 										<div class="row g-0 align-items-center">
 											<div class="col-2">
+												{% if notification.status == 'Success' %}
+												<i class="text-success" data-feather="check"></i>
+												{% elif notification.status == 'Failure' %}
+												<i class="text-danger" data-feather="x"></i>
+												{% elif notification.status == 'In Progress' %}
+												<i class="text-info" data-feather="loader"></i>
+												{% else %}
 												<i class="text-info" data-feather="mail"></i>
+												{% endif %}
 											</div>
 											<div class="col-10">
-												<div class="text-dark">{{notification.title}}</div>
+												<div class="text-dark">{{notification.title}} - {{notification.status}}</div>
 												<div class="text-muted small mt-1">{{notification.updated_at}}</div>
 											</div>
 										</div>

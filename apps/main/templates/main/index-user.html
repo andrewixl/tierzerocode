@@ -225,6 +225,55 @@
 						<div class="col-12 col-md-6 col-xxl-3 d-flex order-1 order-xxl-3">
 							<div class="card flex-fill w-100">
 								<div class="card-header">
+									<h5 class="card-title mb-0">MFA Method Adoption</h5>
+								</div>
+								<div class="card-body d-flex">
+									<div class="align-self-center w-100">
+										<div class="py-3">
+											<div class="chart chart-xs">
+												<canvas id="adoption-auth-pie"></canvas>
+											</div>
+										</div>
+
+										<table class="table mb-0">
+											<tbody>
+												<tr>
+													<td><i class="fas fa-circle text-primary fa-fw"></i> Windows Hello for Business</td>
+													<td class="text-end">{{auth_method_adoption_data.0}}</td>
+												</tr>
+												<tr>
+													<td><i class="fas fa-circle text-secondary fa-fw"></i> Passkey Device</td>
+													<td class="text-end">{{auth_method_adoption_data.1}}</td>
+												</tr>
+												<tr>
+													<td><i class="fas fa-circle text-success fa-fw"></i> Passkey Authenticator</td>
+													<td class="text-end">{{auth_method_adoption_data.2}}</td>
+												</tr>
+												<tr>
+													<td><i class="fas fa-circle text-danger fa-fw"></i> MS Authenticator Passwordless</td>
+													<td class="text-end">{{auth_method_adoption_data.3}}</td>
+												</tr>
+												<tr>
+													<td><i class="fas fa-circle text-warning fa-fw"></i> MS Authenticator Push</td>
+													<td class="text-end">{{auth_method_adoption_data.4}}</td>
+												</tr>
+												<tr>
+													<td><i class="fas fa-circle text-info fa-fw"></i> Software OTP</td>
+													<td class="text-end">{{auth_method_adoption_data.5}}</td>
+												</tr>
+												<tr>
+													<td><i class="fas fa-circle text-light fa-fw"></i> Mobile Phone</td>
+													<td class="text-end">{{auth_method_adoption_data.6}}</td>
+												</tr>
+											</tbody>
+										</table>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-12 col-md-6 col-xxl-3 d-flex order-1 order-xxl-3">
+							<div class="card flex-fill w-100">
+								<div class="card-header">
 									<h5 class="card-title mb-0">Highest Auth Method Adoption</h5>
 								</div>
 								<div class="card-body d-flex">
@@ -304,7 +353,7 @@
 								</div>
 							</div>
 						</div>
-						<div class="col-12 col-md-6 col-xxl-3 d-flex order-1 order-xxl-3">
+						<!-- <div class="col-12 col-md-6 col-xxl-3 d-flex order-1 order-xxl-3">
 							<div class="card flex-fill w-100">
 								<div class="card-header">
 									<h5 class="card-title mb-0">Full Passwordless Enrollment Users</h5>
@@ -332,7 +381,7 @@
 									</div>
 								</div>
 							</div>
-						</div>
+						</div> -->
 						<div class="col-12 col-md-6 col-xxl-3 d-flex order-1 order-xxl-3">
 							<div class="card flex-fill w-100">
 								<div class="card-header">
@@ -368,12 +417,12 @@
 			<script>
 				document.addEventListener("DOMContentLoaded", function() {
 					// Pie chart
-					new Chart(document.getElementById("dashboard-os-platform-pie"), {
+					new Chart(document.getElementById("adoption-auth-pie"), {
 						type: "pie",
 						data: {
-							labels: {{ osPlatformLabels|safe }},
+							labels: {{ auth_method_adoption_labels|safe }},
 							datasets: [{ 
-								data: {{ osPlatformData|safe }},
+								data: {{ auth_method_adoption_data|safe }},
 								backgroundColor: [
 									window.theme.primary,
 									window.theme.secondary,
@@ -381,67 +430,7 @@
 									window.theme.danger,
 									window.theme.warning,
 									window.theme.info,
-									'rgb(0,0,0)',
-								],
-								borderWidth: 5,
-								borderColor: window.theme.white
-							}]
-						},
-						options: {
-							responsive: !window.MSInputMethodContext,
-							maintainAspectRatio: false,
-							legend: {
-								display: false
-							},
-							cutoutPercentage: 70
-						}
-					});
-				});
-			</script>
-			<script>
-				document.addEventListener("DOMContentLoaded", function() {
-					// Pie chart
-					new Chart(document.getElementById("dashboard-endpoint-type-pie"), {
-						type: "pie",
-						data: {
-							labels: {{ endpointTypeLabels|safe }},
-							datasets: [{
-								data: {{ endpointTypeData|safe }},
-								backgroundColor: [
-									window.theme.primary,
-									window.theme.secondary,
-									window.theme.success,
-									window.theme.danger,
-									// "#E8EAED"
-								],
-								borderWidth: 5,
-								borderColor: window.theme.white
-							}]
-						},
-						options: {
-							responsive: !window.MSInputMethodContext,
-							maintainAspectRatio: false,
-							legend: {
-								display: false
-							},
-							cutoutPercentage: 70
-						}
-					});
-				});
-			</script>
-			<script>
-				document.addEventListener("DOMContentLoaded", function() {
-					// Pie chart
-					new Chart(document.getElementById("dashboard-tier-zero-pie"), {
-						type: "pie",
-						data: {
-							labels: {{ compliantLabels|safe }},
-							datasets: [{
-								data: {{ compliantData|safe }},
-								backgroundColor: [
-									window.theme.success,
-									window.theme.danger,
-									"#E8EAED"
+									window.theme.light
 								],
 								borderWidth: 5,
 								borderColor: window.theme.white
@@ -473,34 +462,6 @@
 									window.theme.success,
 									window.theme.danger,
 									window.theme.warning,
-								],
-								borderWidth: 5,
-								borderColor: window.theme.white
-							}]
-						},
-						options: {
-							responsive: !window.MSInputMethodContext,
-							maintainAspectRatio: false,
-							legend: {
-								display: false
-							},
-							cutoutPercentage: 70
-						}
-					});
-				});
-			</script>
-			<script>
-				document.addEventListener("DOMContentLoaded", function() {
-					// Pie chart
-					new Chart(document.getElementById("full-passwordless-pie"), {
-						type: "pie",
-						data: {
-							labels: {{ count_passwordless_labels|safe }},
-							datasets: [{ 
-								data: {{ count_passwordless_data|safe }},
-								backgroundColor: [
-									window.theme.success,
-									window.theme.danger,
 								],
 								borderWidth: 5,
 								borderColor: window.theme.white

@@ -1,24 +1,27 @@
-from django.shortcuts import render, redirect
+# Standard library imports
+import re
+
+# Third-party imports
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.management import call_command
+from django.core.paginator import Paginator
+from django.db.models import Count, Prefetch, Q
 from django.forms.models import model_to_dict
-import re
-from django.db.models import Prefetch, Count
-# Import Device Integration API Scripts
-#X6969
+from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
+from django.shortcuts import render, redirect
+
+# Local imports
+from .integrations.cs_health_check import *
 from .integrations.device_integrations.CloudflareZeroTrust import *
 from .integrations.device_integrations.CrowdStrikeFalcon import *
 from .integrations.device_integrations.MicrosoftDefenderforEndpoint import *
 from .integrations.device_integrations.MicrosoftEntraID import *
 from .integrations.device_integrations.MicrosoftIntune import *
-from .integrations.device_integrations.SophosCentral import *
 from .integrations.device_integrations.Qualys import *
-# Import User Integration API Scripts
+from .integrations.device_integrations.SophosCentral import *
 from .integrations.user_integrations.MicrosoftEntraID import *
-# Import Integrations Models
-from .models import Integration, Device, DeviceComplianceSettings, Notification
-# Setup Logging
-# logger = logging.getLogger('custom_logger')
+from .models import Device, DeviceComplianceSettings, Integration, Notification, UserData
 
 ############################################################################################
 
@@ -121,9 +124,6 @@ def initialSetup(request):
 
 ############################################################################################
 
-from django.core.management import call_command
-from django.http import HttpResponse, HttpResponseForbidden
-
 @login_required
 def migration(request):
     if not request.user.is_superuser:
@@ -132,8 +132,6 @@ def migration(request):
     return HttpResponse("Migrations applied.")
 
 ############################################################################################
-
-from .integrations.cs_health_check import *
 
 @login_required
 def indexDevice(request):
@@ -165,6 +163,7 @@ def indexDevice(request):
 		'page': 'device-dashboard',
 		'enabled_integrations': enabled_integrations,
 		'enabled_user_integrations': getEnabledUserIntegrations(),
+		'notifications': Notification.objects.all(),
 		'endpoint_device_counts': integration_device_counts,
 		'osPlatformLabels': os_platforms,
 		'osPlatformData': osPlatformData,
@@ -175,7 +174,6 @@ def indexDevice(request):
     }
 	return render(request, 'main/index-device.html', context)
 
-from django.db.models import Q
 @login_required
 def indexUser(request):
 	# test()
@@ -202,13 +200,6 @@ def indexUser(request):
     )
    
    # Count passwordless and non-passwordless users
-	passwordless_count = UserData.objects.filter(
-        Q(lowest_authentication_strength__in=['Passwordless', 'Phishing Resistant'])
-    ).count()
-	non_passwordless_count = UserData.objects.exclude(
-        lowest_authentication_strength__in=['Passwordless', 'Phishing Resistant']
-    ).count()
-
 	passwordless_capable_count = UserData.objects.filter(
         Q(highest_authentication_strength__in=['Passwordless', 'Phishing Resistant'])
     ).count()
@@ -222,6 +213,7 @@ def indexUser(request):
 	context = {
 		'page': 'user-dashboard',
 		'enabled_integrations': getEnabledIntegrations(),
+		'notifications': Notification.objects.all(),
         'auth_method_labels': ['Phishing Resistant', 'Passwordless', 'MFA', 'Deprecated', 'None'],
         'auth_method_data': [
             auth_strength_counts['count_phishing_resistant'],
@@ -238,8 +230,6 @@ def indexUser(request):
             auth_strength_counts['count_low_deprecated'],
             auth_strength_counts['count_low_none'],
         ],
-        'count_passwordless_labels': ['Passwordless', 'Non-Passwordless'],
-        'count_passwordless_data': [passwordless_count, non_passwordless_count],
         'count_passwordless_capable_labels': ['Passwordless', 'Non-Passwordless'],
         'count_passwordless_capable_data': [passwordless_capable_count, non_passwordless_capable_count],
         'count_internal_worker': persona_map.get('Internal Worker', 0),
@@ -257,6 +247,16 @@ def indexUser(request):
             + persona_map.get('OnPrem Service Account Non-Interactive', 0)
             + persona_map.get('OnPrem Service Account Interactive', 0)
         ),
+		'auth_method_adoption_labels': ['Windows Hello for Business', 'Passkey Device', 'Passkey Authenticator', 'MS Authenticator Passwordless', 'MS Authenticator Push', 'Software OTP', 'Mobile Phone'],
+		'auth_method_adoption_data': [
+			users.filter(windowsHelloforBusiness_authentication_method=True).count(),
+			users.filter(passKeyDeviceBound_authentication_method=True).count(),
+			users.filter(passKeyDeviceBoundAuthenticator_authentication_method=True).count(),
+			users.filter(microsoftAuthenticatorPasswordless_authentication_method=True).count(),
+			users.filter(microsoftAuthenticatorPush_authentication_method=True).count(),
+			users.filter(softwareOneTimePasscode_authentication_method=True).count(),
+			users.filter(mobilePhone_authentication_method=True).count(),
+		],
         'count_unknown_account': persona_map.get('Unknown', 0),
         'count_duplicate_account': persona_map.get('DUPLICATE', 0),
     }
@@ -288,14 +288,6 @@ def personaMetrics(request, persona):
         count_low_deprecated=Count('id', filter=Q(lowest_authentication_strength='Deprecated')),
         count_low_none=Count('id', filter=Q(lowest_authentication_strength='None')),
     )
-   
-   # Count passwordless and non-passwordless users
-	passwordless_count = users.filter(
-        Q(lowest_authentication_strength__in=['Passwordless', 'Phishing Resistant'])
-    ).count()
-	non_passwordless_count = users.exclude(
-        lowest_authentication_strength__in=['Passwordless', 'Phishing Resistant']
-    ).count()
 
 	passwordless_capable_count = users.filter(
         Q(highest_authentication_strength__in=['Passwordless', 'Phishing Resistant'])
@@ -311,6 +303,7 @@ def personaMetrics(request, persona):
 	context = {
 		'page': 'user-dashboard',
 		'enabled_integrations': getEnabledIntegrations(),
+		'notifications': Notification.objects.all(),
 		'persona': persona,
 		'persona_count': users.count(),
 		'percent_mfa': "{:.2f}".format(((auth_strength_counts['count_phishing_resistant'] + auth_strength_counts['count_passwordless'] + auth_strength_counts['count_mfa'] + auth_strength_counts['count_deprecated']) / users.count()) * 100 if users.count() > 0 else 0),
@@ -383,6 +376,7 @@ def profileSettings(request):
 	context = {
 		'page':"profile-settings",
 		'enabled_integrations': getEnabledIntegrations(),
+		'notifications': Notification.objects.all(),
 		'devicecomps':device_compliance_settings_list,
 	}
 	return render( request, 'main/profile-settings.html', context)
@@ -474,6 +468,7 @@ def deviceData(request, id):
 		'page':"device-data",
 		'enabled_integrations': getEnabledIntegrations(),
 		'enabled_user_integrations': getEnabledUserIntegrations(),
+		'notifications': Notification.objects.all(),
 		'device':device,
 		'ints' : integrations,
 		# X6969
@@ -518,6 +513,7 @@ def masterList(request):
 		'page':"master-list",
 		'enabled_integrations': enabled_integrations,
 		'enabled_user_integrations': getEnabledUserIntegrations(),
+		'notifications': Notification.objects.all(),
 		'endpoint_list':endpoint_list,
 		'os_platforms': os_platforms,
 		'endpoint_types': endpoint_types,
@@ -541,11 +537,74 @@ def userMasterList(request):
 	context = {
 		'page':"master-list-user",
 		'enabled_integrations': getEnabledIntegrations(),
+		'notifications': Notification.objects.all(),
 		'auth_strengths': ['None', 'MFA', 'Passwordless', 'Phishing Resistant', 'Deprecated'],
         'personas': ['Internal Worker', 'Internal Admin', 'External Worker', 'External Admin', 'Hourly Worker', 'Test Account', 'Robot Account', 'Shared Admin', 'OnPrem Internal Admin', 'OnPrem External Admin', 'Service Account Non-Interactive', 'Service Account Interactive', 'OnPrem Service Account Non-Interactive', 'OnPrem Service Account Interactive', 'Unknown', 'DUPLICATE'],
 		'user_list':user_list,
 	}
 	return render( request, 'main/user-master-list.html', context)
+
+############################################################################################
+
+@login_required
+def user_master_list_api(request):
+    # DataTables parameters
+    draw = int(request.GET.get('draw', 1))
+    start = int(request.GET.get('start', 0))
+    length = int(request.GET.get('length', 10))
+    search_value = request.GET.get('search[value]', '')
+
+    # Filtering
+    highest_auth = request.GET.getlist('highest_auth[]')
+    lowest_auth = request.GET.getlist('lowest_auth[]')
+    personas = request.GET.getlist('personas[]')
+
+    users = UserData.objects.all().order_by('upn')
+
+    if highest_auth:
+        users = users.filter(highest_authentication_strength__in=highest_auth)
+    if lowest_auth:
+        users = users.filter(lowest_authentication_strength__in=lowest_auth)
+    if personas:
+        users = users.filter(persona__in=personas)
+    if search_value:
+        users = users.filter(upn__icontains=search_value)
+
+    total = users.count()
+
+    # Pagination
+    paginator = Paginator(users, length)
+    page_number = (start // length) + 1
+    page = paginator.get_page(page_number)
+
+    data = []
+    for user_data in page.object_list:
+        row = [
+            f'<a href="/device/{user_data.id}">{user_data.upn}</a>',
+            user_data.persona,
+            user_data.created_at_timestamp,
+            user_data.last_logon_timestamp.strftime("%Y-%m-%d %H:%M:%S") if user_data.last_logon_timestamp else "",
+            user_data.highest_authentication_strength,
+            user_data.lowest_authentication_strength,
+            "&#9989;" if user_data.passKeyDeviceBound_authentication_method else "&#10060;",
+            "&#9989;" if user_data.passKeyDeviceBoundAuthenticator_authentication_method else "&#10060;",
+            "&#9989;" if user_data.windowsHelloforBusiness_authentication_method else "&#10060;",
+            "&#9989;" if user_data.microsoftAuthenticatorPasswordless_authentication_method else "&#10060;",
+            "&#9989;" if user_data.microsoftAuthenticatorPush_authentication_method else "&#10060;",
+            "&#9989;" if user_data.softwareOneTimePasscode_authentication_method else "&#10060;",
+            "&#9989;" if user_data.temporaryAccessPass_authentication_method else "&#10060;",
+            "&#9989;" if user_data.mobilePhone_authentication_method else "&#10060;",
+            "&#9989;" if user_data.email_authentication_method else "&#10060;",
+            "&#9989;" if user_data.securityQuestion_authentication_method else "&#10060;",
+        ]
+        data.append(row)
+
+    return JsonResponse({
+        "draw": draw,
+        "recordsTotal": total,
+        "recordsFiltered": total,
+        "data": data,
+    })
 
 ############################################################################################
 
@@ -567,6 +626,7 @@ def endpointList(request, integration):
 		'page':integration,
 		'enabled_integrations': getEnabledIntegrations(),
 		'enabled_user_integrations': getEnabledUserIntegrations(),
+		'notifications': Notification.objects.all(),
 		'integration':integration_clean.title(),
 		'endpoint_list':endpoint_list,
 	}
@@ -604,6 +664,7 @@ def integrations(request):
 		'notifications': Notification.objects.all(),
 		'enabled_integrations': getEnabledIntegrations(),
 		'enabled_user_integrations': getEnabledUserIntegrations(),
+		'notifications': Notification.objects.all(),
 		'deviceIntegrationStatuses':deviceIntegrationStatuses,
 		'userIntegrationStatuses':userIntegrationStatuses,
 	}
