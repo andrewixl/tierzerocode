@@ -214,7 +214,13 @@ class DeviceComplianceChecker:
     @staticmethod
     def check_device_compliance(device: Device) -> Dict[str, Any]:
         """Check compliance for a specific device"""
-        if not device.osPlatform:
+        # Safely get the OS platform, handling potential field access issues
+        try:
+            os_platform = getattr(device, 'osPlatform', None)
+        except Exception:
+            os_platform = None
+            
+        if not os_platform:
             return {
                 'compliant': False,
                 'reason': 'No OS platform specified',
@@ -223,7 +229,7 @@ class DeviceComplianceChecker:
             }
         
         # Get compliance settings for the device's OS platform
-        compliance_settings = ComplianceSettingsManager.get_compliance_settings_for_platform(device.osPlatform)
+        compliance_settings = ComplianceSettingsManager.get_compliance_settings_for_platform(os_platform)
         
         if not compliance_settings:
             return {
@@ -269,11 +275,26 @@ class DeviceComplianceChecker:
             'devices_needing_attention': []
         }
         
-        devices = Device.objects.all()
+        try:
+            devices = Device.objects.all()
+        except Exception as e:
+            # If there's a database error, return a basic report
+            report['error'] = f"Database error: {str(e)}"
+            return report
         
         for device in devices:
-            report['total_devices'] += 1
-            compliance_result = DeviceComplianceChecker.check_device_compliance(device)
+            try:
+                report['total_devices'] += 1
+                compliance_result = DeviceComplianceChecker.check_device_compliance(device)
+            except Exception as e:
+                # Skip devices that cause errors
+                continue
+            
+            # Safely get the OS platform
+            try:
+                os_platform = getattr(device, 'osPlatform', None)
+            except Exception:
+                os_platform = None
             
             if compliance_result['compliant']:
                 report['compliant_devices'] += 1
@@ -281,13 +302,13 @@ class DeviceComplianceChecker:
                 report['non_compliant_devices'] += 1
                 report['devices_needing_attention'].append({
                     'hostname': device.hostname,
-                    'platform': device.osPlatform,
+                    'platform': os_platform,
                     'missing_integrations': compliance_result['missing_integrations'],
                     'reason': compliance_result['reason']
                 })
             
             # Track compliance by platform
-            platform = device.osPlatform or 'Unknown'
+            platform = os_platform or 'Unknown'
             if platform not in report['compliance_by_platform']:
                 report['compliance_by_platform'][platform] = {
                     'total': 0,
