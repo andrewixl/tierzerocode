@@ -137,27 +137,21 @@ def syncMicrosoftEntraID():
 def syncMicrosoftEntraIDBackground(request):
     """Run Microsoft Intune device sync in a background thread."""
     def run():
-        try:
-            Notification.objects.create(
+        obj = Notification.objects.create(
                 title="Microsoft Entra ID Device Integration Sync",
                 status="In Progress",
                 created_at=timezone.now(),
                 updated_at=timezone.now(),
             )  # type: ignore[attr-defined]
+        try:
             messages.info(request, 'Microsoft Entra ID Device Integration Sync in Progress')
             syncMicrosoftEntraID()
-            createLog(1505,"System Integration","System Integration Event","Superuser",True,"System Integration Sync","Success","Microsoft Entra ID",request.session['user_email'])
-            Notification.objects.filter(title="Microsoft Entra ID Device Integration Sync").update(
-                status="Success",
-                updated_at=timezone.now(),
-            )  # type: ignore[attr-defined]
+            createLog(1505,"System Integration","System Integration Event","Superuser",True,"System Integration Sync","Success","Microsoft Entra ID",request.session.get('user_email', 'unknown'))
+            obj.update(status="Success",updated_at=timezone.now())
             messages.info(request, 'Microsoft Entra ID Device Integration Sync Success')
         except Exception as e:
             createLog(1505,"System Integration","System Integration Event","Superuser",True,"System Integration Sync","Failure",f"Microsoft Entra ID - {e}",request.session['user_email'])
-            Notification.objects.filter(title="Microsoft Entra ID Device Integration Sync").update(
-                status="Failure",
-                updated_at=timezone.now(),
-            )  # type: ignore[attr-defined]
+            obj.update(status="Failure",updated_at=timezone.now())
             messages.error(request, f'Microsoft Entra ID Device Integration Sync Failed: {e}')
     thread = threading.Thread(target=run)
     thread.start()

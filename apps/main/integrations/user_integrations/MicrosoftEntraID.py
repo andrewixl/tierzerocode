@@ -287,27 +287,21 @@ def syncMicrosoftEntraIDUser():
 def syncMicrosoftEntraIDUserBackground(request):
     """Run Microsoft Entra ID user sync in a background thread."""
     def run():
-        try:
-            Notification.objects.create(
+        obj = Notification.objects.create(
                 title="Microsoft Entra ID User Integration Sync",
                 status="In Progress",
                 created_at=timezone.now(),
                 updated_at=timezone.now(),
             )  # type: ignore[attr-defined]
+        try:
             messages.info(request, 'Microsoft Entra ID User Integration Sync in Progress')
             syncMicrosoftEntraIDUser()
             createLog(1505,"System Integration","System Integration Event","Superuser",True,"System Integration Sync","Success","Microsoft Entra ID User",request.session.get('user_email', 'unknown'))
-            Notification.objects.filter(title="Microsoft Entra ID User Integration Sync").update(
-                status="Success",
-                updated_at=timezone.now(),
-            )  # type: ignore[attr-defined]
+            obj.update(status="Success",updated_at=timezone.now())
             messages.info(request, 'Microsoft Entra ID User Integration Sync Success')
         except Exception as e:
             createLog(1505,"System Integration","System Integration Event","Superuser",True,"System Integration Sync","Failure",f"Microsoft Entra ID User - {e}",request.session.get('user_email', 'unknown'))
-            Notification.objects.filter(title="Microsoft Entra ID User Integration Sync").update(
-                status="Failure",
-                updated_at=timezone.now(),
-            )  # type: ignore[attr-defined]
+            obj.update(status="Failure",updated_at=timezone.now())
             messages.error(request, f'Microsoft Entra ID User Integration Sync Failed: {e}')
     thread = threading.Thread(target=run)
     thread.start()

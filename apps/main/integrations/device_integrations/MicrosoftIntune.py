@@ -166,27 +166,21 @@ def syncMicrosoftIntune():
 def syncMicrosoftIntuneBackground(request):
     """Run Microsoft Intune device sync in a background thread."""
     def run():
-        try:
-            Notification.objects.create(
+        obj = Notification.objects.create(
                 title="Microsoft Intune Device Integration Sync",
                 status="In Progress",
                 created_at=timezone.now(),
                 updated_at=timezone.now(),
             )  # type: ignore[attr-defined]
+        try:
             messages.info(request, 'Microsoft Intune Device Integration Sync in Progress')
             syncMicrosoftIntune()
             createLog(1505,"System Integration","System Integration Event","Superuser",True,"System Integration Sync","Success","Microsoft Intune - Device",request.session.get('user_email', 'unknown'))
-            Notification.objects.filter(title="Microsoft Intune Device Integration Sync").update(
-                status="Success",
-                updated_at=timezone.now(),
-            )  # type: ignore[attr-defined]
+            obj.update(status="Success",updated_at=timezone.now())
             messages.info(request, 'Microsoft Intune Device Integration Sync Success')
         except Exception as e:
             createLog(1505,"System Integration","System Integration Event","Superuser",True,"System Integration Sync","Failure",f"Microsoft Intune - Device - {e}",request.session.get('user_email', 'unknown'))
-            Notification.objects.filter(title="Microsoft Intune Device Integration Sync").update(
-                status="Failure",
-                updated_at=timezone.now(),
-            )  # type: ignore[attr-defined]
+            obj.update(status="Failure",updated_at=timezone.now())
             messages.error(request, f'Microsoft Intune Device Integration Sync Failed: {e}')
     thread = threading.Thread(target=run)
     thread.start()
