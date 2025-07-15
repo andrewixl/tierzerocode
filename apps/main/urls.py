@@ -30,6 +30,13 @@ urlpatterns = [
     re_path(r'^user-dashboard/(?P<persona>[-\w]+)$', views.personaMetrics),
     re_path(r'^migrate$', views.migration),
     path('api/user-master-list/', views.user_master_list_api, name='user_master_list_api'),
+    
+    # New API endpoints for settings management
+    path('api/compliance-summary/', views.compliance_summary_api, name='compliance_summary_api'),
+    path('api/compliance-report/', views.compliance_report_api, name='compliance_report_api'),
+    path('api/bulk-update-compliance/', views.bulk_update_compliance_api, name='bulk_update_compliance_api'),
+    path('api/reset-compliance-settings/', views.reset_compliance_settings_api, name='reset_compliance_settings_api'),
+    
 ] 
 
 # urlpatterns += staticfiles_urlpatterns()

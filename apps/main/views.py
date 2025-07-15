@@ -356,30 +356,31 @@ def profileSettings(request):
 	if redirect_url:
 		return redirect(redirect_url)
 	
-	device_compliance_settings_list = []
-	settings = []
-
-	for device_compliance_setting in DeviceComplianceSettings.objects.all():
-		settings.append(device_compliance_setting)
+	# Import the new utilities
+	from .utils import ComplianceSettingsManager, DeviceComplianceChecker
 	
-	for setting in settings:
-		mini_list = []
-		for config in setting._meta.get_fields():
-			if str(config) == 'main.DeviceComplianceSettings.id' or str(config) == 'main.DeviceComplianceSettings.os_platform':
-				vals = str(config).split(".")[2]
-			else:
-				vals = (str(config).split(".")[2]).replace("_", " ").title()
-			data = getattr(setting, config.name)
-			mini_list.append([str(vals),str(data)])
-		device_compliance_settings_list.append(mini_list)
+	# Get compliance settings using the new manager
+	compliance_settings = ComplianceSettingsManager.get_all_compliance_settings()
+	
+	# Get compliance summary for dashboard
+	compliance_summary = ComplianceSettingsManager.get_compliance_summary()
+	
+	# Get compliance report for insights
+	compliance_report = DeviceComplianceChecker.get_compliance_report()
 
 	context = {
-		'page':"profile-settings",
+		'page': "profile-settings",
 		'enabled_integrations': getEnabledIntegrations(),
 		'notifications': Notification.objects.all(),
-		'devicecomps':device_compliance_settings_list,
+		'devicecomps': compliance_settings,  # Use the new structured data
+		'compliance_summary': compliance_summary,
+		'compliance_report': compliance_report,
 	}
-	return render( request, 'main/profile-settings.html', context)
+	
+	# Use the new structured format
+	context['devicecomps'] = compliance_settings
+	
+	return render(request, 'main/profile-settings.html', context)
 
 @login_required
 def update_compliance(request, id):
@@ -389,19 +390,34 @@ def update_compliance(request, id):
 		return redirect(redirect_url)
 	
 	if request.method == 'POST':
-		device_compliance_setting = DeviceComplianceSettings.objects.get(id = id)
-
-		print (request.POST)
-		#X6969
-		device_compliance_setting.cloudflare_zero_trust = str(request.POST.get('Cloudflare Zero Trust', False)).replace("on", "True")
-		device_compliance_setting.crowdstrike_falcon = str(request.POST.get('Crowdstrike Falcon', False)).replace("on", "True")
-		device_compliance_setting.microsoft_defender_for_endpoint = str(request.POST.get('Microsoft Defender For Endpoint', False)).replace("on", "True")
-		device_compliance_setting.microsoft_entra_id = str(request.POST.get('Microsoft Entra Id', False)).replace("on", "True")
-		device_compliance_setting.microsoft_intune = str(request.POST.get('Microsoft Intune', False)).replace("on", "True")
-		device_compliance_setting.sophos_central = str(request.POST.get('Sophos Central', False)).replace("on", "True")
-		device_compliance_setting.qualys = str(request.POST.get('Qualys', False)).replace("on", "True")
-		device_compliance_setting.save()
-	return redirect ('/profile-settings')
+		from .utils import ComplianceSettingsManager
+		
+		# Parse the form data to extract integration settings
+		integration_settings = {}
+		integration_mapping = {
+			'Cloudflare Zero Trust': 'Cloudflare Zero Trust',
+			'Crowdstrike Falcon': 'Crowdstrike Falcon', 
+			'Microsoft Defender For Endpoint': 'Microsoft Defender For Endpoint',
+			'Microsoft Entra Id': 'Microsoft Entra Id',
+			'Microsoft Intune': 'Microsoft Intune',
+			'Sophos Central': 'Sophos Central',
+			'Qualys': 'Qualys'
+		}
+		
+		for integration_name, field_name in integration_mapping.items():
+			# Check if the integration is enabled (checkbox was checked)
+			is_enabled = request.POST.get(field_name) == 'on'
+			integration_settings[integration_name] = is_enabled
+		
+		# Update the compliance settings using the manager
+		success = ComplianceSettingsManager.update_compliance_settings(id, integration_settings)
+		
+		if success:
+			messages.success(request, 'Compliance settings updated successfully!')
+		else:
+			messages.error(request, 'Failed to update compliance settings.')
+	
+	return redirect('/profile-settings')
 
 ############################################################################################
 
@@ -767,5 +783,119 @@ def syncUsers(request, integration):
 		syncMicrosoftEntraIDUserBackground(request)
 	print("Redirecting to Integrations")
 	return redirect('/integrations')
+
+############################################################################################
+# API Views for Settings Management
+############################################################################################
+
+@login_required
+def compliance_summary_api(request):
+    """API endpoint to get compliance settings summary"""
+    from .utils import ComplianceSettingsManager
+    
+    try:
+        summary = ComplianceSettingsManager.get_compliance_summary()
+        return JsonResponse({
+            'success': True,
+            'data': summary
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+
+@login_required
+def compliance_report_api(request):
+    """API endpoint to get comprehensive compliance report"""
+    from .utils import DeviceComplianceChecker
+    
+    try:
+        report = DeviceComplianceChecker.get_compliance_report()
+        return JsonResponse({
+            'success': True,
+            'data': report
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+
+@login_required
+def bulk_update_compliance_api(request):
+    """API endpoint to bulk update compliance settings"""
+    from .utils import ComplianceSettingsManager
+    
+    if request.method != 'POST':
+        return JsonResponse({
+            'success': False,
+            'error': 'Method not allowed'
+        }, status=405)
+    
+    try:
+        data = request.POST
+        integration_settings = {}
+        
+        # Parse the integration settings from the request
+        integration_mapping = {
+            'cloudflare_zero_trust': 'Cloudflare Zero Trust',
+            'crowdstrike_falcon': 'Crowdstrike Falcon',
+            'microsoft_defender_for_endpoint': 'Microsoft Defender For Endpoint',
+            'microsoft_entra_id': 'Microsoft Entra Id',
+            'microsoft_intune': 'Microsoft Intune',
+            'sophos_central': 'Sophos Central',
+            'qualys': 'Qualys'
+        }
+        
+        for field_name, integration_name in integration_mapping.items():
+            if field_name in data:
+                integration_settings[integration_name] = data[field_name] == 'true'
+        
+        if not integration_settings:
+            return JsonResponse({
+                'success': False,
+                'error': 'No integration settings provided'
+            }, status=400)
+        
+        updated_count = ComplianceSettingsManager.bulk_update_compliance_settings(integration_settings)
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'Updated {updated_count} platform settings',
+            'updated_count': updated_count
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+
+@login_required
+def reset_compliance_settings_api(request):
+    """API endpoint to reset all compliance settings to defaults"""
+    from .utils import ComplianceSettingsManager
+    
+    if request.method != 'POST':
+        return JsonResponse({
+            'success': False,
+            'error': 'Method not allowed'
+        }, status=405)
+    
+    try:
+        updated_count = ComplianceSettingsManager.reset_compliance_settings_to_defaults()
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'Reset {updated_count} platform settings to defaults',
+            'updated_count': updated_count
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
 
 ############################################################################################

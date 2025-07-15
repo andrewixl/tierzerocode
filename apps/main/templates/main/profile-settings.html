@@ -1,128 +1,539 @@
 {% extends 'main/base.html' %}
 {% load static %}
-  {% block content %}
-			<main class="content">
-				<div class="container-fluid p-0">
 
-					<h1 class="h3 mb-3">Settings</h1>
+{% block content %}
+<main class="content">
+    <div class="container-fluid p-0">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1 class="h3 mb-0">Settings</h1>
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-outline-secondary" onclick="resetAllSettings()">
+                    <i class="fas fa-undo"></i> Reset All
+                </button>
+                <button type="button" class="btn btn-primary" onclick="saveAllSettings()">
+                    <i class="fas fa-save"></i> Save All Changes
+                </button>
+            </div>
+        </div>
 
-					<div class="row">
-						<div class="col-md-3 col-xl-2">
-							<div class="card">
-								<div class="list-group list-group-flush" role="tablist">
-									<div class="card-header bg-secondary">
-										<h5 class="card-title text-white mb-0">Profile Settings</h5>
-									</div>
-									<a class="list-group-item list-group-item-action active" data-bs-toggle="list" href="#account" role="tab">
-										Account
-									</a>
-									<!-- <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#password" role="tab">
-										Password
-									</a>
-									<a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#" role="tab">
-										Privacy and safety
-									</a>
-									<a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#" role="tab">
-										Email notifications
-									</a>
-									<a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#" role="tab">
-										Web notifications
-									</a> -->
-									<div class="card-header bg-secondary">
-										<h5 class="card-title text-white warning mb-0">System Settings</h5>
-									</div>
-									<a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#compliance-settings" role="tab">
-										Compliance Settings
-									</a>
-									<!-- <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#" role="tab">
-										Your data
-									</a>
-									<a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#" role="tab">
-										Delete account
-									</a> -->
-								</div>
+        <div class="row">
+            <!-- Settings Navigation -->
+            <div class="col-md-3 col-xl-2">
+                <div class="card">
+                    <div class="list-group list-group-flush" role="tablist">
+                        <!-- Profile Section -->
+                        <div class="card-header bg-primary">
+                            <h5 class="card-title text-white mb-0">
+                                <i class="fas fa-user"></i> Profile
+                            </h5>
+                        </div>
+                        <a class="list-group-item list-group-item-action active" data-bs-toggle="list" href="#profile" role="tab">
+                            <i class="fas fa-user-circle me-2"></i>Account Information
+                        </a>
+                        
+                        <!-- System Settings Section -->
+                        <div class="card-header bg-secondary mt-3">
+                            <h5 class="card-title text-white mb-0">
+                                <i class="fas fa-cogs"></i> System Settings
+                            </h5>
+                        </div>
+                        <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#compliance" role="tab">
+                            <i class="fas fa-shield-alt me-2"></i>Compliance Policies
+                        </a>
+                        <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#notifications" role="tab">
+                            <i class="fas fa-bell me-2"></i>Notifications
+                        </a>
+                        <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#integrations" role="tab">
+                            <i class="fas fa-plug me-2"></i>Integrations
+                        </a>
+                    </div>
+                </div>
+            </div>
 
-								
-							</div>
-						</div>
+            <!-- Settings Content -->
+            <div class="col-md-9 col-xl-10">
+                <div class="tab-content">
+                    <!-- Profile Tab -->
+                    <div class="tab-pane fade show active" id="profile" role="tabpanel">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-user-circle me-2"></i>Profile Information
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="profileForm">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label" for="firstName">
+                                                <i class="fas fa-user me-1"></i>First Name
+                                            </label>
+                                            <input type="text" class="form-control" id="firstName" 
+                                                   value="{{request.user.first_name}}" disabled>
+                                            <div class="form-text">Managed by your organization</div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label" for="lastName">
+                                                <i class="fas fa-user me-1"></i>Last Name
+                                            </label>
+                                            <input type="text" class="form-control" id="lastName" 
+                                                   value="{{request.user.last_name}}" disabled>
+                                            <div class="form-text">Managed by your organization</div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label" for="email">
+                                            <i class="fas fa-envelope me-1"></i>Email Address
+                                        </label>
+                                        <input type="email" class="form-control" id="email" 
+                                               value="{{request.user.email}}" disabled>
+                                        <div class="form-text">Managed by your organization</div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
 
-						<div class="col-md-9 col-xl-10">
-							<div class="tab-content">
-								<div class="tab-pane fade show active" id="account" role="tabpanel">
-									<div class="card">
-										<div class="card-header">
-											<h5 class="card-title mb-0">Profile Info</h5>
-										</div>
-										<div class="card-body">
-											<form action="" method="post">
-												<div class="row">
-													<div class="mb-3 col-md-6">
-														<label class="form-label" for="inputFirstName">First name</label>
-														<input type="text" class="form-control" id="inputFirstName" name=first_name placeholder="First name" value="{{request.user.first_name}}" disabled>
-													</div>
-													<div class="mb-3 col-md-6">
-														<label class="form-label" for="inputLastName">Last name</label>
-														<input type="text" class="form-control" id="inputLastName" name="last_name" placeholder="Last name" value="{{request.user.last_name}}" disabled>
-													</div>
-												</div>
-												<div class="mb-3">
-													<label class="form-label" for="inputEmail4">Email</label>
-													<input type="email" class="form-control" id="inputEmail4" name="email_address" placeholder="Email" value="{{request.user.email}}" disabled>
-												</div>
-												<button type="submit" class="btn btn-primary" disabled>Save Changes</button>
-											</form>
+                    <!-- Compliance Settings Tab -->
+                    <div class="tab-pane fade" id="compliance" role="tabpanel">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-shield-alt me-2"></i>Compliance Policies
+                                </h5>
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="selectAllIntegrations()">
+                                        Select All
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="deselectAllIntegrations()">
+                                        Deselect All
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Configure which security integrations are required for each operating system platform to be considered compliant.
+                                </div>
+                                
+                                <div class="compliance-settings-container">
+                                    
+                                    {% for devicecomp in devicecomps %}
+                                    <div class="compliance-platform-card mb-4">
+                                        <div class="card">
+                                            <div class="card-header bg-light">
+                                                <h6 class="mb-0">
+                                                    <i class="fas fa-desktop me-2"></i>{{devicecomp.os_platform}} Devices
+                                                </h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <form class="compliance-form" data-platform-id="{{devicecomp.id}}">
+                                                    {% csrf_token %}
+                                                    <div class="row">
+                                                        {% for integration_name, is_required in devicecomp.integrations.items %}
+                                                        <div class="col-md-6 col-lg-4 mb-3">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input integration-checkbox" 
+                                                                       type="checkbox" 
+                                                                       name="{{integration_name}}" 
+                                                                       id="integration_{{devicecomp.id}}_{{forloop.counter0}}"
+                                                                       {% if is_required %}checked{% endif %}
+                                                                       data-integration="{{integration_name}}"
+                                                                       data-platform="{{devicecomp.os_platform}}"
+                                                                       data-index="{{forloop.counter0}}">
+                                                                <label class="form-check-label integration-label" 
+                                                                       for="integration_{{devicecomp.id}}_{{forloop.counter0}}"
+                                                                       data-checkbox-id="integration_{{devicecomp.id}}_{{forloop.counter0}}"
+                                                                       data-integration-name="{{integration_name}}">
+                                                                    <span class="integration-name">{{integration_name}}</span>
+                                                                    <small class="text-muted d-block">Required for compliance</small>
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                        {% endfor %}
+                                                    </div>
+                                                    <div class="d-flex justify-content-between align-items-center mt-3">
+                                                        <div class="compliance-status">
+                                                            <span class="badge bg-success" id="status_{{devicecomp.id}}">
+                                                                <i class="fas fa-check-circle me-1"></i>Active
+                                                            </span>
+                                                        </div>
+                                                        <button type="submit" class="btn btn-primary btn-sm">
+                                                            <i class="fas fa-save me-1"></i>Save Changes
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-										</div>
-									</div>
-								</div>
-								<div class="tab-pane fade show" id="compliance-settings" role="tabpanel">
-									<div class="card">
-										<div class="card-header">
+                    <!-- Notifications Tab -->
+                    <div class="tab-pane fade" id="notifications" role="tabpanel">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-bell me-2"></i>Notification Preferences
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    Notification settings are not yet implemented. This feature is coming soon.
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6>Email Notifications</h6>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" id="emailCompliance" disabled>
+                                            <label class="form-check-label" for="emailCompliance">
+                                                Compliance violations
+                                            </label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" id="emailSecurity" disabled>
+                                            <label class="form-check-label" for="emailSecurity">
+                                                Security alerts
+                                            </label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" id="emailUpdates" disabled>
+                                            <label class="form-check-label" for="emailUpdates">
+                                                System updates
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6>In-App Notifications</h6>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" id="appCompliance" disabled>
+                                            <label class="form-check-label" for="appCompliance">
+                                                Compliance violations
+                                            </label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" id="appSecurity" disabled>
+                                            <label class="form-check-label" for="appSecurity">
+                                                Security alerts
+                                            </label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" id="appUpdates" disabled>
+                                            <label class="form-check-label" for="appUpdates">
+                                                System updates
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-											<h5 class="card-title mb-0">Compliance Settings</h5>
-										</div>
-										<div class="card-body">
-											{% for devicecomp in devicecomps %}
-											<form action="/update_compliance/{{devicecomp.0.1}}" method="post">
-												{% csrf_token %}
-												<div>
-													<label class="form-check form-check-inline">
-														<!-- <input class="form-check-input" type="checkbox" value="option1"> -->
-														<span class="form-check-label">
-															{{devicecomp.1.1}} Devices
-														</span>
-													</label>
-													{% for device in devicecomp %}
-													<label class="form-check form-check-inline">
-														{% if device.1 == 'True' %}
-														<input class="form-check-input" type="checkbox" name="{{device.0}}" checked>
-														<span class="form-check-label">
-															{{device.0}}
-														</span>
-														{% elif device.1 == 'False' %}
-														<input class="form-check-input" type="checkbox" name="{{device.0}}">
-														<span class="form-check-label">
-															{{device.0}}
-														</span>
-														{% endif %}
-													</label>
-													{% endfor %}
-												</div>
-												<br>
-												<button type="submit" class="btn btn-primary">Save Changes</button>
-											</form>
-											<hr><br>
-											{% endfor %}
+                    <!-- Integrations Tab -->
+                    <div class="tab-pane fade" id="integrations" role="tabpanel">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-plug me-2"></i>Integration Status
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    {% for integration in enabled_integrations %}
+                                    <div class="col-md-6 col-lg-4 mb-3">
+                                        <div class="card h-100">
+                                            <div class="card-body text-center">
+                                                <div class="mb-3">
+                                                    {% if integration.image_navbar_path %}
+                                                    <img src="{% static integration.image_navbar_path %}" 
+                                                         alt="{{integration.integration_type}}" 
+                                                         class="integration-icon" style="height: 40px;">
+                                                    {% else %}
+                                                    <i class="fas fa-plug fa-2x text-muted"></i>
+                                                    {% endif %}
+                                                </div>
+                                                <h6 class="card-title">{{integration.integration_type}}</h6>
+                                                <div class="mb-2">
+                                                    {% if integration.enabled %}
+                                                    <span class="badge bg-success">
+                                                        <i class="fas fa-check-circle me-1"></i>Active
+                                                    </span>
+                                                    {% else %}
+                                                    <span class="badge bg-secondary">
+                                                        <i class="fas fa-times-circle me-1"></i>Inactive
+                                                    </span>
+                                                    {% endif %}
+                                                </div>
+                                                {% if integration.last_synced_at %}
+                                                <small class="text-muted">
+                                                    Last synced: {{integration.last_synced_at|date:"M j, Y g:i A"}}
+                                                </small>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
 
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
+<!-- Settings Management JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize compliance form handlers
+    initializeComplianceForms();
+    
+    // Initialize tab functionality
+    initializeTabs();
+});
 
-				</div>
-			</main>
-            {% endblock %}
-</body>
-</html>
+function initializeComplianceForms() {
+    const forms = document.querySelectorAll('.compliance-form');
+    
+    forms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            saveComplianceSettings(this);
+        });
+        
+        // Add change listeners for real-time status updates
+        const checkboxes = form.querySelectorAll('.integration-checkbox');
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                updateComplianceStatus(form);
+            });
+            
+            // Ensure proper label association
+            const label = form.querySelector(`label[for="${checkbox.id}"]`);
+            if (!label) {
+                console.warn(`No label found for checkbox ${checkbox.id}`);
+            }
+        });
+        
+        // Add click handlers to all labels in this form
+        const labels = form.querySelectorAll('.integration-label');
+        labels.forEach(label => {
+            label.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const integrationName = this.getAttribute('data-integration-name');
+                
+                // Find the checkbox by matching the integration name within this form
+                const checkbox = form.querySelector(`input[data-integration="${integrationName}"]`);
+                
+                if (checkbox) {
+                    checkbox.checked = !checkbox.checked;
+                    checkbox.dispatchEvent(new Event('change'));
+                }
+            });
+        });
+    });
+}
+
+function saveComplianceSettings(form) {
+    const platformId = form.dataset.platformId;
+    const formData = new FormData(form);
+    
+    // Show loading state
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Saving...';
+    submitBtn.disabled = true;
+    
+    fetch(`/update_compliance/${platformId}`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+        }
+    })
+    .then(response => {
+        if (response.ok) {
+            showNotification('Settings saved successfully!', 'success');
+            updateComplianceStatus(form);
+        } else {
+            throw new Error('Failed to save settings');
+        }
+    })
+    .catch(error => {
+        console.error('Error saving settings:', error);
+        showNotification('Failed to save settings. Please try again.', 'error');
+    })
+    .finally(() => {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    });
+}
+
+function updateComplianceStatus(form) {
+    const checkboxes = form.querySelectorAll('.integration-checkbox:checked');
+    const statusBadge = form.querySelector('.compliance-status .badge');
+    
+    if (checkboxes.length > 0) {
+        statusBadge.className = 'badge bg-success';
+        statusBadge.innerHTML = '<i class="fas fa-check-circle me-1"></i>Active';
+    } else {
+        statusBadge.className = 'badge bg-warning';
+        statusBadge.innerHTML = '<i class="fas fa-exclamation-triangle me-1"></i>No Requirements';
+    }
+}
+
+function selectAllIntegrations() {
+    document.querySelectorAll('.integration-checkbox').forEach(checkbox => {
+        checkbox.checked = true;
+        checkbox.dispatchEvent(new Event('change'));
+    });
+    showNotification('All integrations selected', 'info');
+}
+
+function deselectAllIntegrations() {
+    document.querySelectorAll('.integration-checkbox').forEach(checkbox => {
+        checkbox.checked = false;
+        checkbox.dispatchEvent(new Event('change'));
+    });
+    showNotification('All integrations deselected', 'info');
+}
+
+function saveAllSettings() {
+    const forms = document.querySelectorAll('.compliance-form');
+    let savedCount = 0;
+    
+    forms.forEach(form => {
+        saveComplianceSettings(form);
+        savedCount++;
+    });
+    
+    if (savedCount > 0) {
+        showNotification(`Saving ${savedCount} platform settings...`, 'info');
+    }
+}
+
+function resetAllSettings() {
+    if (confirm('Are you sure you want to reset all compliance settings to their default values?')) {
+        // This would need to be implemented in the backend
+        showNotification('Reset functionality coming soon', 'info');
+    }
+}
+
+function showNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    notification.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.remove();
+        }
+    }, 5000);
+}
+
+function initializeTabs() {
+    // Add smooth transitions and better tab handling
+    const tabLinks = document.querySelectorAll('[data-bs-toggle="list"]');
+    tabLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            // Remove active class from all tabs
+            tabLinks.forEach(l => l.classList.remove('active'));
+            // Add active class to clicked tab
+            this.classList.add('active');
+        });
+    });
+}
+</script>
+
+<style>
+.compliance-platform-card .card {
+    border-left: 4px solid #007bff;
+    transition: all 0.3s ease;
+}
+
+.compliance-platform-card .card:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+}
+
+.integration-checkbox:checked + .form-check-label .integration-name {
+    font-weight: 600;
+    color: #007bff;
+}
+
+.integration-icon {
+    max-width: 100%;
+    object-fit: contain;
+}
+
+.form-check-input:checked {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.alert {
+    border-radius: 8px;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.card-header {
+    border-bottom: 1px solid rgba(0,0,0,0.125);
+}
+
+.list-group-item {
+    border: none;
+    border-radius: 0;
+    transition: all 0.2s ease;
+}
+
+.list-group-item:hover {
+    background-color: #f8f9fa;
+}
+
+.list-group-item.active {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.badge {
+    font-size: 0.75rem;
+    padding: 0.5em 0.75em;
+}
+
+.btn-group .btn {
+    border-radius: 4px;
+}
+
+.compliance-status {
+    font-size: 0.875rem;
+}
+
+@media (max-width: 768px) {
+    .compliance-settings-container .row {
+        margin: 0;
+    }
+    
+    .compliance-settings-container .col-md-6,
+    .compliance-settings-container .col-lg-4 {
+        padding: 0 5px;
+    }
+}
+</style>
+{% endblock %}
