@@ -68,7 +68,7 @@ def initialChecks(request):
 	return None
 	
 def getEnabledIntegrations():
-    return Integration.objects.filter(enabled=True, integration_context="Device")
+	return Integration.objects.filter(enabled=True, integration_context="Device")
 
 def getEnabledUserIntegrations():
 	return Integration.objects.filter(enabled=True, integration_context="User")
@@ -145,7 +145,7 @@ def indexDevice(request):
 
 	# Count of devices for each integration
 	integration_device_counts = [["Master List Endpoints", Device.objects.count()]]
-	integrations_with_data = Integration.objects.filter(integration_type__in=integration_names, enabled=True)
+	integrations_with_data = Integration.objects.filter(integration_type__in=integration_names, enabled=True, integration_context="Device")
 	for integration in integrations_with_data:
 		integration_device_counts.append([integration.integration_type, Device.objects.filter(integration__integration_type=integration).count(), integration.image_navbar_path])
 
@@ -162,7 +162,7 @@ def indexDevice(request):
 	context = {
 		'page': 'device-dashboard',
 		'enabled_integrations': enabled_integrations,
-		'enabled_user_integrations': getEnabledUserIntegrations(),
+		'enabled_user_integrations': getEnabledIntegrations(),
 		'notifications': Notification.objects.all(),
 		'endpoint_device_counts': integration_device_counts,
 		'osPlatformLabels': os_platforms,
@@ -212,7 +212,7 @@ def indexUser(request):
  
 	context = {
 		'page': 'user-dashboard',
-		'enabled_integrations': getEnabledIntegrations(),
+		'enabled_integrations': getEnabledUserIntegrations(),
 		'notifications': Notification.objects.all(),
         'auth_method_labels': ['Phishing Resistant', 'Passwordless', 'MFA', 'Deprecated', 'None'],
         'auth_method_data': [
