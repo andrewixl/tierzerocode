@@ -135,7 +135,7 @@ def syncMicrosoftEntraID():
 
 ######################################## Start Background Sync Microsoft Intune ########################################
 def syncMicrosoftEntraIDBackground(request):
-    syncMicrosoftEntraID()
+    """Run Microsoft Intune device sync in a background thread."""
     def run():
         try:
             Notification.objects.create(
