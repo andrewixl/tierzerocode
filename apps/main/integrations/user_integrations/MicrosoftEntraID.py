@@ -13,7 +13,7 @@ from apps.logger.views import createLog
 ######################################## Start Get Microsoft Entra ID Access Token ########################################
 def getMicrosoftEntraIDAccessToken(client_id, client_secret, tenant_id):
     """Acquire an access token for Microsoft Entra ID using MSAL."""
-    authority = 'https://login.microsoftonline.com/' + tenant_id
+    authority = f'https://login.microsoftonline.com/{tenant_id}'
     scope = ['https://graph.microsoft.com/.default']
     client = msal.ConfidentialClientApplication(client_id, authority=authority, client_credential=client_secret)
     

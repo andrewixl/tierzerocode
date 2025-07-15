@@ -1,14 +1,18 @@
 # Import Dependencies
-import msal, requests, threading
+import msal, requests, threading, time
 from django.utils import timezone
+from datetime import datetime
+from django.contrib import messages
+from django.utils.timezone import make_aware
 # Import Models
-from ...models import Integration, Device, MicrosoftIntuneDeviceData, DeviceComplianceSettings
+from ...models import Integration, Device, MicrosoftIntuneDeviceData, DeviceComplianceSettings, Notification
 # Import Function Scripts
 from .ReusedFunctions import *
 from ....logger.views import createLog
 
 ######################################## Start Get Microsoft Intune Access Token ########################################
 def getMicrosoftIntuneAccessToken(client_id, client_secret, tenant_id):
+    """Acquire an access token for Microsoft Entra ID using MSAL."""
     authority = f'https://login.microsoftonline.com/{tenant_id}'
     scope = ['https://graph.microsoft.com/.default']
     client = msal.ConfidentialClientApplication(client_id, authority=authority, client_credential=client_secret)
@@ -150,6 +154,7 @@ def updateMicrosoftIntuneDeviceDatabase(json_data):
 
 ######################################## Start Sync Microsoft Intune ########################################
 def syncMicrosoftIntune():
+    """Synchronize Microsoft Intune Devices and update the local database."""
     data = Integration.objects.get(integration_type="Microsoft Intune")
     updateMicrosoftIntuneDeviceDatabase(getMicrosoftIntuneDevices(getMicrosoftIntuneAccessToken(data.client_id, data.client_secret, data.tenant_id)))
     data.last_synced_at = timezone.now()
@@ -159,12 +164,30 @@ def syncMicrosoftIntune():
 
 ######################################## Start Background Sync Microsoft Intune ########################################
 def syncMicrosoftIntuneBackground(request):
+    """Run Microsoft Intune device sync in a background thread."""
     def run():
         try:
+            Notification.objects.create(
+                title="Microsoft Intune Device Integration Sync",
+                status="In Progress",
+                created_at=timezone.now(),
+                updated_at=timezone.now(),
+            )  # type: ignore[attr-defined]
+            messages.info(request, 'Microsoft Intune Device Integration Sync in Progress')
             syncMicrosoftIntune()
-            createLog(1505,"System Integration","System Integration Event","Superuser",True,"System Integration Sync","Success","Microsoft Intune",request.session['user_email'])
+            createLog(1505,"System Integration","System Integration Event","Superuser",True,"System Integration Sync","Success","Microsoft Intune - Device",request.session.get('user_email', 'unknown'))
+            Notification.objects.filter(title="Microsoft Intune Device Integration Sync").update(
+                status="Success",
+                updated_at=timezone.now(),
+            )  # type: ignore[attr-defined]
+            messages.info(request, 'Microsoft Intune Device Integration Sync Success')
         except Exception as e:
-            createLog(1505,"System Integration","System Integration Event","Superuser",True,"System Integration Sync","Failure",f"Microsoft Intune - {e}",request.session['user_email'])
+            createLog(1505,"System Integration","System Integration Event","Superuser",True,"System Integration Sync","Failure",f"Microsoft Intune - Device - {e}",request.session.get('user_email', 'unknown'))
+            Notification.objects.filter(title="Microsoft Intune Device Integration Sync").update(
+                status="Failure",
+                updated_at=timezone.now(),
+            )  # type: ignore[attr-defined]
+            messages.error(request, f'Microsoft Intune Device Integration Sync Failed: {e}')
     thread = threading.Thread(target=run)
     thread.start()
 ######################################## End Background Sync Microsoft Intune ########################################
