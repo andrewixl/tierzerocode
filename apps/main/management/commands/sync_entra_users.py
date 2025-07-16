@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.utils import timezone
-from apps.main.integrations.user_integrations.MicrosoftEntraID import syncMicrosoftEntraIDUsers
+from apps.main.integrations.user_integrations.MicrosoftEntraID import syncMicrosoftEntraIDUser
 from apps.main.models import Notification
 import logging
 
@@ -23,7 +23,7 @@ class Command(BaseCommand):
         
         try:
             # Run the sync
-            syncMicrosoftEntraIDUsers()
+            syncMicrosoftEntraIDUser()
             
             # Update notification to success
             notification.status = "Success"
