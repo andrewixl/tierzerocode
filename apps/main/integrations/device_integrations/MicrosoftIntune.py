@@ -176,11 +176,15 @@ def syncMicrosoftIntuneBackground(request):
             messages.info(request, 'Microsoft Intune Device Integration Sync in Progress')
             syncMicrosoftIntune()
             createLog(1505,"System Integration","System Integration Event","Superuser",True,"System Integration Sync","Success","Microsoft Intune - Device",request.session.get('user_email', 'unknown'))
-            obj.update(status="Success",updated_at=timezone.now())
+            obj.status = "Success"
+            obj.updated_at = timezone.now()
+            obj.save()
             messages.info(request, 'Microsoft Intune Device Integration Sync Success')
         except Exception as e:
             createLog(1505,"System Integration","System Integration Event","Superuser",True,"System Integration Sync","Failure",f"Microsoft Intune - Device - {e}",request.session.get('user_email', 'unknown'))
-            obj.update(status="Failure",updated_at=timezone.now())
+            obj.status = "Failure"
+            obj.updated_at = timezone.now()
+            obj.save()
             messages.error(request, f'Microsoft Intune Device Integration Sync Failed: {e}')
     thread = threading.Thread(target=run)
     thread.start()
