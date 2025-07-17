@@ -127,9 +127,9 @@ def initialSetup(request):
 @login_required
 def migration(request):
     if not request.user.is_superuser:
-        return HttpResponseForbidden("Unauthorized")
+        return HttpResponseForbidden("Unauthorized".encode())
     call_command('migrate')
-    return HttpResponse("Migrations applied.")
+    return HttpResponse("Migrations applied.".encode())
 
 ############################################################################################
 
@@ -619,6 +619,52 @@ def user_master_list_api(request):
         "draw": draw,
         "recordsTotal": total,
         "recordsFiltered": total,
+        "data": data,
+    })
+
+@login_required
+def user_master_list_export_api(request):
+    """API endpoint for exporting all user data without pagination"""
+    # Filtering
+    highest_auth = request.GET.getlist('highest_auth[]')
+    lowest_auth = request.GET.getlist('lowest_auth[]')
+    personas = request.GET.getlist('personas[]')
+    search_value = request.GET.get('search[value]', '')
+
+    users = UserData.objects.all().order_by('upn')
+
+    if highest_auth:
+        users = users.filter(highest_authentication_strength__in=highest_auth)
+    if lowest_auth:
+        users = users.filter(lowest_authentication_strength__in=lowest_auth)
+    if personas:
+        users = users.filter(persona__in=personas)
+    if search_value:
+        users = users.filter(upn__icontains=search_value)
+
+    data = []
+    for user_data in users:
+        row = [
+            user_data.upn,  # Remove HTML link for export
+            user_data.persona,
+            user_data.created_at_timestamp,
+            user_data.last_logon_timestamp.strftime("%Y-%m-%d %H:%M:%S") if user_data.last_logon_timestamp else "",
+            user_data.highest_authentication_strength,
+            user_data.lowest_authentication_strength,
+            "Yes" if user_data.passKeyDeviceBound_authentication_method else "No",
+            "Yes" if user_data.passKeyDeviceBoundAuthenticator_authentication_method else "No",
+            "Yes" if user_data.windowsHelloforBusiness_authentication_method else "No",
+            "Yes" if user_data.microsoftAuthenticatorPasswordless_authentication_method else "No",
+            "Yes" if user_data.microsoftAuthenticatorPush_authentication_method else "No",
+            "Yes" if user_data.softwareOneTimePasscode_authentication_method else "No",
+            "Yes" if user_data.temporaryAccessPass_authentication_method else "No",
+            "Yes" if user_data.mobilePhone_authentication_method else "No",
+            "Yes" if user_data.email_authentication_method else "No",
+            "Yes" if user_data.securityQuestion_authentication_method else "No",
+        ]
+        data.append(row)
+
+    return JsonResponse({
         "data": data,
     })
 
