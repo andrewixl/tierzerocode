@@ -20,6 +20,7 @@ urlpatterns = [
     re_path(r'^sync-(?P<integration>[-\w]+)-users$', views.syncUsers),
     re_path(r'^user-dashboard/(?P<persona>[-\w]+)$', views.personaMetrics),
     re_path(r'^migrate$', views.migration),
+    re_path(r'^test$', views.test),
     path('api/user-master-list/', views.user_master_list_api, name='user_master_list_api'),
     path('api/user-master-list-export/', views.user_master_list_export_api, name='user_master_list_export_api'),
     

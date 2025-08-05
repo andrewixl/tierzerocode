@@ -88,7 +88,8 @@ def complianceSettings(os_platform):
 	except DeviceComplianceSettings.DoesNotExist:
 		return {}
 
-def test():
+@login_required
+def test(request):
 	# Device.objects.all().delete()
 	# Integration.objects.all().delete()
 	UserData.objects.all().delete()
@@ -240,12 +241,9 @@ def indexUser(request):
         'count_test_account': persona_map.get('Test Account', 0),
         'count_robot_account': persona_map.get('Robot Account', 0),
         'count_shared_admin': persona_map.get('Shared Admin', 0),
-        'count_onprem_admin': persona_map.get('OnPrem Internal Admin', 0) + persona_map.get('OnPrem External Admin', 0),
         'count_service_account': (
             persona_map.get('Service Account Non-Interactive', 0)
             + persona_map.get('Service Account Interactive', 0)
-            + persona_map.get('OnPrem Service Account Non-Interactive', 0)
-            + persona_map.get('OnPrem Service Account Interactive', 0)
         ),
 		'auth_method_adoption_labels': ['Windows Hello for Business', 'Passkey Device', 'Passkey Authenticator', 'MS Authenticator Passwordless', 'MS Authenticator Push', 'Software OTP', 'Mobile Phone'],
 		'auth_method_adoption_data': [

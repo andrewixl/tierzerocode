@@ -95,19 +95,16 @@ def getPersonaGroupMembership(access_token, group_id):
 def getPersonaGroupMemberships(access_token):
     """Fetch all persona group memberships for mapping personas."""
     persona_groups = [
-        {"display_name": "myID_Persona_ShdAdm", "id": "06994220-a58e-40f5-8843-5c4fdceb0d3f"},
-        {"display_name": "myID_Persona_Contractor", "id": "142edc02-1d76-4df9-920a-56df82a4b203"},
-        {"display_name": "myID_Persona_Emp", "id": "148047f5-46e4-4d15-a817-961f9ad1c69e"},
-        {"display_name": "myID_Persona_IntAdm", "id": "16cedc07-20b8-480e-973b-3b921d543863"},
-        {"display_name": "myID_Persona_SVC_NI", "id": "21d0cf6d-42ff-497a-9bc8-34ee17f7f248"},
-        {"display_name": "myID_Persona_Tst", "id": "43cbb218-7edf-4008-bfd5-81f787091116"},
-        {"display_name": "myID_Persona_Hourly", "id": "4a43deb5-b6c9-49ce-ae2a-e306685e0489"},
-        {"display_name": "myID_Persona_Robots", "id": "54dffbaa-0c55-4048-adea-6eb4011ad9e1"},
-        {"display_name": "myID_Persona_OnPrem_ExtAdm", "id": "b16e4c86-a57c-46b9-9ba3-1df7b2be63db"},
-        {"display_name": "myID_Persona_ExtAdm", "id": "bb90327f-f3f4-4343-a6a4-4b926ca41943"},
-        {"display_name": "myID_Persona_SVC_I", "id": "d8150d2c-1199-4d48-bb90-903fd0c2ef1e"},
-        {"display_name": "myID_Persona_OnPrem_SVC_NI", "id": "e9bde049-b0cc-4895-a017-dbcf769eaab3"},
-        {"display_name": "myID_Persona_OnPrem_SVC_I", "id": "ecea03d6-52e0-4b6d-92d5-c837d3dd0698"}
+        {"display_name": "myID_Persona_cld_ShdAdm", "id": "b8cc6523-ba76-411b-8535-47ae8281c8eb"},
+        {"display_name": "myID_Persona_cld_Contractor", "id": "656ac754-5b1b-42a4-b280-d253edaf7722"},
+        {"display_name": "myID_Persona_cld_Emp", "id": "f5370b41-d93d-48cd-9fa7-23e6cce36753"},
+        {"display_name": "myID_Persona_cld_IntAdm", "id": "20e88424-9cf6-476b-a27c-96c10ff5cda7"},
+        {"display_name": "myID_Persona_cld_SVC_NI", "id": "8fa7006e-8bbc-4251-8685-eee93a976f95"},
+        {"display_name": "myID_Persona_cld_Tst", "id": "d4106d05-4f6a-478f-870d-0cdae06bdb25"},
+        {"display_name": "myID_Persona_cld_Hourly", "id": "9321dabb-f680-455c-b3cc-a82a3cb906d0"},
+        {"display_name": "myID_Persona_cld_Robots", "id": "16dedf78-8029-4005-9d0f-8b423557b17a"},
+        {"display_name": "myID_Persona_cld_ExtAdm", "id": "a7f0ed2b-8cb0-465a-9183-f8d48d392076"},
+        {"display_name": "myID_Persona_cld_SVC_I", "id": "cf0c33f6-a23a-47fd-801c-667da87f6cfb"},
     ]
 
     all_members = []
@@ -158,19 +155,16 @@ def updateMicrosoftEntraIDUserDatabase(users, authentication_data, access_token)
 
     # Define a mapping of persona groups to persona names
     persona_mapping = {
-        "myID_Persona_ShdAdm": "Shared Admin",
-        "myID_Persona_Contractor": "External Worker",
-        "myID_Persona_Emp": "Internal Worker",
-        "myID_Persona_IntAdm": "Internal Admin",
-        "myID_Persona_SVC_NI": "Service Account Non-Interactive",
-        "myID_Persona_Tst": "Test Account",
-        "myID_Persona_Hourly": "Hourly Worker",
-        "myID_Persona_Robots": "Robot Account",
-        "myID_Persona_OnPrem_ExtAdm": "OnPrem External Admin",
-        "myID_Persona_ExtAdm": "External Admin",
-        "myID_Persona_SVC_I": "Service Account Interactive",
-        "myID_Persona_OnPrem_SVC_NI": "OnPrem Service Account Non-Interactive",
-        "myID_Persona_OnPrem_SVC_I": "OnPrem Service Account Interactive",
+        "myID_Persona_cld_ShdAdm": "Shared Admin",
+        "myID_Persona_cld_Contractor": "External Worker",
+        "myID_Persona_cld_Emp": "Internal Worker",
+        "myID_Persona_cld_IntAdm": "Internal Admin",
+        "myID_Persona_cld_SVC_NI": "Service Account Non-Interactive",
+        "myID_Persona_cld_Tst": "Test Account",
+        "myID_Persona_cld_Hourly": "Hourly Worker",
+        "myID_Persona_cld_Robots": "Robot Account",
+        "myID_Persona_cld_ExtAdm": "External Admin",
+        "myID_Persona_cld_SVC_I": "Service Account Interactive",
     }
 
     for user_data in users:
