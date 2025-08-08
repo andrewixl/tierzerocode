@@ -105,6 +105,9 @@ def getPersonaGroupMemberships(access_token):
         {"display_name": "myID_Persona_cld_Robots", "id": "16dedf78-8029-4005-9d0f-8b423557b17a"},
         {"display_name": "myID_Persona_cld_ExtAdm", "id": "a7f0ed2b-8cb0-465a-9183-f8d48d392076"},
         {"display_name": "myID_Persona_cld_SVC_I", "id": "cf0c33f6-a23a-47fd-801c-667da87f6cfb"},
+        {"display_name": "myid_SharedMailbox", "id": "78250c74-8ede-43d1-b3ac-56db4cc5bbce"},
+        {"display_name": "myid_ConferenceRooms", "id": "bdd9653e-88b1-477b-931f-32ce6e1c3344"},
+        {"display_name": "myid_MonitoringMailboxes", "id": "c90a0e8c-ed3b-41f7-b3a3-32c695351e73"},
     ]
 
     all_members = []
@@ -165,6 +168,9 @@ def updateMicrosoftEntraIDUserDatabase(users, authentication_data, access_token)
         "myID_Persona_cld_Robots": "Robot Account",
         "myID_Persona_cld_ExtAdm": "External Admin",
         "myID_Persona_cld_SVC_I": "Service Account Interactive",
+        "myid_SharedMailbox": "Service Account Interactive",
+        "myid_ConferenceRooms": "Service Account Interactive",
+        "myid_MonitoringMailboxes": "Service Account Interactive",
     }
 
     for user_data in users:
