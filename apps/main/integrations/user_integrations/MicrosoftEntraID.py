@@ -196,7 +196,7 @@ def updateMicrosoftEntraIDUserDatabase(users, authentication_data, access_token)
 
         # Convert last logon timestamp
         last_logon = None
-        last_logon_timestamp = user_data.get('signInActivity', {}).get('lastSignInDateTime')
+        last_logon_timestamp = user_data.get('signInActivity', {}).get('lastSuccessfulSignInDateTime')
         if last_logon_timestamp:
             try:
                 last_logon = make_aware(datetime.utcfromtimestamp(int(last_logon_timestamp) / 10**7 - 11644473600))
