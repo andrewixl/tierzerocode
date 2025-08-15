@@ -173,6 +173,9 @@ def updateMicrosoftEntraIDUserDatabase(users, authentication_data, access_token)
         "myid_MonitoringMailboxes": "Service Account Interactive",
     }
 
+    # Track which users were processed during this sync
+    processed_upns = set()
+
     for user_data in users:
         if not user_data.get('userPrincipalName'):
             continue
@@ -268,6 +271,18 @@ def updateMicrosoftEntraIDUserDatabase(users, authentication_data, access_token)
             userdata.save()
 
         userdata.integration.add(integration)  # type: ignore[attr-defined]
+        
+        # Track this user as processed
+        processed_upns.add(user_fields['upn'])
+
+    # Delete users that were not updated during this sync
+    # Get all users for this integration that weren't processed
+    existing_users = UserData.objects.filter(integration=integration)  # type: ignore[attr-defined]
+    for existing_user in existing_users:
+        if existing_user.upn not in processed_upns:  # type: ignore[attr-defined]
+            print(f"Deleting user not updated during sync: {existing_user.upn}")  # type: ignore[attr-defined]
+            existing_user.delete()
+
 ######################################## End Update Microsoft Entra ID User Database ########################################
 
 ######################################## Start Sync Microsoft Entra ID User ########################################
