@@ -567,14 +567,37 @@ def user_master_list_api(request):
     start = int(request.GET.get('start', 0))
     length = int(request.GET.get('length', 10))
     search_value = request.GET.get('search[value]', '')
+    
+    # Sorting parameters
+    order_column = request.GET.get('order[0][column]', '0')
+    order_dir = request.GET.get('order[0][dir]', 'asc')
+    
+    # Column mapping for sorting (must match the order in your table headers)
+    columns = ['upn', 'persona', 'created_at_timestamp', 'last_logon_timestamp', 
+               'highest_authentication_strength', 'lowest_authentication_strength',
+               'passKeyDeviceBound_authentication_method', 'passKeyDeviceBoundAuthenticator_authentication_method',
+               'windowsHelloforBusiness_authentication_method', 'microsoftAuthenticatorPasswordless_authentication_method',
+               'microsoftAuthenticatorPush_authentication_method', 'softwareOneTimePasscode_authentication_method',
+               'temporaryAccessPass_authentication_method', 'mobilePhone_authentication_method',
+               'email_authentication_method', 'securityQuestion_authentication_method']
 
     # Filtering
     highest_auth = request.GET.getlist('highest_auth[]')
     lowest_auth = request.GET.getlist('lowest_auth[]')
     personas = request.GET.getlist('personas[]')
 
-    users = UserData.objects.all().order_by('upn')
+    users = UserData.objects.all()
 
+    # Apply sorting
+    if order_column.isdigit() and int(order_column) < len(columns):
+        sort_field = columns[int(order_column)]
+        if order_dir == 'desc':
+            sort_field = f'-{sort_field}'
+        users = users.order_by(sort_field)
+    else:
+        users = users.order_by('upn')  # Default sorting
+
+    # Apply filters
     if highest_auth:
         users = users.filter(highest_authentication_strength__in=highest_auth)
     if lowest_auth:

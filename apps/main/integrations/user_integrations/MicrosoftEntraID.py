@@ -29,14 +29,8 @@ def getMicrosoftEntraIDAccessToken(client_id, client_secret, tenant_id):
 
 ######################################## Start Get Microsoft Entra ID Users ########################################
 def getMicrosoftEntraIDUsers(access_token):
-    # Hourly SMS Exempt Group: < 6 mins
-    # url = 'https://graph.microsoft.com/v1.0/groups/6da370d4-32d9-4b70-9da7-6fae6d8f467a/members?$select=userPrincipalName,id,employeeId,givenName,surname,accountEnabled,jobTitle,department,extension_09474e7580ed457a8d48b4d8698a8f68_lastLogonTimestamp,createdDateTime'
-    # Internal Worker Group: < 5 mins
-    # url = 'https://graph.microsoft.com/v1.0/groups/148047f5-46e4-4d15-a817-961f9ad1c69e/members?$select=userPrincipalName,id,employeeId,givenName,surname,accountEnabled,jobTitle,department,extension_09474e7580ed457a8d48b4d8698a8f68_lastLogonTimestamp,createdDateTime'
     # All Users Minus Guest Accounts:
     url = "https://graph.microsoft.com/v1.0/users?$select=userPrincipalName,id,employeeId,givenName,surname,accountEnabled,jobTitle,department,createdDateTime,signInActivity&$filter=accountEnabled eq true and userType eq 'Member'"
-    # WHfB Test Group
-    # url = "https://graph.microsoft.com/v1.0/groups/91ee09a4-d562-4b25-875d-8a6568886b0a/members?$select=userPrincipalName,id,employeeId,givenName,surname,accountEnabled,jobTitle,department,extension_09474e7580ed457a8d48b4d8698a8f68_lastLogonTimestamp,createdDateTime"
     headers = {'Authorization': access_token}
     graph_results_clean = []
     
@@ -199,7 +193,11 @@ def updateMicrosoftEntraIDUserDatabase(users, authentication_data, access_token)
         last_logon_timestamp = user_data.get('signInActivity', {}).get('lastSuccessfulSignInDateTime')
         if last_logon_timestamp:
             try:
-                last_logon = make_aware(datetime.utcfromtimestamp(int(last_logon_timestamp) / 10**7 - 11644473600))
+                # Parse ISO 8601 datetime string (e.g., "2025-08-15T05:02:50Z")
+                last_logon = datetime.fromisoformat(last_logon_timestamp.replace('Z', '+00:00'))
+                # Make it timezone-aware if it isn't already
+                if last_logon.tzinfo is None:
+                    last_logon = make_aware(last_logon)
             except Exception:
                 last_logon = None
 
