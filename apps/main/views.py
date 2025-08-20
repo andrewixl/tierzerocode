@@ -665,25 +665,34 @@ def user_master_list_export_api(request):
 
     data = []
     for user_data in users:
-        row = [
-            user_data.upn,  # Remove HTML link for export
-            user_data.persona,
-            user_data.created_at_timestamp,
-            user_data.last_logon_timestamp.strftime("%Y-%m-%d %H:%M:%S") if user_data.last_logon_timestamp else "",
-            user_data.highest_authentication_strength,
-            user_data.lowest_authentication_strength,
-            "Yes" if user_data.passKeyDeviceBound_authentication_method else "No",
-            "Yes" if user_data.passKeyDeviceBoundAuthenticator_authentication_method else "No",
-            "Yes" if user_data.windowsHelloforBusiness_authentication_method else "No",
-            "Yes" if user_data.microsoftAuthenticatorPasswordless_authentication_method else "No",
-            "Yes" if user_data.microsoftAuthenticatorPush_authentication_method else "No",
-            "Yes" if user_data.softwareOneTimePasscode_authentication_method else "No",
-            "Yes" if user_data.temporaryAccessPass_authentication_method else "No",
-            "Yes" if user_data.mobilePhone_authentication_method else "No",
-            "Yes" if user_data.email_authentication_method else "No",
-            "Yes" if user_data.securityQuestion_authentication_method else "No",
-        ]
-        data.append(row)
+        try:
+            # Handle null values safely
+            created_at = user_data.created_at_timestamp.strftime("%Y-%m-%d %H:%M:%S") if user_data.created_at_timestamp else ""
+            last_logon = user_data.last_logon_timestamp.strftime("%Y-%m-%d %H:%M:%S") if user_data.last_logon_timestamp else ""
+            
+            row = [
+                user_data.upn or "",  # Handle null UPN
+                user_data.persona or "",  # Handle null persona
+                created_at,
+                last_logon,
+                user_data.highest_authentication_strength or "",
+                user_data.lowest_authentication_strength or "",
+                "Yes" if user_data.passKeyDeviceBound_authentication_method else "No",
+                "Yes" if user_data.passKeyDeviceBoundAuthenticator_authentication_method else "No",
+                "Yes" if user_data.windowsHelloforBusiness_authentication_method else "No",
+                "Yes" if user_data.microsoftAuthenticatorPasswordless_authentication_method else "No",
+                "Yes" if user_data.microsoftAuthenticatorPush_authentication_method else "No",
+                "Yes" if user_data.softwareOneTimePasscode_authentication_method else "No",
+                "Yes" if user_data.temporaryAccessPass_authentication_method else "No",
+                "Yes" if user_data.mobilePhone_authentication_method else "No",
+                "Yes" if user_data.email_authentication_method else "No",
+                "Yes" if user_data.securityQuestion_authentication_method else "No",
+            ]
+            data.append(row)
+        except Exception as e:
+            # Log the error and continue with other users
+            print(f"Error processing user {user_data.upn}: {str(e)}")
+            continue
 
     return JsonResponse({
         "data": data,

@@ -11,7 +11,7 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-body">
-                        <!-- Filter Dropdown -->
+                        <!-- Filter Dropdowns -->
                         <div class="row mb-3">
                             <div class="col-md-4">
                                 <label for="highest-auth-strength-filter" class="form-label fw-bold">Filter by Highest Authentication Strength:</label>
@@ -38,31 +38,35 @@
                                 </select>
                             </div>
                         </div>
-                        <table id="datatables-responsive" class="table table-striped" style="width:100%">
-                            <thead>
-                                <tr>
-                                    <th>UPN</th>
-                                    <th>Persona</th>
-                                    <th>Created At</th>
-                                    <th>Last Sign-on</th>
-                                    <th>Highest Authentication Strength</th>
-                                    <th>Lowest Authentication Strength</th>
-                                    <th>Passkey</th>
-                                    <th>MS Auth Passkey</th>
-                                    <th>WHfB</th>
-                                    <th>Phone Sign-in</th>
-                                    <th>Push</th>
-                                    <th>OTP</th>
-                                    <th>TAP</th>
-                                    <th>Phone</th>
-                                    <th>Email</th>
-                                    <th>Sec. Qs</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- DataTables will populate this via AJAX -->
-                            </tbody>
-                        </table>
+                        
+                        <!-- Data Table -->
+                        <div class="table-responsive">
+                            <table id="datatables-responsive" class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>UPN</th>
+                                        <th>Persona</th>
+                                        <th>Created At</th>
+                                        <th>Last Sign-on</th>
+                                        <th>Highest Authentication Strength</th>
+                                        <th>Lowest Authentication Strength</th>
+                                        <th>Passkey</th>
+                                        <th>MS Auth Passkey</th>
+                                        <th>WHfB</th>
+                                        <th>Phone Sign-in</th>
+                                        <th>Push</th>
+                                        <th>OTP</th>
+                                        <th>TAP</th>
+                                        <th>Phone</th>
+                                        <th>Email</th>
+                                        <th>Sec. Qs</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- DataTables will populate this via AJAX -->
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -72,31 +76,22 @@
 {% endblock %}
 
 {% block extra_js %}
-<!-- Include jQuery first -->
+<!-- External Libraries -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<!-- Include Select2 CSS and JS -->
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.full.min.js"></script>
-<!-- Include DataTables CSS and JS -->
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
-<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
-<!-- Include DataTables Buttons extension CSS and JS -->
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/2.0.0/css/buttons.dataTables.min.css">
-<script src="https://cdn.datatables.net/buttons/2.0.0/js/dataTables.buttons.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.0.0/js/buttons.html5.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.0.0/js/buttons.print.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.css">
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css">
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
-<!-- Include XLSX library for Excel export -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 <style>
-    .form-label {
-        color: #495057;
-        margin-bottom: 0.5rem;
-    }
-    
     .select2-container--default .select2-selection--multiple {
         border: 1px solid #ced4da;
         border-radius: 0.375rem;
@@ -117,19 +112,6 @@
         margin-right: 5px;
     }
     
-    .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
-        color: #f8f9fa;
-    }
-    
-    .card {
-        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-        border: 1px solid rgba(0, 0, 0, 0.125);
-    }
-    
-    .card-body {
-        padding: 1.5rem;
-    }
-    
     .table thead th {
         background-color: #f8f9fa;
         border-bottom: 2px solid #dee2e6;
@@ -139,21 +121,13 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        // Initialize Select2 for multi-select dropdown
-        $('#highest-auth-strength-filter').select2({
-            placeholder: "Select Authentication Strengths(s)",
-            allowClear: true
-        });
-        $('#lowest-auth-strength-filter').select2({
-            placeholder: "Select Authentication Strengths(s)",
-            allowClear: true
-        });
-        $('#persona-filter').select2({
-            placeholder: "Select Persona(s)",
+        // Initialize Select2 for multi-select dropdowns
+        $('#highest-auth-strength-filter, #lowest-auth-strength-filter, #persona-filter').select2({
+            placeholder: "Select options...",
             allowClear: true
         });
 
-        // Datatables Responsive
+        // Initialize DataTable
         var table = $("#datatables-responsive").DataTable({
             serverSide: true,
             processing: true,
@@ -172,7 +146,57 @@
                     text: 'Export to Excel',
                     title: 'User Master List',
                     exportOptions: {
-                        columns: [0, 1, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15] // Exclude hidden columns
+                        columns: [0, 1, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+                    },
+                    action: function (e, dt, button, config) {
+                        // Get all data from server for export
+                        var exportData = {
+                            highest_auth: $('#highest-auth-strength-filter').val(),
+                            lowest_auth: $('#lowest-auth-strength-filter').val(),
+                            personas: $('#persona-filter').val(),
+                            export: true,
+                            length: -1 // Request all data
+                        };
+                        
+                        $.ajax({
+                            url: "{% url 'user_master_list_export_api' %}",
+                            method: 'GET',
+                            data: exportData,
+                            success: function(response) {
+                                console.log('Export response:', response);
+                                if (response.data && response.data.length > 0) {
+                                    // Create workbook and worksheet
+                                    var wb = XLSX.utils.book_new();
+                                    var headers = ['UPN', 'Persona', 'Created At', 'Last Sign-on', 'Passkey', 'MS Auth Passkey', 'WHfB', 'Phone Sign-in', 'Push', 'OTP', 'TAP', 'Phone', 'Email', 'Sec. Qs'];
+                                    var ws = XLSX.utils.aoa_to_sheet([headers]);
+                                    
+                                    // Add data rows
+                                    XLSX.utils.sheet_add_aoa(ws, response.data, {origin: 'A2'});
+                                    
+                                    // Set column widths
+                                    ws['!cols'] = [
+                                        { width: 30 }, { width: 18 }, { width: 18 }, { width: 20 },
+                                        { width: 12 }, { width: 15 }, { width: 12 }, { width: 15 },
+                                        { width: 12 }, { width: 12 }, { width: 12 }, { width: 12 },
+                                        { width: 12 }, { width: 12 }
+                                    ];
+                                    
+                                    // Add worksheet to workbook
+                                    XLSX.utils.book_append_sheet(wb, ws, 'User Master List');
+                                    
+                                    // Save file
+                                    var timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+                                    XLSX.writeFile(wb, `User_Master_List_${timestamp}.xlsx`);
+                                } else {
+                                    console.log('No data received or empty response');
+                                    alert('No data available for export.');
+                                }
+                            },
+                            error: function(xhr, status, error) {
+                                console.error('Export error:', xhr.responseText, status, error);
+                                alert('Error exporting data. Please check the console for details.');
+                            }
+                        });
                     }
                 },
                 {
@@ -180,748 +204,188 @@
                     text: 'Export to PDF',
                     title: 'User Master List',
                     exportOptions: {
-                        columns: [0, 1, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15] // Exclude hidden columns
+                        columns: [0, 1, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+                    },
+                    action: function (e, dt, button, config) {
+                        // Get all data from server for export
+                        var exportData = {
+                            highest_auth: $('#highest-auth-strength-filter').val(),
+                            lowest_auth: $('#lowest-auth-strength-filter').val(),
+                            personas: $('#persona-filter').val(),
+                            export: true,
+                            length: -1 // Request all data
+                        };
+                        
+                        $.ajax({
+                            url: "{% url 'user_master_list_export_api' %}",
+                            method: 'GET',
+                            data: exportData,
+                            success: function(response) {
+                                console.log('Export response:', response);
+                                if (response.data && response.data.length > 0) {
+                                    // Create PDF document
+                                    var docDefinition = {
+                                        pageSize: 'A4',
+                                        pageOrientation: 'landscape',
+                                        pageMargins: [20, 80, 20, 80],
+                                        header: {
+                                            text: 'User Master List - Tier Zero CO.D.E',
+                                            alignment: 'center',
+                                            fontSize: 16,
+                                            bold: true,
+                                            margin: [0, 20, 0, 0]
+                                        },
+                                        footer: function(currentPage, pageCount) {
+                                            return {
+                                                text: 'Page ' + currentPage.toString() + ' of ' + pageCount + ' | Generated on ' + new Date().toLocaleDateString(),
+                                                alignment: 'center',
+                                                fontSize: 9,
+                                                margin: [0, 0, 0, 20]
+                                            };
+                                        },
+                                        content: [
+                                            {
+                                                table: {
+                                                    headerRows: 1,
+                                                    widths: ['*', '*', '*', '*', '*', '*', '*', '*', '*', '*', '*', '*', '*', '*'],
+                                                    body: [
+                                                        ['UPN', 'Persona', 'Created At', 'Last Sign-on', 'Passkey', 'MS Auth', 'WHfB', 'Phone', 'Push', 'OTP', 'TAP', 'Phone', 'Email', 'Sec. Qs']
+                                                    ].concat(response.data)
+                                                }
+                                            }
+                                        ]
+                                    };
+                                    
+                                    var timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+                                    pdfMake.createPdf(docDefinition).download(`User_Master_List_${timestamp}.pdf`);
+                                } else {
+                                    console.log('No data received or empty response');
+                                    alert('No data available for export.');
+                                }
+                            },
+                            error: function(xhr, status, error) {
+                                console.error('Export error:', xhr.responseText, status, error);
+                                alert('Error exporting data. Please check the console for details.');
+                            }
+                        });
                     }
                 },
                 {
                     extend: 'print',
                     text: 'Print',
                     exportOptions: {
-                        columns: [0, 1, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15] // Exclude hidden columns
+                        columns: [0, 1, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+                    },
+                    action: function (e, dt, button, config) {
+                        // Get all data from server for export
+                        var exportData = {
+                            highest_auth: $('#highest-auth-strength-filter').val(),
+                            lowest_auth: $('#lowest-auth-strength-filter').val(),
+                            personas: $('#persona-filter').val(),
+                            export: true,
+                            length: -1 // Request all data
+                        };
+                        
+                        $.ajax({
+                            url: "{% url 'user_master_list_export_api' %}",
+                            method: 'GET',
+                            data: exportData,
+                            success: function(response) {
+                                console.log('Export response:', response);
+                                if (response.data && response.data.length > 0) {
+                                    // Create print window
+                                    var printWindow = window.open('', '_blank');
+                                    var timestamp = new Date().toLocaleString();
+                                    
+                                    var tableHtml = `
+                                        <html>
+                                        <head>
+                                            <title>User Master List - Tier Zero CO.D.E</title>
+                                            <style>
+                                                body { font-family: Arial, sans-serif; margin: 20px; }
+                                                table { width: 100%; border-collapse: collapse; }
+                                                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                                                th { background-color: #f2f2f2; font-weight: bold; }
+                                                .header { text-align: center; margin-bottom: 20px; }
+                                                @media print { body { margin: 0; } }
+                                            </style>
+                                        </head>
+                                        <body>
+                                            <div class="header">
+                                                <h1>User Master List</h1>
+                                                <p>Tier Zero CO.D.E - Generated on ${timestamp}</p>
+                                                <p>Total Users: ${response.data.length}</p>
+                                            </div>
+                                            <table>
+                                                <thead>
+                                                    <tr>
+                                                        <th>UPN</th>
+                                                        <th>Persona</th>
+                                                        <th>Created At</th>
+                                                        <th>Last Sign-on</th>
+                                                        <th>Passkey</th>
+                                                        <th>MS Auth</th>
+                                                        <th>WHfB</th>
+                                                        <th>Phone Sign-in</th>
+                                                        <th>Push</th>
+                                                        <th>OTP</th>
+                                                        <th>TAP</th>
+                                                        <th>Phone</th>
+                                                        <th>Email</th>
+                                                        <th>Sec. Qs</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>`;
+                                    
+                                    response.data.forEach(function(row) {
+                                        tableHtml += '<tr>';
+                                        row.forEach(function(cell) {
+                                            tableHtml += `<td>${cell}</td>`;
+                                        });
+                                        tableHtml += '</tr>';
+                                    });
+                                    
+                                    tableHtml += `
+                                                </tbody>
+                                            </table>
+                                        </body>
+                                        </html>`;
+                                    
+                                    printWindow.document.write(tableHtml);
+                                    printWindow.document.close();
+                                    
+                                    setTimeout(function() {
+                                        printWindow.print();
+                                    }, 500);
+                                } else {
+                                    console.log('No data received or empty response');
+                                    alert('No data available for export.');
+                                }
+                            },
+                            error: function(xhr, status, error) {
+                                console.error('Export error:', xhr.responseText, status, error);
+                                alert('Error exporting data. Please check the console for details.');
+                            }
+                        });
                     }
                 }
             ],
             columnDefs: [
                 {
-                    targets: [4, 5], // Index of the hidden column
+                    targets: [4, 5], // Hide authentication strength columns
                     visible: false
                 },
                 {
-                    targets: [3], // The index of your Last Sign-on column
+                    targets: [3], // Last Sign-on column
                     type: 'date'
                 }
             ]
         });
 
-        // Custom export functions that use the export API
-        function exportToExcel() {
-            $.ajax({
-                url: "{% url 'user_master_list_export_api' %}",
-                method: 'GET',
-                data: {
-                    highest_auth: $('#highest-auth-strength-filter').val(),
-                    lowest_auth: $('#lowest-auth-strength-filter').val(),
-                    personas: $('#persona-filter').val(),
-                    'search[value]': table.search()
-                },
-                success: function(response) {
-                    // Create workbook and worksheet
-                    var wb = XLSX.utils.book_new();
-                    
-                    // Define styles for headers with gradient effect
-                    var headerStyle = {
-                        font: { 
-                            bold: true, 
-                            color: { rgb: "FFFFFF" },
-                            sz: 11,
-                            name: "Calibri"
-                        },
-                        fill: { 
-                            fgColor: { rgb: "2E5BBA" },
-                            patternType: "solid"
-                        },
-                        alignment: { 
-                            horizontal: "center", 
-                            vertical: "center",
-                            wrapText: true
-                        },
-                        border: {
-                            top: { style: "medium", color: { rgb: "1E3A8A" } },
-                            bottom: { style: "medium", color: { rgb: "1E3A8A" } },
-                            left: { style: "thin", color: { rgb: "1E3A8A" } },
-                            right: { style: "thin", color: { rgb: "1E3A8A" } }
-                        }
-                    };
-                    
-                    // Define styles for data cells with alternating colors
-                    var dataStyleEven = {
-                        font: { 
-                            sz: 10,
-                            name: "Calibri"
-                        },
-                        fill: { 
-                            fgColor: { rgb: "F8FAFC" },
-                            patternType: "solid"
-                        },
-                        border: {
-                            top: { style: "thin", color: { rgb: "E2E8F0" } },
-                            bottom: { style: "thin", color: { rgb: "E2E8F0" } },
-                            left: { style: "thin", color: { rgb: "E2E8F0" } },
-                            right: { style: "thin", color: { rgb: "E2E8F0" } }
-                        },
-                        alignment: { 
-                            vertical: "center",
-                            horizontal: "center"
-                        }
-                    };
-                    
-                    var dataStyleOdd = {
-                        font: { 
-                            sz: 10,
-                            name: "Calibri"
-                        },
-                        fill: { 
-                            fgColor: { rgb: "FFFFFF" },
-                            patternType: "solid"
-                        },
-                        border: {
-                            top: { style: "thin", color: { rgb: "E2E8F0" } },
-                            bottom: { style: "thin", color: { rgb: "E2E8F0" } },
-                            left: { style: "thin", color: { rgb: "E2E8F0" } },
-                            right: { style: "thin", color: { rgb: "E2E8F0" } }
-                        },
-                        alignment: { 
-                            vertical: "center",
-                            horizontal: "center"
-                        }
-                    };
-                    
-                    // Special styles for Yes/No cells
-                    var yesStyle = {
-                        font: { 
-                            sz: 10,
-                            name: "Calibri",
-                            color: { rgb: "059669" },
-                            bold: true
-                        },
-                        fill: { 
-                            fgColor: { rgb: "D1FAE5" },
-                            patternType: "solid"
-                        },
-                        border: {
-                            top: { style: "thin", color: { rgb: "E2E8F0" } },
-                            bottom: { style: "thin", color: { rgb: "E2E8F0" } },
-                            left: { style: "thin", color: { rgb: "E2E8F0" } },
-                            right: { style: "thin", color: { rgb: "E2E8F0" } }
-                        },
-                        alignment: { 
-                            vertical: "center",
-                            horizontal: "center"
-                        }
-                    };
-                    
-                    var noStyle = {
-                        font: { 
-                            sz: 10,
-                            name: "Calibri",
-                            color: { rgb: "DC2626" },
-                            bold: true
-                        },
-                        fill: { 
-                            fgColor: { rgb: "FEE2E2" },
-                            patternType: "solid"
-                        },
-                        border: {
-                            top: { style: "thin", color: { rgb: "E2E8F0" } },
-                            bottom: { style: "thin", color: { rgb: "E2E8F0" } },
-                            left: { style: "thin", color: { rgb: "E2E8F0" } },
-                            right: { style: "thin", color: { rgb: "E2E8F0" } }
-                        },
-                        alignment: { 
-                            vertical: "center",
-                            horizontal: "center"
-                        }
-                    };
-                    
-                    // Create worksheet with headers
-                    var headers = ['UPN', 'Persona', 'Created At', 'Last Sign-on', 'Highest Auth Strength', 'Lowest Auth Strength', 'Passkey', 'MS Auth Passkey', 'WHfB', 'Phone Sign-in', 'Push', 'OTP', 'TAP', 'Phone', 'Email', 'Sec. Qs'];
-                    var ws = XLSX.utils.aoa_to_sheet([headers]);
-                    
-                    // Add data rows
-                    XLSX.utils.sheet_add_aoa(ws, response.data, {origin: 'A2'});
-                    
-                    // Apply styles to headers
-                    for (var i = 0; i < headers.length; i++) {
-                        var cellRef = XLSX.utils.encode_cell({r: 0, c: i});
-                        if (!ws[cellRef]) ws[cellRef] = {};
-                        ws[cellRef].s = headerStyle;
-                    }
-                    
-                    // Apply styles to data cells with alternating colors and special Yes/No styling
-                    for (var row = 1; row <= response.data.length; row++) {
-                        for (var col = 0; col < headers.length; col++) {
-                            var cellRef = XLSX.utils.encode_cell({r: row, c: col});
-                            if (!ws[cellRef]) ws[cellRef] = {};
-                            
-                            // Choose style based on row (alternating) and content
-                            var cellValue = response.data[row-1][col];
-                            if (cellValue === 'Yes') {
-                                ws[cellRef].s = yesStyle;
-                            } else if (cellValue === 'No') {
-                                ws[cellRef].s = noStyle;
-                            } else {
-                                ws[cellRef].s = (row % 2 === 0) ? dataStyleEven : dataStyleOdd;
-                            }
-                        }
-                    }
-                    
-                    // Set column widths with auto-fit for better readability
-                    var colWidths = [
-                        { width: 30, hidden: false }, // UPN
-                        { width: 18, hidden: false }, // Persona
-                        { width: 18, hidden: false }, // Created At
-                        { width: 20, hidden: false }, // Last Sign-on
-                        { width: 22, hidden: true },  // Highest Auth (hidden)
-                        { width: 22, hidden: true },  // Lowest Auth (hidden)
-                        { width: 12, hidden: false }, // Passkey
-                        { width: 15, hidden: false }, // MS Auth Passkey
-                        { width: 12, hidden: false }, // WHfB
-                        { width: 15, hidden: false }, // Phone Sign-in
-                        { width: 12, hidden: false }, // Push
-                        { width: 12, hidden: false }, // OTP
-                        { width: 12, hidden: false }, // TAP
-                        { width: 12, hidden: false }, // Phone
-                        { width: 12, hidden: false }, // Email
-                        { width: 12, hidden: false }  // Sec. Qs
-                    ];
-                    ws['!cols'] = colWidths;
-                    
-                    // Set row heights for better appearance
-                    ws['!rows'] = [
-                        { hpt: 25 }, // Header row height
-                        ...Array(response.data.length).fill({ hpt: 20 }) // Data row heights
-                    ];
-                    
-                    // Add worksheet to workbook
-                    XLSX.utils.book_append_sheet(wb, ws, 'User Master List');
-                    
-                    // Save file with timestamp
-                    var timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
-                    XLSX.writeFile(wb, `User_Master_List_${timestamp}.xlsx`);
-                },
-                error: function() {
-                    alert('Error exporting data. Please try again.');
-                }
-            });
-        }
-
-        function exportToPDF() {
-            $.ajax({
-                url: "{% url 'user_master_list_export_api' %}",
-                method: 'GET',
-                data: {
-                    highest_auth: $('#highest-auth-strength-filter').val(),
-                    lowest_auth: $('#lowest-auth-strength-filter').val(),
-                    personas: $('#persona-filter').val(),
-                    'search[value]': table.search()
-                },
-                success: function(response) {
-                    // Create PDF document with fancy styling
-                    var docDefinition = {
-                        pageSize: 'A4',
-                        pageOrientation: 'landscape',
-                        pageMargins: [20, 80, 20, 80],
-                        header: {
-                            stack: [
-                                {
-                                    text: 'Tier Zero CO.D.E',
-                                    alignment: 'center',
-                                    fontSize: 20,
-                                    bold: true,
-                                    color: '#2E5BBA',
-                                    margin: [0, 10, 0, 5]
-                                },
-                                {
-                                    text: 'User Master List - Authentication Analysis Report',
-                                    alignment: 'center',
-                                    fontSize: 14,
-                                    color: '#6B7280',
-                                    margin: [0, 0, 0, 10]
-                                },
-                                {
-                                    canvas: [
-                                        {
-                                            type: 'line',
-                                            x1: 50, y1: 0, x2: 550, y2: 0,
-                                            lineWidth: 2,
-                                            lineColor: '#2E5BBA'
-                                        }
-                                    ],
-                                    margin: [0, 10, 0, 0]
-                                }
-                            ],
-                            margin: [0, 20, 0, 0]
-                        },
-                        footer: function(currentPage, pageCount) {
-                            return {
-                                stack: [
-                                    {
-                                        canvas: [
-                                            {
-                                                type: 'line',
-                                                x1: 50, y1: 0, x2: 550, y2: 0,
-                                                lineWidth: 1,
-                                                lineColor: '#E5E7EB'
-                                            }
-                                        ],
-                                        margin: [0, 0, 0, 10]
-                                    },
-                                    {
-                                        text: 'Generated on ' + new Date().toLocaleDateString() + ' at ' + new Date().toLocaleTimeString() + ' | Page ' + currentPage.toString() + ' of ' + pageCount + ' | Tier Zero CO.D.E',
-                                        alignment: 'center',
-                                        fontSize: 9,
-                                        color: '#6B7280',
-                                        margin: [0, 0, 0, 20]
-                                    }
-                                ]
-                            };
-                        },
-                        content: [
-                            {
-                                stack: [
-                                    {
-                                        columns: [
-                                            {
-                                                text: '📊 Report Summary',
-                                                fontSize: 12,
-                                                bold: true,
-                                                color: '#2E5BBA',
-                                                width: 'auto'
-                                            },
-                                            {
-                                                text: 'Generated: ' + new Date().toLocaleString(),
-                                                alignment: 'right',
-                                                fontSize: 10,
-                                                color: '#6B7280',
-                                                width: '*'
-                                            }
-                                        ],
-                                        margin: [0, 0, 0, 10]
-                                    },
-                                    {
-                                        text: 'Total Users: ' + response.data.length + ' | Filters Applied: ' + ($('#highest-auth-strength-filter').val().length + $('#lowest-auth-strength-filter').val().length + $('#persona-filter').val().length) + ' active',
-                                        fontSize: 10,
-                                        color: '#6B7280',
-                                        margin: [0, 0, 0, 20]
-                                    }
-                                ]
-                            },
-                            {
-                                table: {
-                                    headerRows: 1,
-                                    widths: ['*', '*', '*', '*', '*', '*', '*', '*', '*', '*', '*', '*', '*', '*', '*', '*'],
-                                    body: [
-                                        [
-                                            {text: 'UPN', style: 'tableHeader'},
-                                            {text: 'Persona', style: 'tableHeader'},
-                                            {text: 'Created At', style: 'tableHeader'},
-                                            {text: 'Last Sign-on', style: 'tableHeader'},
-                                            {text: 'Highest Auth', style: 'tableHeader'},
-                                            {text: 'Lowest Auth', style: 'tableHeader'},
-                                            {text: 'Passkey', style: 'tableHeader'},
-                                            {text: 'MS Auth', style: 'tableHeader'},
-                                            {text: 'WHfB', style: 'tableHeader'},
-                                            {text: 'Phone', style: 'tableHeader'},
-                                            {text: 'Push', style: 'tableHeader'},
-                                            {text: 'OTP', style: 'tableHeader'},
-                                            {text: 'TAP', style: 'tableHeader'},
-                                            {text: 'Phone', style: 'tableHeader'},
-                                            {text: 'Email', style: 'tableHeader'},
-                                            {text: 'Sec. Qs', style: 'tableHeader'}
-                                        ]
-                                    ].concat(response.data.map(function(row, index) {
-                                        return row.map(function(cell, cellIndex) {
-                                            var style = index % 2 === 0 ? 'tableRowEven' : 'tableRowOdd';
-                                            if (cell === 'Yes') {
-                                                style = 'yesCell';
-                                            } else if (cell === 'No') {
-                                                style = 'noCell';
-                                            }
-                                            return {
-                                                text: cell,
-                                                style: style
-                                            };
-                                        });
-                                    }))
-                                }
-                            }
-                        ],
-                        styles: {
-                            tableHeader: {
-                                bold: true,
-                                fontSize: 9,
-                                color: 'white',
-                                fillColor: '#2E5BBA',
-                                alignment: 'center',
-                                margin: [2, 2, 2, 2]
-                            },
-                            tableRowEven: {
-                                fontSize: 8,
-                                fillColor: '#F8FAFC',
-                                margin: [2, 1, 2, 1]
-                            },
-                            tableRowOdd: {
-                                fontSize: 8,
-                                fillColor: '#FFFFFF',
-                                margin: [2, 1, 2, 1]
-                            },
-                            yesCell: {
-                                fontSize: 8,
-                                color: '#059669',
-                                bold: true,
-                                fillColor: '#D1FAE5',
-                                margin: [2, 1, 2, 1]
-                            },
-                            noCell: {
-                                fontSize: 8,
-                                color: '#DC2626',
-                                bold: true,
-                                fillColor: '#FEE2E2',
-                                margin: [2, 1, 2, 1]
-                            }
-                        },
-                        defaultStyle: {
-                            font: 'Helvetica'
-                        }
-                    };
-                    
-                    var timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
-                    pdfMake.createPdf(docDefinition).download(`User_Master_List_${timestamp}.pdf`);
-                },
-                error: function() {
-                    alert('Error exporting data. Please try again.');
-                }
-            });
-        }
-
-        function exportToPrint() {
-            $.ajax({
-                url: "{% url 'user_master_list_export_api' %}",
-                method: 'GET',
-                data: {
-                    highest_auth: $('#highest-auth-strength-filter').val(),
-                    lowest_auth: $('#lowest-auth-strength-filter').val(),
-                    personas: $('#persona-filter').val(),
-                    'search[value]': table.search()
-                },
-                success: function(response) {
-                    // Create fancy print window
-                    var printWindow = window.open('', '_blank');
-                    var timestamp = new Date().toLocaleString();
-                    
-                    var tableHtml = `
-                        <html>
-                        <head>
-                            <title>User Master List - Tier Zero CO.D.E</title>
-                            <style>
-                                @media print {
-                                    body { margin: 0; }
-                                    .no-print { display: none; }
-                                }
-                                
-                                body {
-                                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                                    margin: 20px;
-                                    background-color: #f5f5f5;
-                                }
-                                
-                                .header {
-                                    text-align: center;
-                                    margin-bottom: 30px;
-                                    padding: 30px;
-                                    background: linear-gradient(135deg, #2E5BBA 0%, #1E3A8A 50%, #0F172A 100%);
-                                    color: white;
-                                    border-radius: 15px;
-                                    box-shadow: 0 8px 25px rgba(46, 91, 186, 0.3);
-                                    position: relative;
-                                    overflow: hidden;
-                                }
-                                
-                                .header::before {
-                                    content: '';
-                                    position: absolute;
-                                    top: 0;
-                                    left: 0;
-                                    right: 0;
-                                    bottom: 0;
-                                    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="0.5" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
-                                    pointer-events: none;
-                                }
-                                
-                                .header h1 {
-                                    margin: 0;
-                                    font-size: 32px;
-                                    font-weight: 600;
-                                    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-                                    position: relative;
-                                    z-index: 1;
-                                }
-                                
-                                .header .subtitle {
-                                    margin-top: 8px;
-                                    font-size: 16px;
-                                    opacity: 0.95;
-                                    font-weight: 300;
-                                    position: relative;
-                                    z-index: 1;
-                                }
-                                
-                                .info-bar {
-                                    background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%);
-                                    padding: 20px;
-                                    margin-bottom: 25px;
-                                    border-radius: 12px;
-                                    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-                                    display: flex;
-                                    justify-content: space-between;
-                                    align-items: center;
-                                    border: 1px solid #E2E8F0;
-                                    position: relative;
-                                }
-                                
-                                .info-bar::before {
-                                    content: '';
-                                    position: absolute;
-                                    top: 0;
-                                    left: 0;
-                                    right: 0;
-                                    height: 3px;
-                                    background: linear-gradient(90deg, #2E5BBA, #1E3A8A, #2E5BBA);
-                                    border-radius: 12px 12px 0 0;
-                                }
-                                
-                                .info-item {
-                                    display: flex;
-                                    align-items: center;
-                                    gap: 10px;
-                                    padding: 8px 12px;
-                                    background: rgba(255, 255, 255, 0.7);
-                                    border-radius: 8px;
-                                    border: 1px solid #E2E8F0;
-                                    transition: all 0.2s ease;
-                                }
-                                
-                                .info-item:hover {
-                                    background: rgba(255, 255, 255, 0.9);
-                                    transform: translateY(-1px);
-                                    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-                                }
-                                
-                                .info-label {
-                                    font-weight: 600;
-                                    color: #374151;
-                                }
-                                
-                                .info-value {
-                                    color: #6B7280;
-                                }
-                                
-                                table {
-                                    width: 100%;
-                                    border-collapse: collapse;
-                                    background: white;
-                                    border-radius: 12px;
-                                    overflow: hidden;
-                                    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-                                    border: 1px solid #E2E8F0;
-                                }
-                                
-                                thead th {
-                                    background: linear-gradient(135deg, #2E5BBA 0%, #1E3A8A 50%, #0F172A 100%);
-                                    color: white;
-                                    padding: 15px 8px;
-                                    text-align: center;
-                                    font-weight: 700;
-                                    font-size: 11px;
-                                    border: none;
-                                    text-transform: uppercase;
-                                    letter-spacing: 0.8px;
-                                    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-                                    position: relative;
-                                }
-                                
-                                thead th::after {
-                                    content: '';
-                                    position: absolute;
-                                    bottom: 0;
-                                    left: 0;
-                                    right: 0;
-                                    height: 2px;
-                                    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-                                }
-                                
-                                tbody tr:nth-child(even) {
-                                    background-color: #F8F9FA;
-                                }
-                                
-                                tbody tr:nth-child(odd) {
-                                    background-color: #FFFFFF;
-                                }
-                                
-                                tbody tr:hover {
-                                    background-color: #E3F2FD;
-                                }
-                                
-                                tbody td {
-                                    padding: 10px 8px;
-                                    text-align: center;
-                                    font-size: 10px;
-                                    border-bottom: 1px solid #E5E7EB;
-                                    vertical-align: middle;
-                                }
-                                
-                                .status-yes {
-                                    color: #059669;
-                                    font-weight: 600;
-                                }
-                                
-                                .status-no {
-                                    color: #DC2626;
-                                    font-weight: 600;
-                                }
-                                
-                                .print-button {
-                                    position: fixed;
-                                    top: 20px;
-                                    right: 20px;
-                                    background: linear-gradient(135deg, #2E5BBA 0%, #1E3A8A 100%);
-                                    color: white;
-                                    border: none;
-                                    padding: 15px 30px;
-                                    border-radius: 25px;
-                                    cursor: pointer;
-                                    font-weight: 600;
-                                    font-size: 14px;
-                                    box-shadow: 0 4px 15px rgba(46, 91, 186, 0.3);
-                                    transition: all 0.3s ease;
-                                    z-index: 1000;
-                                    border: 2px solid transparent;
-                                }
-                                
-                                .print-button:hover {
-                                    background: linear-gradient(135deg, #1E3A8A 0%, #0F172A 100%);
-                                    transform: translateY(-2px);
-                                    box-shadow: 0 8px 25px rgba(46, 91, 186, 0.4);
-                                    border-color: rgba(255, 255, 255, 0.2);
-                                }
-                                
-                                .print-button:active {
-                                    transform: translateY(0);
-                                    box-shadow: 0 2px 10px rgba(46, 91, 186, 0.3);
-                                }
-                                
-                                @media print {
-                                    .print-button { display: none; }
-                                    body { background: white; }
-                                }
-                            </style>
-                        </head>
-                        <body>
-                            <button class="print-button no-print" onclick="window.print()">🖨️ Print Report</button>
-                            
-                            <div class="header">
-                                <h1>User Master List</h1>
-                                <div class="subtitle">Tier Zero CO.D.E - Authentication Analysis Report</div>
-                            </div>
-                            
-                            <div class="info-bar">
-                                <div class="info-item">
-                                    <span class="info-label">📊 Total Users:</span>
-                                    <span class="info-value">${response.data.length}</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">📅 Generated:</span>
-                                    <span class="info-value">${timestamp}</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">🔍 Filters Applied:</span>
-                                    <span class="info-value">${$('#highest-auth-strength-filter').val().length + $('#lowest-auth-strength-filter').val().length + $('#persona-filter').val().length} active</span>
-                                </div>
-                            </div>
-                            
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>UPN</th>
-                                        <th>Persona</th>
-                                        <th>Created At</th>
-                                        <th>Last Sign-on</th>
-                                        <th>Highest Auth</th>
-                                        <th>Lowest Auth</th>
-                                        <th>Passkey</th>
-                                        <th>MS Auth</th>
-                                        <th>WHfB</th>
-                                        <th>Phone</th>
-                                        <th>Push</th>
-                                        <th>OTP</th>
-                                        <th>TAP</th>
-                                        <th>Phone</th>
-                                        <th>Email</th>
-                                        <th>Sec. Qs</th>
-                                    </tr>
-                                </thead>
-                                <tbody>`;
-                    
-                    response.data.forEach(function(row) {
-                        tableHtml += '<tr>';
-                        row.forEach(function(cell, index) {
-                            var cellClass = '';
-                            if (cell === 'Yes') {
-                                cellClass = 'status-yes';
-                            } else if (cell === 'No') {
-                                cellClass = 'status-no';
-                            }
-                            tableHtml += `<td class="${cellClass}">${cell}</td>`;
-                        });
-                        tableHtml += '</tr>';
-                    });
-                    
-                    tableHtml += `
-                                </tbody>
-                            </table>
-                        </body>
-                        </html>`;
-                    
-                    printWindow.document.write(tableHtml);
-                    printWindow.document.close();
-                    
-                    // Auto-print after a short delay
-                    setTimeout(function() {
-                        printWindow.print();
-                    }, 500);
-                },
-                error: function() {
-                    alert('Error exporting data. Please try again.');
-                }
-            });
-        }
-
-        $('#highest-auth-strength-filter').on('change', function() { table.ajax.reload(); });
-        $('#lowest-auth-strength-filter').on('change', function() { table.ajax.reload(); });
-        $('#persona-filter').on('change', function() { table.ajax.reload(); });
-
-        // Override export buttons to use custom API
-        setTimeout(function() {
-            $('.dt-buttons .dt-button').each(function() {
-                var buttonText = $(this).text();
-                if (buttonText === 'Export to Excel') {
-                    $(this).off('click').on('click', function(e) {
-                        e.preventDefault();
-                        exportToExcel();
-                    });
-                } else if (buttonText === 'Export to PDF') {
-                    $(this).off('click').on('click', function(e) {
-                        e.preventDefault();
-                        exportToPDF();
-                    });
-                } else if (buttonText === 'Print') {
-                    $(this).off('click').on('click', function(e) {
-                        e.preventDefault();
-                        exportToPrint();
-                    });
-                }
-            });
-        }, 100);
+        // Filter change handlers
+        $('#highest-auth-strength-filter, #lowest-auth-strength-filter, #persona-filter').on('change', function() {
+            table.ajax.reload();
+        });
     });
 </script>
 {% endblock %}
