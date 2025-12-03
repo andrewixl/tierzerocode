@@ -30,4 +30,7 @@ urlpatterns = [
     path('api/compliance-report/', views.compliance_report_api, name='compliance_report_api'),
     path('api/bulk-update-compliance/', views.bulk_update_compliance_api, name='bulk_update_compliance_api'),
     path('api/reset-compliance-settings/', views.reset_compliance_settings_api, name='reset_compliance_settings_api'),
+    
+    # Notification management
+    re_path(r'^delete-notification/(?P<id>\d+)$', views.delete_notification, name='delete_notification'),
 ]

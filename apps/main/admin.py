@@ -38,4 +38,20 @@ admin.site.register(UserData, UserDataAdmin)
 admin.site.register(CrowdStrikeFalconPreventionPolicy)
 admin.site.register(CrowdStrikeFalconPreventionPolicySetting)
 
-admin.site.register(Notification)
+class NotificationAdmin(admin.ModelAdmin):
+    list_display = ('title', 'status', 'created_at', 'updated_at')
+    list_filter = ('status', 'created_at', 'updated_at')
+    search_fields = ('title', 'status')
+    ordering = ('-created_at',)
+    readonly_fields = ('created_at', 'updated_at')
+    fieldsets = (
+        ('Notification Details', {
+            'fields': ('title', 'status')
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+
+admin.site.register(Notification, NotificationAdmin)

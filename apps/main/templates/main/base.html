@@ -191,8 +191,8 @@
 								{% if notifications %}
 								{% for notification in notifications %}
 								<div class="list-group">
-									<a href="" class="list-group-item">
-										<div class="row g-0 align-items-center">
+									<div class="list-group-item d-flex align-items-center">
+										<div class="row g-0 align-items-center flex-grow-1">
 											<div class="col-2">
 												{% if notification.status == 'Success' %}
 												<i class="text-success" data-feather="check"></i>
@@ -209,7 +209,10 @@
 												<div class="text-muted small mt-1">{{notification.updated_at}}</div>
 											</div>
 										</div>
-									</a>
+										<a href="/delete-notification/{{notification.id}}" class="text-danger ms-2" onclick="return confirm('Are you sure you want to delete this notification?');" title="Delete notification">
+											<i data-feather="x-circle"></i>
+										</a>
+									</div>
 								</div>
 								{% endfor %}
 								{% else %}

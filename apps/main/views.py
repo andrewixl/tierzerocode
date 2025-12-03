@@ -13,7 +13,6 @@ from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
 from django.shortcuts import render, redirect
 
 # Local imports
-from .integrations.cs_health_check import *
 from .integrations.device_integrations.CloudflareZeroTrust import *
 from .integrations.device_integrations.CrowdStrikeFalcon import *
 from .integrations.device_integrations.MicrosoftDefenderforEndpoint import *
@@ -1185,5 +1184,19 @@ def reset_compliance_settings_api(request):
             'success': False,
             'error': str(e)
         }, status=500)
+
+@login_required
+def delete_notification(request, id):
+    """Delete a notification"""
+    try:
+        notification = Notification.objects.get(id=id)
+        notification.delete()
+        messages.success(request, 'Notification deleted successfully.')
+    except Notification.DoesNotExist:
+        messages.error(request, 'Notification not found.')
+    except Exception as e:
+        messages.error(request, f'Error deleting notification: {str(e)}')
+    
+    return redirect(request.META.get('HTTP_REFERER', '/'))
 
 ############################################################################################
