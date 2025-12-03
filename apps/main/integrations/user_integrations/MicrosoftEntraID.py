@@ -97,6 +97,67 @@ def getMicrosoftEntraIDUsers(access_token):
     headers = {'Authorization': access_token}
     return _fetch_paginated_data(url, headers)
 
+def getMicrosoftEntraIDGuests(access_token):
+    """Fetch all enabled Microsoft Entra ID guests."""
+    url = "https://graph.microsoft.com/v1.0/users/$count?$filter=userType eq 'guest'"
+    headers = {'Authorization': access_token, 'ConsistencyLevel': 'eventual'}
+    response = requests.get(url, headers=headers)
+    # $count endpoint returns the count as text/plain (just a number) or as JSON
+    # Handle both cases
+    try:
+        result = response.json()
+        # If it's a dict with 'value', return that; if it's just a number, return it
+        if isinstance(result, dict) and 'value' in result:
+            return result['value']
+        elif isinstance(result, (int, float)):
+            return int(result)
+        else:
+            return int(response.text)
+    except (ValueError, TypeError):
+        # If JSON parsing fails, it's likely text/plain
+        return int(response.text)
+
+def getMicrosoftEntraIDGroups(access_token):
+    """Fetch all enabled Microsoft Entra ID groups."""
+    # url = "https://graph.microsoft.com/v1.0/users?$select=userPrincipalName,id,employeeId,givenName,surname,accountEnabled,jobTitle,department,createdDateTime,signInActivity&$filter=accountEnabled eq true and userType eq 'Guest'"
+    url = "https://graph.microsoft.com/v1.0/groups/$count"
+    # headers = {'Authorization': access_token}
+    headers = {'Authorization': access_token, 'ConsistencyLevel': 'eventual'}
+    # return _fetch_paginated_data(url, headers)
+    response = requests.get(url, headers=headers)
+    # $count endpoint returns the count as text/plain (just a number) or as JSON
+    # Handle both cases
+    try:
+        result = response.json()
+        # If it's a dict with 'value', return that; if it's just a number, return it
+        if isinstance(result, dict) and 'value' in result:
+            return result['value']
+        elif isinstance(result, (int, float)):
+            return int(result)
+        else:
+            return int(response.text)
+    except (ValueError, TypeError):
+        # If JSON parsing fails, it's likely text/plain
+        return int(response.text)
+
+def getMicrosoftEntraIDApps(access_token):
+    """Fetch all enabled Microsoft Entra ID apps."""
+    url = "https://graph.microsoft.com/v1.0/applications?$count=true&$top=1"
+    headers = {'Authorization': access_token, 'ConsistencyLevel': 'eventual'}
+    response = requests.get(url, headers=headers)
+    # Extract @odata.count from the response
+    try:
+        result = response.json()
+        # Get @odata.count property from the response
+        if isinstance(result, dict) and '@odata.count' in result:
+            return int(result['@odata.count'])
+        else:
+            # Fallback: if no @odata.count, return 0
+            return 0
+    except (ValueError, TypeError, KeyError):
+        # If parsing fails, return 0
+        return 0
+
 def getMicrosoftEntraIDUserAuthenticationMethods(access_token):
     """Fetch authentication methods for all users."""
     url = f'https://graph.microsoft.com/beta/reports/authenticationMethods/userRegistrationDetails?$select=userPrincipalName,isAdmin,isSsprRegistered,isSsprEnabled,isSsprCapable,isMfaRegistered,isMfaCapable,isPasswordlessCapable,methodsRegistered'

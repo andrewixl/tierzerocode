@@ -1,0 +1,340 @@
+{% extends 'main/base.html' %}
+{% load static %}
+  {% block content %}
+			<main class="content">
+				<div class="container-fluid p-0">
+
+					<div class="row mb-2 mb-xl-3">
+						<div class="col-auto d-none d-sm-block">
+							<h3><strong>Tenant Analytics</strong> Dashboard</h3>
+						</div>
+					</div>
+
+                    <div class="row">
+						<div class="col-12 col-lg-4">
+							<div class="card">
+								<div class="card-header">
+									<h3>Tenant</h3>
+									<h4 class="card-subtitle text-muted">Name</h4>
+                                    <h4 class="card-subtitle">The Hershey Company</h4>
+                                    <br>
+                                    <h4 class="card-subtitle text-muted">Tenant ID</h4>
+                                    <h4 class="card-subtitle">90254b37-ddd6-4784-a73c-67a28484e423</h4>
+                                    <br>
+                                    <h4 class="card-subtitle text-muted">Primary Domain</h4>
+                                    <h4 class="card-subtitle">hersheys.com</h4>
+								</div>
+							</div>
+						</div>
+                        <div class="col-12 col-lg-8">
+                            <div class="row">
+                                <div class="col-lg-4">
+                                    <a href="/user-dashboard/users"><div class="card">
+                                        <div class="card-body py-2">
+                                            <div class="row align-items-center">
+                                                <div class="col mt-0">
+                                                    <h5 class="card-title mb-0">Users</h5>
+                                                </div>
+                                                <div class="col-auto">
+                                                    <div class="stat text-primary">
+                                                        <i class="align-middle" data-feather="users"></i>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <h2 class="mt-1 mb-0">{{ count_users }}</h2>
+                                        </div>
+                                    </div></a>
+                                </div>
+                                <div class="col-lg-4">
+                                    <a href="/user-dashboard/guests"><div class="card">
+                                        <div class="card-body py-2">
+                                            <div class="row align-items-center">
+                                                <div class="col mt-0">
+                                                    <h5 class="card-title mb-0">Guests</h5>
+                                                </div>
+                                                <div class="col-auto">
+                                                    <div class="stat text-primary">
+                                                        <i class="align-middle" data-feather="user-plus"></i>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <h2 class="mt-1 mb-0">{{ count_guests }}</h2>
+                                        </div>
+                                    </div></a>
+                                </div>
+                                <div class="col-lg-4">
+                                    <a href="/user-dashboard/groups"><div class="card">
+                                        <div class="card-body py-2">
+                                            <div class="row align-items-center">
+                                                <div class="col mt-0">
+                                                    <h5 class="card-title mb-0">Groups</h5>
+                                                </div>
+                                                <div class="col-auto">
+                                                    <div class="stat text-primary">
+                                                        <i class="align-middle" data-feather="users"></i>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <h2 class="mt-1 mb-0">{{ count_groups }}</h2>
+                                        </div>
+                                    </div></a>
+                                </div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col-lg-4">
+                                    <a href="/user-dashboard/apps"><div class="card">
+                                        <div class="card-body py-2">
+                                            <div class="row align-items-center">
+                                                <div class="col mt-0">
+                                                    <h5 class="card-title mb-0">Apps</h5>
+                                                </div>
+                                                <div class="col-auto">
+                                                    <div class="stat text-primary">
+                                                        <i class="align-middle" data-feather="grid"></i>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <h2 class="mt-1 mb-0">{{ count_apps }}</h2>
+                                        </div>
+                                    </div></a>
+                                </div>
+                                <div class="col-lg-4">
+                                    <a href="/user-dashboard/apps"><div class="card">
+                                        <div class="card-body py-2">
+                                            <div class="row align-items-center">
+                                                <div class="col mt-0">
+                                                    <h5 class="card-title mb-0">Devices</h5>
+                                                </div>
+                                                <div class="col-auto">
+                                                    <div class="stat text-primary">
+                                                        <i class="align-middle" data-feather="grid"></i>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <h2 class="mt-1 mb-0">{{ count_devices }}</h2>
+                                        </div>
+                                    </div></a>
+                                </div>
+                                <div class="col-lg-4">
+                                    <a href="/user-dashboard/apps"><div class="card">
+                                        <div class="card-body py-2">
+                                            <div class="row align-items-center">
+                                                <div class="col mt-0">
+                                                    <h5 class="card-title mb-0">Managed</h5>
+                                                </div>
+                                                <div class="col-auto">
+                                                    <div class="stat text-primary">
+                                                        <i class="align-middle" data-feather="grid"></i>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <h2 class="mt-1 mb-0">{{ count_managed }}</h2>
+                                        </div>
+                                    </div></a>
+                                </div>
+                            </div>
+                        </div>
+					</div>
+                    <div class="row">
+                        <div class="col-12 col-lg-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">Privileged User Authentication Methods</h5>
+                                    <p class="text-muted mb-0 small">Strongest authentication method registered by privileged users.</p>
+                                </div>
+                                <div class="card-body">
+                                    <div id="sankey-diagram-privileged-users" style="height: 350px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">All User Authentication Methods</h5>
+                                    <p class="text-muted mb-0 small">Strongest authentication method registered by all users.</p>
+                                </div>
+                                <div class="card-body">
+                                    <div id="sankey-diagram-all-users" style="height: 350px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+				</div>
+			</main>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script>
+	document.addEventListener("DOMContentLoaded", function() {
+		// Get the sk1 counts from the backend
+		var sk1_count_privileged_users = {{ sk1_count_privileged_users|default:0 }};
+		var sk1_count_privileged_phishing_resistant_users = {{ sk1_count_privileged_phishing_resistant_users|default:0 }};
+		var sk1_count_privileged_passkey_users = {{ sk1_count_privileged_passkey_users|default:0 }};
+		var sk1_count_privileged_whfb_users = {{ sk1_count_privileged_whfb_users|default:0 }};
+		var sk1_count_privileged_phishable_users = {{ sk1_count_privileged_phishable_users|default:0 }};
+		var sk1_count_privileged_phone_users = {{ sk1_count_privileged_phone_users|default:0 }};
+		var sk1_count_privileged_authenticator_users = {{ sk1_count_privileged_authenticator_users|default:0 }};
+		var sk1_count_privileged_single_factor_users = {{ sk1_count_privileged_single_factor_users|default:0 }};
+		
+		// Define the nodes for the Sankey diagram
+		// Node indices: Users=0, Phish Resistant=1, Phishable=2, Passkey=3, WHfB=4, Phone=5, Authenticator=6, Single Factor=7
+		var data = {
+			type: "sankey",
+			orientation: "h",
+			node: {
+				pad: 35,
+				thickness: 12,
+				line: {
+					color: "black",
+					width: 0.5
+				},
+				label: ["Users", "Phish Resistant", "Phishable", "Passkey", "WHfB", "Phone", "Authenticator", "Single Factor"],
+				color: ["#4A90E2", "#50C878", "#dce24a", "#50C878", "#50C878", "#dce24a", "#dce24a", "#FF6B6B"],
+				// Position nodes: x=0 (Users), x=0.5 (intermediate), x=1 (final nodes)
+				// y positions: 0=top, 1=bottom
+				x: [0, 0.5, 0.5, 1, 1, 1, 1, 1],
+				y: [0.5, 0.25, 0.5, 0.1, 0.25, 0.5, 0.75, 0.95]
+			},
+			link: {
+				// Flows: 
+				// Users -> Phish Resistant (0 -> 1)
+				// Phish Resistant -> Passkey (1 -> 3)
+				// Phish Resistant -> WHfB (1 -> 4)
+				// Users -> Phishable (0 -> 2)
+				// Phishable -> Phone (2 -> 5)
+				// Phishable -> Authenticator (2 -> 6)
+				// Users -> Single Factor (0 -> 7)
+				source: [0, 1, 1, 0, 2, 2, 0],
+				target: [1, 3, 4, 2, 5, 6, 7],
+				value: [
+					sk1_count_privileged_phishing_resistant_users,  // Users -> Phish Resistant
+					sk1_count_privileged_passkey_users,            // Phish Resistant -> Passkey
+					sk1_count_privileged_whfb_users,               // Phish Resistant -> WHfB
+					sk1_count_privileged_phishable_users,          // Users -> Phishable
+					sk1_count_privileged_phone_users,              // Phishable -> Phone
+					sk1_count_privileged_authenticator_users,      // Phishable -> Authenticator
+					sk1_count_privileged_single_factor_users       // Users -> Single Factor
+				],
+				color: [
+					"rgba(80, 200, 120, 0.4)",  // Users -> Phish Resistant
+					"rgba(80, 200, 120, 0.4)",  // Phish Resistant -> Passkey
+					"rgba(80, 200, 120, 0.4)",  // Phish Resistant -> WHfB
+					"rgba(220, 226, 74, 0.4)",  // Users -> Phishable
+					"rgba(220, 226, 74, 0.4)",  // Phishable -> Phone
+					"rgba(220, 226, 74, 0.4)",  // Phishable -> Authenticator
+					"rgba(255, 107, 107, 0.4)"   // Users -> Single Factor
+				]
+			}
+		};
+
+		var layout = {
+			title: "",
+			font: {
+				size: 12
+			},
+			paper_bgcolor: "rgba(0,0,0,0)",
+			plot_bgcolor: "rgba(0,0,0,0)",
+			margin: {
+				l: 10,
+				r: 10,
+				t: 10,
+				b: 10
+			}
+		};
+
+		var config = {
+			responsive: true,
+			displayModeBar: false
+		};
+
+		Plotly.newPlot('sankey-diagram-privileged-users', [data], layout, config);
+	});
+</script>
+<script>
+	document.addEventListener("DOMContentLoaded", function() {
+		// Get the sk1 counts from the backend
+		var sk2_count_users = {{ sk2_count_users|default:0 }};
+		var sk2_count_single_factor_users = {{ sk2_count_single_factor_users|default:0 }};
+		var sk2_count_phone_users = {{ sk2_count_phone_users|default:0 }};
+		var sk2_count_authenticator_users = {{ sk2_count_authenticator_users|default:0 }};
+		var sk2_count_phishable_users = {{ sk2_count_phishable_users|default:0 }};
+		var sk2_count_passkey_users = {{ sk2_count_passkey_users|default:0 }};
+		var sk2_count_whfb_users = {{ sk2_count_whfb_users|default:0 }};
+		var sk2_count_phishing_resistant_users = {{ sk2_count_phishing_resistant_users|default:0 }};
+		
+		// Define the nodes for the Sankey diagram
+		// Node indices: Users=0, Phish Resistant=1, Phishable=2, Passkey=3, WHfB=4, Phone=5, Authenticator=6, Single Factor=7
+		var data = {
+			type: "sankey",
+			orientation: "h",
+			node: {
+				pad: 50,
+				thickness: 12,
+				line: {
+					color: "black",
+					width: 0.5
+				},
+				label: ["Users", "Phish Resistant", "Phishable", "Passkey", "WHfB", "Phone", "Authenticator", "Single Factor"],
+				color: ["#4A90E2", "#50C878", "#dce24a", "#50C878", "#50C878", "#dce24a", "#dce24a", "#FF6B6B"],
+				// Position nodes: x=0 (Users), x=0.5 (intermediate), x=1 (final nodes)
+				// y positions: 0=top, 1=bottom
+				x: [0, 0.5, 0.5, 1, 1, 1, 1, 1],
+				y: [0.5, 0.25, 0.5, 0.1, 0.25, 0.5, 0.75, 0.95]
+			},
+			link: {
+				// Flows: 
+				// Users -> Phish Resistant (0 -> 1)
+				// Phish Resistant -> Passkey (1 -> 3)
+				// Phish Resistant -> WHfB (1 -> 4)
+				// Users -> Phishable (0 -> 2)
+				// Phishable -> Phone (2 -> 5)
+				// Phishable -> Authenticator (2 -> 6)
+				// Users -> Single Factor (0 -> 7)
+				source: [0, 1, 1, 0, 2, 2, 0],
+				target: [1, 3, 4, 2, 5, 6, 7],
+				value: [
+					sk2_count_phishing_resistant_users,  // Users -> Phish Resistant
+					sk2_count_passkey_users,            // Phish Resistant -> Passkey
+					sk2_count_whfb_users,               // Phish Resistant -> WHfB
+					sk2_count_phishable_users,          // Users -> Phishable
+					sk2_count_phone_users,              // Phishable -> Phone
+					sk2_count_authenticator_users,      // Phishable -> Authenticator
+					sk2_count_single_factor_users       // Users -> Single Factor
+				],
+				color: [
+					"rgba(80, 200, 120, 0.4)",  // Users -> Phish Resistant
+					"rgba(80, 200, 120, 0.4)",  // Phish Resistant -> Passkey
+					"rgba(80, 200, 120, 0.4)",  // Phish Resistant -> WHfB
+					"rgba(220, 226, 74, 0.4)",  // Users -> Phishable
+					"rgba(220, 226, 74, 0.4)",  // Phishable -> Phone
+					"rgba(220, 226, 74, 0.4)",  // Phishable -> Authenticator
+					"rgba(255, 107, 107, 0.4)"   // Users -> Single Factor
+				]
+			}
+		};
+
+		var layout = {
+			title: "",
+			font: {
+				size: 12
+			},
+			paper_bgcolor: "rgba(0,0,0,0)",
+			plot_bgcolor: "rgba(0,0,0,0)",
+			margin: {
+				l: 10,
+				r: 10,
+				t: 10,
+				b: 10
+			}
+		};
+
+		var config = {
+			responsive: true,
+			displayModeBar: false
+		};
+
+		Plotly.newPlot('sankey-diagram-all-users', [data], layout, config);
+	});
+</script>
+{% endblock %}

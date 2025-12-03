@@ -2,7 +2,8 @@ from . import views
 from django.urls import re_path, path
 
 urlpatterns = [
-    re_path(r'^$', views.indexDevice),
+    re_path(r'^$', views.index),
+    re_path(r'^device-dashboard$', views.index),
     re_path(r'^user-dashboard$', views.indexUser),
     re_path(r'^profile-settings$', views.profileSettings),
     re_path(r'^update_compliance/(?P<id>\d+)$', views.update_compliance),

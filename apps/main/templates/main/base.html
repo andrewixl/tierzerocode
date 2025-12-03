@@ -62,6 +62,16 @@
 				</div>
 
 				<ul class="sidebar-nav">
+					{% if page == 'dashboard' %}
+					<li class="sidebar-item active">
+					{% else %}
+					<li class="sidebar-item">
+					{% endif %}
+						<a class="sidebar-link" href="/">
+							<i class="align-middle" data-feather="sliders"></i> <span class="align-middle">Dashboard</span>
+						</a>
+					</li>
+
 					<li class="sidebar-header">
 						Endpoints
 					</li>
@@ -70,7 +80,7 @@
 					{% else %}
 					<li class="sidebar-item">
 					{% endif %}
-						<a class="sidebar-link" href="/">
+						<a class="sidebar-link" href="/device-dashboard">
 							<i class="align-middle" data-feather="sliders"></i> <span class="align-middle">Endpoint Dashboard</span>
 						</a>
 					</li>
