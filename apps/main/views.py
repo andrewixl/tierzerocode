@@ -202,11 +202,12 @@ def index(request):
 	).count()
 	sk1_count_privileged_whfb_users = sk1_privileged_users.filter(
 		Q(windowsHelloforBusiness_authentication_method=True)
-	).exclude(
-		Q(passKeyDeviceBound_authentication_method=True) |
-		Q(passKeyDeviceBoundAuthenticator_authentication_method=True)
 	).count()
-	sk1_count_privileged_phishing_resistant_users = sk1_count_privileged_passkey_users + sk1_count_privileged_whfb_users
+	sk1_count_privileged_phishing_resistant_users = sk1_privileged_users.filter(
+		Q(passKeyDeviceBound_authentication_method=True) |
+		Q(passKeyDeviceBoundAuthenticator_authentication_method=True) |
+		Q(windowsHelloforBusiness_authentication_method=True)
+	).count()
 	
 	# Phishable users (have phone OR authenticator, but NOT phishing resistant)
 	# Priority: Phone > Authenticator (if user has both, count as Phone)
@@ -221,12 +222,19 @@ def index(request):
 		Q(microsoftAuthenticatorPasswordless_authentication_method=True) |
 		Q(microsoftAuthenticatorPush_authentication_method=True)
 	).exclude(
-		Q(mobilePhone_authentication_method=True) |
 		Q(passKeyDeviceBound_authentication_method=True) |
 		Q(passKeyDeviceBoundAuthenticator_authentication_method=True) |
 		Q(windowsHelloforBusiness_authentication_method=True)
 	).count()
-	sk1_count_privileged_phishable_users = sk1_count_privileged_phone_users + sk1_count_privileged_authenticator_users
+	sk1_count_privileged_phishable_users = sk1_privileged_users.filter(
+		Q(mobilePhone_authentication_method=True) |
+		Q(microsoftAuthenticatorPasswordless_authentication_method=True) |
+		Q(microsoftAuthenticatorPush_authentication_method=True)
+	).exclude(
+		Q(passKeyDeviceBound_authentication_method=True) |
+		Q(passKeyDeviceBoundAuthenticator_authentication_method=True) |
+		Q(windowsHelloforBusiness_authentication_method=True)
+	).count()
 	
 	# Single Factor users (none of the above methods)
 	# Calculate as: total - phishing_resistant - phishable to ensure all users are accounted for
@@ -248,11 +256,12 @@ def index(request):
 	).count()
 	sk2_count_whfb_users = sk2_users.filter(
 		Q(windowsHelloforBusiness_authentication_method=True)
-	).exclude(
-		Q(passKeyDeviceBound_authentication_method=True) |
-		Q(passKeyDeviceBoundAuthenticator_authentication_method=True)
 	).count()
-	sk2_count_phishing_resistant_users = sk2_count_passkey_users + sk2_count_whfb_users
+	sk2_count_phishing_resistant_users = sk2_users.filter(
+		Q(passKeyDeviceBound_authentication_method=True) |
+		Q(passKeyDeviceBoundAuthenticator_authentication_method=True) |
+		Q(windowsHelloforBusiness_authentication_method=True)
+	).count()
 	
 	# Phishable users (have phone OR authenticator, but NOT phishing resistant)
 	# Priority: Phone > Authenticator (if user has both, count as Phone)
@@ -267,12 +276,19 @@ def index(request):
 		Q(microsoftAuthenticatorPasswordless_authentication_method=True) |
 		Q(microsoftAuthenticatorPush_authentication_method=True)
 	).exclude(
-		Q(mobilePhone_authentication_method=True) |
 		Q(passKeyDeviceBound_authentication_method=True) |
 		Q(passKeyDeviceBoundAuthenticator_authentication_method=True) |
 		Q(windowsHelloforBusiness_authentication_method=True)
 	).count()
-	sk2_count_phishable_users = sk2_count_phone_users + sk2_count_authenticator_users
+	sk2_count_phishable_users = sk2_users.filter(
+		Q(mobilePhone_authentication_method=True) |
+		Q(microsoftAuthenticatorPasswordless_authentication_method=True) |
+		Q(microsoftAuthenticatorPush_authentication_method=True)
+	).exclude(
+		Q(passKeyDeviceBound_authentication_method=True) |
+		Q(passKeyDeviceBoundAuthenticator_authentication_method=True) |
+		Q(windowsHelloforBusiness_authentication_method=True)
+	).count()
 	
 	# Single Factor users (none of the above methods)
 	# Calculate as: total - phishing_resistant - phishable to ensure all users are accounted for
