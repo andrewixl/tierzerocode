@@ -35,6 +35,12 @@
                         <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#notifications" role="tab">
                             <i class="fas fa-bell me-2"></i>Notifications
                         </a>
+                        <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#personas" role="tab">
+                            <i class="fas fa-user-tag me-2"></i>Personas
+                        </a>
+                        <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#persona-groups" role="tab">
+                            <i class="fas fa-users me-2"></i>Persona Groups
+                        </a>
                         <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#integrations" role="tab">
                             <i class="fas fa-plug me-2"></i>Integrations
                         </a>
@@ -230,6 +236,195 @@
                                                 System updates
                                             </label>
                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Personas Tab -->
+                    <div class="tab-pane fade" id="personas" role="tabpanel">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-user-tag me-2"></i>Personas Management
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <!-- Add Persona Form -->
+                                <div class="card mb-4">
+                                    <div class="card-header bg-primary text-white">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-plus me-2"></i>Add New Persona
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <form method="POST" action="/add-persona/" id="add-persona-form">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="current_tab" id="current_tab_persona" value="personas">
+                                            <div class="row">
+                                                <div class="col-md-2 mb-3">
+                                                    <label for="priority" class="form-label">Priority</label>
+                                                    <input type="number" class="form-control" id="priority" name="priority" placeholder="Priority number" min="0" step="1">
+                                                </div>
+                                                <div class="col-md-10 mb-3">
+                                                    <label for="persona_name" class="form-label">Persona Name <span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control" id="persona_name" name="persona_name" required placeholder="Enter persona name">
+                                                </div>
+                                            </div>
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fas fa-plus me-2"></i>Add Persona
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+
+                                <!-- Personas List -->
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-list me-2"></i>Existing Personas
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        {% if personas %}
+                                        <div class="table-responsive">
+                                            <table class="table table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Priority</th>
+                                                        <th>Persona Name</th>
+                                                        <th>Created</th>
+                                                        <th>Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for persona in personas %}
+                                                    <tr>
+                                                        <td>{{ persona.priority|default:"—" }}</td>
+                                                        <td><strong>{{ persona.persona_name }}</strong></td>
+                                                        <td>{{ persona.created_at|date:"M d, Y" }}</td>
+                                                        <td>
+                                                            <a href="/delete-persona/{{ persona.id }}/?tab=personas" 
+                                                               class="btn btn-sm btn-danger" 
+                                                               onclick="return confirm('Are you sure you want to delete the persona &quot;{{ persona.persona_name }}&quot;?');">
+                                                                <i class="fas fa-trash me-1"></i>Delete
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        {% else %}
+                                        <div class="alert alert-info">
+                                            <i class="fas fa-info-circle me-2"></i>No personas found. Add your first persona above.
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Persona Groups Tab -->
+                    <div class="tab-pane fade" id="persona-groups" role="tabpanel">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-users me-2"></i>Persona Groups Management
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <!-- Add Persona Group Form -->
+                                <div class="card mb-4">
+                                    <div class="card-header bg-primary text-white">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-plus me-2"></i>Add New Persona Group
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        {% if personas %}
+                                        <form method="POST" action="/add-persona-group/" id="add-persona-group-form">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="current_tab" id="current_tab_persona_group" value="persona-groups">
+                                            <div class="row">
+                                                <div class="col-md-12 mb-3">
+                                                    <label for="persona_id" class="form-label">Persona <span class="text-danger">*</span></label>
+                                                    <select class="form-select" id="persona_id" name="persona_id" required>
+                                                        <option value="">Select a persona</option>
+                                                        {% for persona in personas %}
+                                                        <option value="{{ persona.id }}">{{ persona.persona_name }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-6 mb-3">
+                                                    <label for="group_name" class="form-label">Name <span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control" id="group_name" name="group_name" required placeholder="Enter group name">
+                                                </div>
+                                                <div class="col-md-6 mb-3">
+                                                    <label for="object_id" class="form-label">Group ID</label>
+                                                    <input type="text" class="form-control" id="object_id" name="object_id" placeholder="Enter group ID">
+                                                </div>
+                                            </div>
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fas fa-plus me-2"></i>Add Persona Group
+                                            </button>
+                                        </form>
+                                        {% else %}
+                                        <div class="alert alert-warning">
+                                            <i class="fas fa-exclamation-triangle me-2"></i>You must create at least one persona before you can create a persona group. Please add a persona in the <a href="#personas" data-bs-toggle="list">Personas</a> tab first.
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <!-- Persona Groups List -->
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-list me-2"></i>Existing Persona Groups
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        {% if persona_groups %}
+                                        <div class="table-responsive">
+                                            <table class="table table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Persona</th>
+                                                        <th>Name</th>
+                                                        <th>Group ID</th>
+                                                        <th>Created</th>
+                                                        <th>Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for group in persona_groups %}
+                                                    <tr>
+                                                        <td><strong>{{ group.persona.persona_name }}</strong></td>
+                                                        <td><strong>{{ group.group_name }}</strong></td>
+                                                        <td>{{ group.object_id|default:"—" }}</td>
+                                                        <td>{{ group.created_at|date:"M d, Y" }}</td>
+                                                        <td>
+                                                            <a href="/delete-persona-group/{{ group.id }}/?tab=persona-groups" 
+                                                               class="btn btn-sm btn-danger" 
+                                                               onclick="return confirm('Are you sure you want to delete the persona group &quot;{{ group.group_name }}&quot;?');">
+                                                                <i class="fas fa-trash me-1"></i>Delete
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        {% else %}
+                                        <div class="alert alert-info">
+                                            <i class="fas fa-info-circle me-2"></i>No persona groups found. Add your first persona group above.
+                                        </div>
+                                        {% endif %}
                                     </div>
                                 </div>
                             </div>
@@ -450,16 +645,137 @@ function showNotification(message, type = 'info') {
 }
 
 function initializeTabs() {
-    // Add smooth transitions and better tab handling
+    // Function to update hidden fields based on current tab
+    function updateTabFields(tabName) {
+        const personaTabField = document.getElementById('current_tab_persona');
+        if (personaTabField && tabName === 'personas') {
+            personaTabField.value = 'personas';
+        }
+        const personaGroupTabField = document.getElementById('current_tab_persona_group');
+        if (personaGroupTabField && tabName === 'persona-groups') {
+            personaGroupTabField.value = 'persona-groups';
+        }
+    }
+    
+    // Function to get current active tab name
+    function getCurrentTabName() {
+        const activeTab = document.querySelector('[data-bs-toggle="list"].active');
+        if (activeTab) {
+            const href = activeTab.getAttribute('href');
+            if (href && href.startsWith('#')) {
+                return href.replace('#', '');
+            }
+        }
+        // Fallback: check which tab pane is visible
+        const activePane = document.querySelector('.tab-pane.show.active');
+        if (activePane) {
+            return activePane.id;
+        }
+        return null;
+    }
+    
+    // Listen to tab clicks and update URL hash
     const tabLinks = document.querySelectorAll('[data-bs-toggle="list"]');
     tabLinks.forEach(link => {
         link.addEventListener('click', function(e) {
-            // Remove active class from all tabs
-            tabLinks.forEach(l => l.classList.remove('active'));
-            // Add active class to clicked tab
-            this.classList.add('active');
+            const href = this.getAttribute('href');
+            if (href && href.startsWith('#')) {
+                const tabName = href.replace('#', '');
+                // Update URL hash to preserve tab on refresh
+                if (window.location.hash !== href) {
+                    window.location.hash = href;
+                }
+                // Use setTimeout to ensure tab is activated before updating
+                setTimeout(() => {
+                    updateTabFields(tabName);
+                }, 100);
+            }
         });
     });
+    
+    // Also listen to Bootstrap's shown event to ensure hash is updated
+    const tabPanes = document.querySelectorAll('.tab-pane');
+    tabPanes.forEach(pane => {
+        pane.addEventListener('shown.bs.tab', function(e) {
+            const paneId = this.id;
+            if (paneId) {
+                const hash = '#' + paneId;
+                if (window.location.hash !== hash) {
+                    window.location.hash = hash;
+                }
+                updateTabFields(paneId);
+            }
+        });
+    });
+    
+    // Function to activate tab from hash
+    function activateTabFromHash() {
+        const hash = window.location.hash;
+        if (hash) {
+            const tabName = hash.replace('#', '');
+            updateTabFields(tabName);
+            
+            // Activate the tab if it exists
+            const targetTab = document.querySelector(`[href="${hash}"]`);
+            if (targetTab) {
+                // Remove active from all tabs and panes
+                tabLinks.forEach(l => l.classList.remove('active'));
+                document.querySelectorAll('.tab-pane').forEach(p => {
+                    p.classList.remove('show', 'active');
+                });
+                
+                // Activate the target tab
+                targetTab.classList.add('active');
+                const targetPane = document.querySelector(hash);
+                if (targetPane) {
+                    targetPane.classList.add('show', 'active');
+                }
+            }
+        } else {
+            // If no hash, set hash based on currently active tab
+            const tabName = getCurrentTabName();
+            if (tabName) {
+                const hash = '#' + tabName;
+                if (window.location.hash !== hash) {
+                    window.location.hash = hash;
+                }
+                updateTabFields(tabName);
+            }
+        }
+    }
+    
+    // On page load, activate tab from hash (with delay to ensure DOM is ready)
+    setTimeout(() => {
+        activateTabFromHash();
+    }, 50);
+    
+    // Listen for hash changes (e.g., after redirect or browser back/forward)
+    window.addEventListener('hashchange', function() {
+        setTimeout(() => {
+            activateTabFromHash();
+        }, 50);
+    });
+    
+    // Update fields when forms are submitted (capture current tab at submit time)
+    const personaForm = document.getElementById('add-persona-form');
+    if (personaForm) {
+        personaForm.addEventListener('submit', function(e) {
+            const tabName = getCurrentTabName();
+            if (tabName) {
+                updateTabFields(tabName);
+            }
+        });
+    }
+    
+    const personaGroupForm = document.getElementById('add-persona-group-form');
+    if (personaGroupForm) {
+        personaGroupForm.addEventListener('submit', function(e) {
+            const tabName = getCurrentTabName();
+            if (tabName) {
+                updateTabFields(tabName);
+            }
+        });
+    }
 }
 </script>
 

@@ -44,6 +44,18 @@ urlpatterns = [
     path('delete-notification/<int:id>/', views.delete_notification, name='delete_notification'),
     
     # ============================================================================
+    # Persona Group Management
+    # ============================================================================
+    path('add-persona-group/', views.add_persona_group, name='add_persona_group'),
+    path('delete-persona-group/<int:id>/', views.delete_persona_group, name='delete_persona_group'),
+    
+    # ============================================================================
+    # Persona Management
+    # ============================================================================
+    path('add-persona/', views.add_persona, name='add_persona'),
+    path('delete-persona/<int:id>/', views.delete_persona, name='delete_persona'),
+    
+    # ============================================================================
     # API Endpoints
     # ============================================================================
     # User Master List APIs

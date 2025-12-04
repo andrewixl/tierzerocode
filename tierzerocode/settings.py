@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 import os
+import platform
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,13 +21,27 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure--xvxmpo#%!0be#gh466p)4a-v3k56-8#=(^k7%ww@gmhbkuudq'
+# Use hardcoded key on Windows, environment variable on Linux/Docker
+if platform.system() == 'Windows':
+    SECRET_KEY = 'django-insecure--xvxmpo#%!0be#gh466p)4a-v3k56-8#=(^k7%ww@gmhbkuudq'
+else:
+    # Linux or Docker
+    SECRET_KEY = os.environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = False
-DEBUG = True
+# Use DEBUG=True on Windows, environment variable on Linux/Docker
+if platform.system() == 'Windows':
+    DEBUG = True
+else:
+    # Linux or Docker
+    DEBUG = bool(os.environ.get("DEBUG", default=0))
 
-ALLOWED_HOSTS = ['hersheys.tierzerocode.com','10.10.10.45','localhost']
+# Use hardcoded hosts on Windows, environment variable on Linux/Docker
+if platform.system() == 'Windows':
+    ALLOWED_HOSTS = ['hersheys.tierzerocode.com','10.10.10.45','localhost']
+else:
+    # Linux or Docker
+    ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS","127.0.0.1").split(",")
 CSRF_TRUSTED_ORIGINS = ['https://hersheys.tierzerocode.com']
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 CSRF_COOKIE_SECURE = True
@@ -85,12 +100,28 @@ WSGI_APPLICATION = 'tierzerocode.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# Use SQLite on Windows, PostgreSQL/MySQL on Linux/Docker
+if platform.system() == 'Windows':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
-}
+else:
+    # Linux or Docker
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.{}'.format(
+                os.getenv('DATABASE_ENGINE', 'sqlite3')
+            ),
+            'NAME': os.getenv('DATABASE_NAME', 'tierzerocode'),
+            'USER': os.getenv('DATABASE_USERNAME', 'tierzerocodeadmin'),
+            'PASSWORD': os.getenv('DATABASE_PASSWORD', 'tierzerocodepassword'),
+            'HOST': os.getenv('DATABASE_HOST', '127.0.0.1'),
+            'PORT': os.getenv('DATABASE_PORT', 5432),
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators

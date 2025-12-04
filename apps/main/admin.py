@@ -9,9 +9,9 @@ from .models import (
     MicrosoftDefenderforEndpointDeviceData,
     CrowdStrikeFalconDeviceData,
     SophosCentralDeviceData,
-    CrowdStrikeFalconPreventionPolicy,
-    CrowdStrikeFalconPreventionPolicySetting,
     Notification,
+    PersonaGroup,
+    Persona,
 )
 
 class UserDataAdmin(admin.ModelAdmin):
@@ -33,10 +33,8 @@ admin.site.register(MicrosoftEntraIDDeviceData)
 admin.site.register(MicrosoftIntuneDeviceData)
 admin.site.register(SophosCentralDeviceData)
 admin.site.register(UserData, UserDataAdmin)
-
-# CS Health Check
-admin.site.register(CrowdStrikeFalconPreventionPolicy)
-admin.site.register(CrowdStrikeFalconPreventionPolicySetting)
+admin.site.register(Persona)
+admin.site.register(PersonaGroup)
 
 class NotificationAdmin(admin.ModelAdmin):
     list_display = ('title', 'status', 'created_at', 'updated_at')

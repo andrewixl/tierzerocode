@@ -21,7 +21,7 @@ from .integrations.device_integrations.MicrosoftIntune import *
 from .integrations.device_integrations.Qualys import *
 from .integrations.device_integrations.SophosCentral import *
 from .integrations.user_integrations.MicrosoftEntraID import *
-from .models import Device, DeviceComplianceSettings, Integration, Notification, UserData
+from .models import Device, DeviceComplianceSettings, Integration, Notification, UserData, PersonaGroup, Persona
 
 ############################################################################################
 
@@ -122,6 +122,57 @@ def initialSetup(request):
 			DeviceComplianceSettings.objects.create(os_platform=os_platform, cloudflare_zero_trust=True, crowdstrike_falcon=True, microsoft_defender_for_endpoint=True, microsoft_entra_id=True, microsoft_intune=True, sophos_central=True, qualys=True)
 
 	return redirect(request.META.get('HTTP_REFERER', '/'))
+
+@login_required
+def add_persona_group(request):
+    """Add a new persona group"""
+    if request.method == 'POST':
+        try:
+            persona_id = request.POST.get('persona_id', '').strip()
+            group_name = request.POST.get('group_name', '').strip()
+            object_id = request.POST.get('object_id', '').strip()
+            current_tab = request.POST.get('current_tab', 'persona-groups')
+            
+            if not persona_id:
+                messages.error(request, 'Persona selection is required.')
+            elif not group_name:
+                messages.error(request, 'Group name is required.')
+            else:
+                try:
+                    persona = Persona.objects.get(id=persona_id)
+                except Persona.DoesNotExist:
+                    messages.error(request, 'Selected persona does not exist.')
+                    return redirect(f'/profile-settings#{current_tab}')
+                
+                PersonaGroup.objects.create(
+                    persona=persona,
+                    group_name=group_name,
+                    object_id=object_id if object_id else None
+                )
+                messages.success(request, f'Persona group "{group_name}" added successfully.')
+        except Exception as e:
+            messages.error(request, f'Error adding persona group: {str(e)}')
+    
+    # Preserve the tab in the redirect
+    current_tab = request.POST.get('current_tab', 'persona-groups')
+    return redirect(f'/profile-settings#{current_tab}')
+
+@login_required
+def delete_persona_group(request, id):
+    """Delete a persona group"""
+    try:
+        persona_group = PersonaGroup.objects.get(id=id)
+        group_name = persona_group.group_name
+        persona_group.delete()
+        messages.success(request, f'Persona group "{group_name}" deleted successfully.')
+    except PersonaGroup.DoesNotExist:
+        messages.error(request, 'Persona group not found.')
+    except Exception as e:
+        messages.error(request, f'Error deleting persona group: {str(e)}')
+    
+    # Preserve the tab in the redirect - check GET parameter or default
+    current_tab = request.GET.get('tab', 'persona-groups')
+    return redirect(f'/profile-settings#{current_tab}')
 
 ############################################################################################
 
@@ -584,6 +635,8 @@ def profileSettings(request):
 		'devicecomps': compliance_settings,  # Use the new structured data
 		'compliance_summary': compliance_summary,
 		'compliance_report': compliance_report,
+        'persona_groups': PersonaGroup.objects.all().order_by('group_name'),
+        'personas': Persona.objects.all().order_by('priority', 'persona_name'),
 	}
 	
 	# Use the new structured format
@@ -1198,5 +1251,55 @@ def delete_notification(request, id):
         messages.error(request, f'Error deleting notification: {str(e)}')
     
     return redirect(request.META.get('HTTP_REFERER', '/'))
+
+@login_required
+def add_persona(request):
+    """Add a new persona"""
+    if request.method == 'POST':
+        try:
+            persona_name = request.POST.get('persona_name', '').strip()
+            priority = request.POST.get('priority', '').strip()
+            current_tab = request.POST.get('current_tab', 'personas')
+            
+            if not persona_name:
+                messages.error(request, 'Persona name is required.')
+            else:
+                # Convert priority to integer if provided
+                priority_int = None
+                if priority:
+                    try:
+                        priority_int = int(priority)
+                    except ValueError:
+                        messages.error(request, 'Priority must be a valid number.')
+                        return redirect(f'/profile-settings#{current_tab}')
+                
+                Persona.objects.create(
+                    persona_name=persona_name,
+                    priority=priority_int
+                )
+                messages.success(request, f'Persona "{persona_name}" added successfully.')
+        except Exception as e:
+            messages.error(request, f'Error adding persona: {str(e)}')
+    
+    # Preserve the tab in the redirect
+    current_tab = request.POST.get('current_tab', 'personas')
+    return redirect(f'/profile-settings#{current_tab}')
+
+@login_required
+def delete_persona(request, id):
+    """Delete a persona"""
+    try:
+        persona = Persona.objects.get(id=id)
+        persona_name = persona.persona_name
+        persona.delete()
+        messages.success(request, f'Persona "{persona_name}" deleted successfully.')
+    except Persona.DoesNotExist:
+        messages.error(request, 'Persona not found.')
+    except Exception as e:
+        messages.error(request, f'Error deleting persona: {str(e)}')
+    
+    # Preserve the tab in the redirect - check GET parameter or default
+    current_tab = request.GET.get('tab', 'personas')
+    return redirect(f'/profile-settings#{current_tab}')
 
 ############################################################################################

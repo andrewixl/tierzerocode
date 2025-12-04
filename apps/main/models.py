@@ -352,12 +352,31 @@ class QualysDevice(models.Model):
 
     def __str__(self):
         return self.hostname
+
+class Persona(models.Model):
+    persona_name = models.CharField(max_length=200, null=True)
+    priority = models.IntegerField(null=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
+
+    def __str__(self):
+        return self.persona_name
+
+class PersonaGroup(models.Model):
+    persona = models.ForeignKey(Persona, on_delete=models.CASCADE, null=True)
+    group_name = models.CharField(max_length=200, null=True)
+    object_id = models.CharField(max_length=200, null=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
+
+    def __str__(self):
+        return self.group_name or 'Unnamed Group'
     
 class UserData(models.Model):
     upn = models.EmailField(max_length=200, null=True)
     uid = models.CharField(max_length=200, null=True)
     network_id = models.CharField(max_length=200, null=True)
-    persona = models.CharField(max_length=200, null=True)
+    persona = models.ForeignKey(Persona, on_delete=models.CASCADE, null=True)
     given_name = models.CharField(max_length=200, null=True)
     surname = models.CharField(max_length=200, null=True)
     job_title = models.CharField(max_length=200, null=True)
@@ -386,6 +405,7 @@ class UserData(models.Model):
     securityQuestion_authentication_method = models.BooleanField(null=True)
     # End Authentication methods
     integration = models.ManyToManyField("Integration", related_name='users')
+    persona_group = models.ForeignKey("PersonaGroup", on_delete=models.CASCADE, null=True, related_name='users')
     created_at_timestamp = models.DateTimeField(null=True)
     last_logon_timestamp = models.DateTimeField(null=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
@@ -393,29 +413,6 @@ class UserData(models.Model):
 
     def __str__(self):
         return self.upn
-
-class CrowdStrikeFalconPreventionPolicy(models.Model):
-    id = models.CharField(max_length=200, primary_key=True)
-    name = models.CharField(max_length=200, null=True)
-    platform_name = models.CharField(max_length=200, null=True)
-    enabled = models.BooleanField(null=True)
-    created_at = models.DateTimeField(auto_now_add=True, null=True)
-    updated_at = models.DateTimeField(auto_now=True, null=True)
-
-    def __str__(self):
-        return self.name
-
-class CrowdStrikeFalconPreventionPolicySetting(models.Model):
-    id = models.CharField(max_length=200, primary_key=True)
-    name = models.CharField(max_length=200, null=True)
-    description = models.CharField(max_length=500, null=True)
-    value = models.CharField(max_length=200, null=True)
-    prevention_policy = models.ForeignKey("CrowdStrikeFalconPreventionPolicy", on_delete=models.CASCADE, null=True, related_name='settings')
-    created_at = models.DateTimeField(auto_now_add=True, null=True)
-    updated_at = models.DateTimeField(auto_now=True, null=True)
-
-    def __str__(self):
-        return self.name
 
 class Notification(models.Model):
     title = models.CharField(max_length=200, null=True)

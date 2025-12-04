@@ -5,45 +5,10 @@ from datetime import datetime
 from django.contrib import messages
 from django.utils.timezone import make_aware
 # Import Models
-from apps.main.models import Integration, UserData, Notification
+from apps.main.models import Integration, UserData, Persona, PersonaGroup, Notification
 # Import Function Scripts
 from apps.main.integrations.device_integrations.ReusedFunctions import *
 from apps.logger.views import createLog
-
-# Constants
-PERSONA_GROUPS = [
-    {"display_name": "myID_Persona_cld_ShdAdm", "id": "b8cc6523-ba76-411b-8535-47ae8281c8eb"},
-    {"display_name": "myID_Persona_cld_Contractor", "id": "656ac754-5b1b-42a4-b280-d253edaf7722"},
-    {"display_name": "myID_Persona_cld_Emp", "id": "f5370b41-d93d-48cd-9fa7-23e6cce36753"},
-    {"display_name": "myID_Persona_cld_IntAdm", "id": "20e88424-9cf6-476b-a27c-96c10ff5cda7"},
-    {"display_name": "myID_Persona_cld_SVC_NI", "id": "8fa7006e-8bbc-4251-8685-eee93a976f95"},
-    {"display_name": "myID_Persona_cld_Tst", "id": "d4106d05-4f6a-478f-870d-0cdae06bdb25"},
-    {"display_name": "myID_Persona_cld_Hourly", "id": "9321dabb-f680-455c-b3cc-a82a3cb906d0"},
-    {"display_name": "myID_Persona_cld_Robots", "id": "16dedf78-8029-4005-9d0f-8b423557b17a"},
-    {"display_name": "myID_Persona_cld_ExtAdm", "id": "a7f0ed2b-8cb0-465a-9183-f8d48d392076"},
-    {"display_name": "myID_Persona_cld_SVC_I", "id": "cf0c33f6-a23a-47fd-801c-667da87f6cfb"},
-    {"display_name": "myid_SharedMailbox", "id": "78250c74-8ede-43d1-b3ac-56db4cc5bbce"},
-    {"display_name": "myid_ConferenceRooms", "id": "bdd9653e-88b1-477b-931f-32ce6e1c3344"},
-    {"display_name": "myid_MonitoringMailboxes", "id": "c90a0e8c-ed3b-41f7-b3a3-32c695351e73"},
-    {"display_name": "Bookings_Scheduling_Mailboxes", "id": "de36d640-878d-47e5-872f-a0da3c5be023"}
-]
-
-PERSONA_MAPPING = {
-    "myID_Persona_cld_ShdAdm": "Shared Admin",
-    "myID_Persona_cld_Contractor": "External Worker",
-    "myID_Persona_cld_Emp": "Internal Worker",
-    "myID_Persona_cld_IntAdm": "Internal Admin",
-    "myID_Persona_cld_SVC_NI": "Service Account Non-Interactive",
-    "myID_Persona_cld_Tst": "Test Account",
-    "myID_Persona_cld_Hourly": "Hourly Worker",
-    "myID_Persona_cld_Robots": "Robot Account",
-    "myID_Persona_cld_ExtAdm": "External Admin",
-    "myID_Persona_cld_SVC_I": "Service Account Interactive",
-    "myid_SharedMailbox": "Service Account Interactive",
-    "myid_ConferenceRooms": "Service Account Interactive",
-    "myid_MonitoringMailboxes": "Service Account Interactive",
-    "Bookings_Scheduling_Mailboxes": "Booking Account",
-}
 
 AUTHENTICATION_STRENGTHS = {
     "Phishing Resistant": {'passKeyDeviceBound', 'passKeyDeviceBoundAuthenticator', 'windowsHelloForBusiness'},
@@ -52,8 +17,6 @@ AUTHENTICATION_STRENGTHS = {
     "Deprecated": {'mobilePhone', 'email', 'securityQuestion'},
     "None": set()
 }
-
-
 
 def getMicrosoftEntraIDAccessToken(client_id, client_secret, tenant_id):
     """Acquire an access token for Microsoft Entra ID using MSAL."""
@@ -164,20 +127,24 @@ def getMicrosoftEntraIDUserAuthenticationMethods(access_token):
     headers = {'Authorization': access_token}
     return _fetch_paginated_data(url, headers)
 
-def getPersonaGroupMembership(access_token, group_id):
+def getPersonaGroupMembership(access_token, object_id):
     """Fetch members of a specific persona group."""
-    url = f'https://graph.microsoft.com/v1.0/groups/{group_id}/members?$select=userPrincipalName'
+    url = f'https://graph.microsoft.com/v1.0/groups/{object_id}/members?$select=userPrincipalName'
     headers = {'Authorization': access_token}
     return _fetch_paginated_data(url, headers)
 
 def getPersonaGroupMemberships(access_token):
     """Fetch all persona group memberships for mapping personas."""
+    persona_groups = PersonaGroup.objects.select_related('persona').all()
     all_members = []
     
-    for group in PERSONA_GROUPS:
-        group_members = getPersonaGroupMembership(access_token, group["id"])
+    for group in persona_groups:
+        if not group.object_id:  # Skip groups without object_id
+            continue
+        group_members = getPersonaGroupMembership(access_token, group.object_id)
         for member in group_members:
-            member["group_display_name"] = group["display_name"]
+            member["persona_group"] = group  # Store the PersonaGroup object
+            member["group_display_name"] = group.group_name
         all_members.extend(group_members)
 
     return all_members
@@ -210,11 +177,13 @@ def _parse_timestamp(timestamp_str):
     except Exception:
         return None
 
-def _get_user_persona(matching_groups):
-    """Determine user persona from matching groups."""
+def _get_user_persona_group(matching_groups):
+    """Determine user persona group from matching groups."""
     if len(matching_groups) > 1:
-        return "DUPLICATE"
-    return PERSONA_MAPPING.get(matching_groups[0], "Unknown") if matching_groups else "Unknown"
+        return None  # Return None for duplicates - we'll handle this separately
+    if matching_groups:
+        return matching_groups[0].get("persona_group")  # Return the PersonaGroup object
+    return None
 
 def _build_authentication_fields(auth_method_types):
     """Build authentication method fields dynamically."""
@@ -275,13 +244,16 @@ def _process_user_data(user_data, authentication_data, persona_memberships):
         {}
     )
 
-    # Determine persona
+    # Determine persona group membership
     matching_groups = [
-        membership["group_display_name"]
+        membership
         for membership in persona_memberships
         if membership.get("userPrincipalName", '').lower() == user_data['userPrincipalName'].lower()
     ]
-    persona = _get_user_persona(matching_groups)
+    persona_group = _get_user_persona_group(matching_groups)
+    
+    # Get persona from persona_group if it exists
+    persona = persona_group.persona if persona_group else None
 
     # Determine authentication strengths
     auth_method_types = set(user_authentication_data.get('methodsRegistered', []))
@@ -292,7 +264,8 @@ def _process_user_data(user_data, authentication_data, persona_memberships):
         'upn': user_data['userPrincipalName'].lower(),
         'uid': user_data['id'],
         'network_id': user_data['employeeId'].lower(),
-        'persona': persona,
+        'persona': persona,  # ForeignKey to Persona model
+        'persona_group': persona_group,  # ForeignKey to PersonaGroup model
         'given_name': user_data.get('givenName', ''),
         'surname': user_data.get('surname', ''),
         'job_title': user_data.get('jobTitle', ''),
@@ -348,6 +321,9 @@ def syncMicrosoftEntraIDUser():
 
 def syncMicrosoftEntraIDUserBackground(request):
     """Run Microsoft Entra ID user sync in a background thread."""
+    # Capture user email before starting thread (request.session may not be thread-safe)
+    user_email = request.session.get('user_email', 'unknown') if hasattr(request, 'session') else 'unknown'
+    
     def run():
         obj = Notification.objects.create(
             title="Microsoft Entra ID User Integration Sync",
@@ -359,13 +335,13 @@ def syncMicrosoftEntraIDUserBackground(request):
         try:
             messages.info(request, 'Microsoft Entra ID User Integration Sync in Progress')
             syncMicrosoftEntraIDUser()
-            createLog(1505, "System Integration", "System Integration Event", "Superuser", True, "System Integration Sync", "Success", "Microsoft Entra ID User", request.session.get('user_email', 'unknown'))
+            createLog(1505, "System Integration", "System Integration Event", "Superuser", True, "System Integration Sync", "Success", "Microsoft Entra ID User", user_email)
             obj.status = "Success"
             obj.updated_at = timezone.now()
             obj.save()
             messages.info(request, 'Microsoft Entra ID User Integration Sync Success')
         except Exception as e:
-            createLog(1505, "System Integration", "System Integration Event", "Superuser", True, "System Integration Sync", "Failure", f"Microsoft Entra ID User - {e}", request.session.get('user_email', 'unknown'))
+            createLog(1505, "System Integration", "System Integration Event", "Superuser", True, "System Integration Sync", "Failure", f"Microsoft Entra ID User - {e}", user_email)
             obj.status = "Failure"
             obj.updated_at = timezone.now()
             obj.save()
