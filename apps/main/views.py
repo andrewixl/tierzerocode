@@ -1,6 +1,5 @@
 # Standard library imports
-import re
-import json
+import re, json
 
 # Third-party imports
 from django.contrib import messages
@@ -81,28 +80,6 @@ def test(request):
 integration_short_map = dict(zip(integration_names, integration_names_short))
 user_integration_short_map = dict(zip(user_integration_names, user_integration_names_short))
 
-# Creates blank integration templates if they do not exist
-# def initialSetup(request):
-# 	for integration in integration_names:
-# 		if not Integration.objects.filter(integration_type=integration, integration_context="Device").exists():
-# 			image_navbar_path = 'main/img/navbar_icons/webp/' + (integration.replace(" ", "_")).lower() + '_logo_nav.webp'
-# 			image_integration_path = 'main/img/integration_images/webp/' + (integration.replace(" ", "_")).lower() + '_logo.webp'
-# 			integration_short = integration_short_map[integration]
-# 			Integration.objects.create(enabled=False, integration_type=integration, integration_type_short=integration_short, integration_context="Device", image_navbar_path=image_navbar_path, image_integration_path=image_integration_path)
-	
-# 	for integration in user_integration_names:
-# 		if not Integration.objects.filter(integration_type=integration, integration_context="User").exists():
-# 			image_navbar_path = 'main/img/navbar_icons/webp/' + (integration.replace(" ", "_")).lower() + '_logo_nav.webp'
-# 			image_integration_path = 'main/img/integration_images/webp/' + (integration.replace(" ", "_")).lower() + '_logo.webp'
-# 			integration_short = user_integration_short_map[integration]
-# 			Integration.objects.create(enabled=False, integration_type=integration, integration_type_short=integration_short, integration_context="User", image_navbar_path=image_navbar_path, image_integration_path=image_integration_path)
-
-# 	for os_platform in os_platforms:
-# 		if not DeviceComplianceSettings.objects.filter(os_platform=os_platform).exists():
-# 			DeviceComplianceSettings.objects.create(os_platform=os_platform, cloudflare_zero_trust=True, crowdstrike_falcon=True, microsoft_defender_for_endpoint=True, microsoft_entra_id=True, microsoft_intune=True, sophos_central=True, qualys=True)
-
-# 	return redirect(request.META.get('HTTP_REFERER', '/'))
-
 @login_required
 def add_persona_group(request):
     """Add a new persona group"""
@@ -165,10 +142,52 @@ def migration(request):
 
 ############################################################################################
 
+def _calculate_auth_method_counts(users_queryset):
+	"""Helper function to calculate authentication method counts for a user queryset."""
+	# Define reusable Q filters for phishing-resistant methods
+	Q_PASSKEY = Q(passKeyDeviceBound_authentication_method=True) | Q(passKeyDeviceBoundAuthenticator_authentication_method=True)
+	Q_WHFB = Q(windowsHelloforBusiness_authentication_method=True)
+	Q_PHISHING_RESISTANT = Q_PASSKEY | Q_WHFB
+	Q_AUTHENTICATOR = Q(microsoftAuthenticatorPasswordless_authentication_method=True) | Q(microsoftAuthenticatorPush_authentication_method=True)
+	Q_PHONE = Q(mobilePhone_authentication_method=True)
+	Q_PHISHABLE = Q_PHONE | Q_AUTHENTICATOR
+	
+	total_users = users_queryset.count()
+	
+	# Phishing Resistant users (have passkey OR WHfB, regardless of other methods)
+	# Priority: Passkey > WHfB (if user has both, count as Passkey)
+	count_passkey_users = users_queryset.filter(Q_PASSKEY).count()
+	count_whfb_users = users_queryset.filter(Q_WHFB).count()
+	count_phishing_resistant_users = users_queryset.filter(Q_PHISHING_RESISTANT).count()
+	
+	# Phishable users (have phone OR authenticator, but NOT phishing resistant)
+	# Priority: Phone > Authenticator (if user has both, count as Phone)
+	count_phone_users = users_queryset.filter(Q_PHONE).exclude(Q_PHISHING_RESISTANT).count()
+	count_authenticator_users = users_queryset.filter(Q_AUTHENTICATOR).exclude(Q_PHISHING_RESISTANT).count()
+	count_phishable_users = users_queryset.filter(Q_PHISHABLE).exclude(Q_PHISHING_RESISTANT).count()
+	
+	# Single Factor users (none of the above methods)
+	# Calculate as: total - phishing_resistant - phishable to ensure all users are accounted for
+	count_single_factor_users = max(0, total_users - count_phishing_resistant_users - count_phishable_users)
+	
+	return {
+		'total_users': total_users,
+		'passkey_users': count_passkey_users,
+		'whfb_users': count_whfb_users,
+		'phishing_resistant_users': count_phishing_resistant_users,
+		'phone_users': count_phone_users,
+		'authenticator_users': count_authenticator_users,
+		'phishable_users': count_phishable_users,
+		'single_factor_users': count_single_factor_users,
+	}
+
 @login_required
 def index(request):
+	access_token = None
 	try:
-		access_token = getMicrosoftEntraIDAccessToken(Integration.objects.get(integration_type="Microsoft Entra ID", integration_context="User").client_id, Integration.objects.get(integration_type="Microsoft Entra ID", integration_context="User").client_secret, Integration.objects.get(integration_type="Microsoft Entra ID", integration_context="User").tenant_id)
+		# Cache the Integration object to avoid 3 separate database queries
+		entra_integration = Integration.objects.get(integration_type="Microsoft Entra ID", integration_context="User")
+		access_token = getMicrosoftEntraIDAccessToken(entra_integration.client_id, entra_integration.client_secret, entra_integration.tenant_id)
 		guests = getMicrosoftEntraIDGuests(access_token)
 		groups = getMicrosoftEntraIDGroups(access_token)
 		apps = getMicrosoftEntraIDApps(access_token)
@@ -177,227 +196,63 @@ def index(request):
 	except Exception as e:
 		guests, groups, apps, devices, managed = 0, 0, 0, 0, 0
 
-	auth_strength_counts = UserData.objects.aggregate(
-        count_phishing_resistant=Count('id', filter=Q(highest_authentication_strength='Phishing Resistant')),
-        count_passwordless=Count('id', filter=Q(highest_authentication_strength='Passwordless')),
-        count_mfa=Count('id', filter=Q(highest_authentication_strength='MFA')),
-        count_deprecated=Count('id', filter=Q(highest_authentication_strength='Deprecated')),
-        count_none=Count('id', filter=Q(highest_authentication_strength='None')),
-        count_low_phishing_resistant=Count('id', filter=Q(lowest_authentication_strength='Phishing Resistant')),
-        count_low_passwordless=Count('id', filter=Q(lowest_authentication_strength='Passwordless')),
-        count_low_mfa=Count('id', filter=Q(lowest_authentication_strength='MFA')),
-        count_low_deprecated=Count('id', filter=Q(lowest_authentication_strength='Deprecated')),
-        count_low_none=Count('id', filter=Q(lowest_authentication_strength='None')),
-    )
-	
-	# Calculate auth method flow counts for Sankey diagram
-	# Count users with each authentication method
-	passkey_users = UserData.objects.filter(Q(passKeyDeviceBound_authentication_method=True) | Q(passKeyDeviceBoundAuthenticator_authentication_method=True))
-	whfb_users = UserData.objects.filter(windowsHelloforBusiness_authentication_method=True)
-	authenticator_users = UserData.objects.filter(microsoftAuthenticatorPush_authentication_method=True)
-	phone_users = UserData.objects.filter(mobilePhone_authentication_method=True)
-	single_factor_users = UserData.objects.filter(Q(highest_authentication_strength='None') | Q(highest_authentication_strength='Deprecated'))
-	
-	# Count users in phish-resistant category (have passkey or WHfB)
-	phish_resistant_users = UserData.objects.filter(
-		Q(passKeyDeviceBound_authentication_method=True) | 
-		Q(passKeyDeviceBoundAuthenticator_authentication_method=True) | 
-		Q(windowsHelloforBusiness_authentication_method=True)
-	)
-	
-	# Count users in phishable category (have authenticator or phone, but exclude single factor)
-	phishable_users = UserData.objects.filter(
-		Q(microsoftAuthenticatorPush_authentication_method=True) | 
-		Q(mobilePhone_authentication_method=True)
-	).exclude(
-		Q(highest_authentication_strength='None') | 
-		Q(highest_authentication_strength='Deprecated')
-	)
-	
-	auth_flow_counts = {
-		'users_to_phish_resistant': phish_resistant_users.count(),
-		'users_to_phishable': phishable_users.count(),
-		'users_to_single_factor': single_factor_users.count(),
-		'phish_resistant_to_passkey': passkey_users.count(),
-		'phish_resistant_to_whfb': whfb_users.count(),
-		'phishable_to_authenticator': authenticator_users.count(),
-		'phishable_to_phone': phone_users.count(),
-	}
-
+	# Calculate authentication method counts for privileged users (sk1)
 	sk1_privileged_users = UserData.objects.filter(isAdmin=True)
-	sk1_count_privileged_users = sk1_privileged_users.count()
-	
-	# Phishing Resistant users (have passkey OR WHfB, regardless of other methods)
-	# Priority: Passkey > WHfB (if user has both, count as Passkey)
-	sk1_count_privileged_passkey_users = sk1_privileged_users.filter(
-		Q(passKeyDeviceBound_authentication_method=True) |
-		Q(passKeyDeviceBoundAuthenticator_authentication_method=True)
-	).count()
-	sk1_count_privileged_whfb_users = sk1_privileged_users.filter(
-		Q(windowsHelloforBusiness_authentication_method=True)
-	).count()
-	sk1_count_privileged_phishing_resistant_users = sk1_privileged_users.filter(
-		Q(passKeyDeviceBound_authentication_method=True) |
-		Q(passKeyDeviceBoundAuthenticator_authentication_method=True) |
-		Q(windowsHelloforBusiness_authentication_method=True)
-	).count()
-	
-	# Phishable users (have phone OR authenticator, but NOT phishing resistant)
-	# Priority: Phone > Authenticator (if user has both, count as Phone)
-	sk1_count_privileged_phone_users = sk1_privileged_users.filter(
-		Q(mobilePhone_authentication_method=True)
-	).exclude(
-		Q(passKeyDeviceBound_authentication_method=True) |
-		Q(passKeyDeviceBoundAuthenticator_authentication_method=True) |
-		Q(windowsHelloforBusiness_authentication_method=True)
-	).count()
-	sk1_count_privileged_authenticator_users = sk1_privileged_users.filter(
-		Q(microsoftAuthenticatorPasswordless_authentication_method=True) |
-		Q(microsoftAuthenticatorPush_authentication_method=True)
-	).exclude(
-		Q(passKeyDeviceBound_authentication_method=True) |
-		Q(passKeyDeviceBoundAuthenticator_authentication_method=True) |
-		Q(windowsHelloforBusiness_authentication_method=True)
-	).count()
-	sk1_count_privileged_phishable_users = sk1_privileged_users.filter(
-		Q(mobilePhone_authentication_method=True) |
-		Q(microsoftAuthenticatorPasswordless_authentication_method=True) |
-		Q(microsoftAuthenticatorPush_authentication_method=True)
-	).exclude(
-		Q(passKeyDeviceBound_authentication_method=True) |
-		Q(passKeyDeviceBoundAuthenticator_authentication_method=True) |
-		Q(windowsHelloforBusiness_authentication_method=True)
-	).count()
-	
-	# Single Factor users (none of the above methods)
-	# Calculate as: total - phishing_resistant - phishable to ensure all users are accounted for
-	sk1_count_privileged_single_factor_users = sk1_count_privileged_users - sk1_count_privileged_phishing_resistant_users - sk1_count_privileged_phishable_users
-	# Ensure it's not negative (shouldn't happen, but safety check)
-	if sk1_count_privileged_single_factor_users < 0:
-		sk1_count_privileged_single_factor_users = 0
+	sk1_counts = _calculate_auth_method_counts(sk1_privileged_users)
 
-
-
+	# Calculate authentication method counts for all users (sk2)
 	sk2_users = UserData.objects.all()
-	sk2_count_users = sk2_users.count()
-	
-	# Phishing Resistant users (have passkey OR WHfB, regardless of other methods)
-	# Priority: Passkey > WHfB (if user has both, count as Passkey)
-	sk2_count_passkey_users = sk2_users.filter(
-		Q(passKeyDeviceBound_authentication_method=True) |
-		Q(passKeyDeviceBoundAuthenticator_authentication_method=True)
-	).count()
-	sk2_count_whfb_users = sk2_users.filter(
-		Q(windowsHelloforBusiness_authentication_method=True)
-	).count()
-	sk2_count_phishing_resistant_users = sk2_users.filter(
-		Q(passKeyDeviceBound_authentication_method=True) |
-		Q(passKeyDeviceBoundAuthenticator_authentication_method=True) |
-		Q(windowsHelloforBusiness_authentication_method=True)
-	).count()
-	
-	# Phishable users (have phone OR authenticator, but NOT phishing resistant)
-	# Priority: Phone > Authenticator (if user has both, count as Phone)
-	sk2_count_phone_users = sk2_users.filter(
-		Q(mobilePhone_authentication_method=True)
-	).exclude(
-		Q(passKeyDeviceBound_authentication_method=True) |
-		Q(passKeyDeviceBoundAuthenticator_authentication_method=True) |
-		Q(windowsHelloforBusiness_authentication_method=True)
-	).count()
-	sk2_count_authenticator_users = sk2_users.filter(
-		Q(microsoftAuthenticatorPasswordless_authentication_method=True) |
-		Q(microsoftAuthenticatorPush_authentication_method=True)
-	).exclude(
-		Q(passKeyDeviceBound_authentication_method=True) |
-		Q(passKeyDeviceBoundAuthenticator_authentication_method=True) |
-		Q(windowsHelloforBusiness_authentication_method=True)
-	).count()
-	sk2_count_phishable_users = sk2_users.filter(
-		Q(mobilePhone_authentication_method=True) |
-		Q(microsoftAuthenticatorPasswordless_authentication_method=True) |
-		Q(microsoftAuthenticatorPush_authentication_method=True)
-	).exclude(
-		Q(passKeyDeviceBound_authentication_method=True) |
-		Q(passKeyDeviceBoundAuthenticator_authentication_method=True) |
-		Q(windowsHelloforBusiness_authentication_method=True)
-	).count()
-	
-	# Single Factor users (none of the above methods)
-	# Calculate as: total - phishing_resistant - phishable to ensure all users are accounted for
-	sk2_count_single_factor_users = sk2_count_users - sk2_count_phishing_resistant_users - sk2_count_phishable_users
-	# Ensure it's not negative (shouldn't happen, but safety check)
-	if sk2_count_single_factor_users < 0:
-		sk2_count_single_factor_users = 0
+	sk2_counts = _calculate_auth_method_counts(sk2_users)
 
+	# Get tenant details
+	tenant_id = tenant_name = tenant_domain = None
 	try:
-		tenant_details = getMicrosoftEntraTenantDetails(access_token)
-		if tenant_details and tenant_details.get('value') and len(tenant_details['value']) > 0:
-			organization = tenant_details['value'][0]
-			tenant_id = organization.get('id')
-			tenant_name = organization.get('displayName')
-			# Extract the default domain from verifiedDomains array
-			verified_domains = organization.get('verifiedDomains', [])
-			default_domain = None
-			for domain in verified_domains:
-				if domain.get('isDefault', False):
-					default_domain = domain.get('name')
-					break
-			tenant_domain = default_domain
-	except Exception as e:
-		tenant_id = None
-		tenant_name = None
-		tenant_domain = None
-
-	count_duplicate_persona = UserData.objects.filter(persona__persona_name='DUPLICATE').count() or 0
-	count_unknown_persona = UserData.objects.filter(persona__persona_name='Unknown').count() or 0
+		if access_token:
+			tenant_details = getMicrosoftEntraTenantDetails(access_token)
+			if tenant_details and tenant_details.get('value') and len(tenant_details['value']) > 0:
+				organization = tenant_details['value'][0]
+				tenant_id = organization.get('id')
+				tenant_name = organization.get('displayName')
+				# Extract the default domain from verifiedDomains array using next() for efficiency
+				verified_domains = organization.get('verifiedDomains', [])
+				tenant_domain = next((domain.get('name') for domain in verified_domains if domain.get('isDefault', False)), None)
+	except Exception:
+		pass
+	
+	# Cache user count to avoid duplicate query
+	count_users = UserData.objects.count()
 	
 	context = {
-        'page': 'dashboard',
-		'count_users': UserData.objects.count(),
-        'count_guests': guests,
-        'count_groups': groups,
-        'count_apps': apps,
-        'count_devices': devices,
-        'count_managed': managed,
-		'auth_method_labels': ['Phishing Resistant', 'Passwordless', 'MFA', 'Deprecated', 'None'],
-		'auth_method_data': [
-            auth_strength_counts['count_phishing_resistant'],
-            auth_strength_counts['count_passwordless'],
-            auth_strength_counts['count_mfa'],
-            auth_strength_counts['count_deprecated'],
-            auth_strength_counts['count_none'],
-        ],
-		'auth_flow_counts': json.dumps(auth_flow_counts),
-        'enabled_integrations': getEnabledIntegrations(),
-        'enabled_user_integrations': getEnabledUserIntegrations(),
-        'notifications': Notification.objects.all(),
+		'page': 'dashboard',
+		'count_users': count_users,
+		'count_guests': guests,
+		'count_groups': groups,
+		'count_apps': apps,
+		'count_devices': devices,
+		'count_managed': managed,
 
-		'sk1_count_privileged_users': sk1_count_privileged_users,
-		'sk1_count_privileged_single_factor_users': sk1_count_privileged_single_factor_users,
-		'sk1_count_privileged_phone_users': sk1_count_privileged_phone_users,
-		'sk1_count_privileged_authenticator_users': sk1_count_privileged_authenticator_users,
-		'sk1_count_privileged_phishable_users': sk1_count_privileged_phishable_users,
-		'sk1_count_privileged_passkey_users': sk1_count_privileged_passkey_users,
-		'sk1_count_privileged_whfb_users': sk1_count_privileged_whfb_users,
-		'sk1_count_privileged_phishing_resistant_users': sk1_count_privileged_phishing_resistant_users,
+		'sk1_count_privileged_users': sk1_counts['total_users'],
+		'sk1_count_privileged_single_factor_users': sk1_counts['single_factor_users'],
+		'sk1_count_privileged_phone_users': sk1_counts['phone_users'],
+		'sk1_count_privileged_authenticator_users': sk1_counts['authenticator_users'],
+		'sk1_count_privileged_phishable_users': sk1_counts['phishable_users'],
+		'sk1_count_privileged_passkey_users': sk1_counts['passkey_users'],
+		'sk1_count_privileged_whfb_users': sk1_counts['whfb_users'],
+		'sk1_count_privileged_phishing_resistant_users': sk1_counts['phishing_resistant_users'],
 
-		'sk2_count_users': sk2_count_users,
-		'sk2_count_single_factor_users': sk2_count_single_factor_users,
-		'sk2_count_phone_users': sk2_count_phone_users,
-		'sk2_count_authenticator_users': sk2_count_authenticator_users,
-		'sk2_count_phishable_users': sk2_count_phishable_users,
-		'sk2_count_passkey_users': sk2_count_passkey_users,
-		'sk2_count_whfb_users': sk2_count_whfb_users,
-		'sk2_count_phishing_resistant_users': sk2_count_phishing_resistant_users,
+		'sk2_count_users': sk2_counts['total_users'],
+		'sk2_count_single_factor_users': sk2_counts['single_factor_users'],
+		'sk2_count_phone_users': sk2_counts['phone_users'],
+		'sk2_count_authenticator_users': sk2_counts['authenticator_users'],
+		'sk2_count_phishable_users': sk2_counts['phishable_users'],
+		'sk2_count_passkey_users': sk2_counts['passkey_users'],
+		'sk2_count_whfb_users': sk2_counts['whfb_users'],
+		'sk2_count_phishing_resistant_users': sk2_counts['phishing_resistant_users'],
 
 		'tenant_id': tenant_id,
 		'tenant_name': tenant_name,
 		'tenant_domain': tenant_domain,
-
-		'count_duplicate_persona': count_duplicate_persona,
-		'count_unknown_persona': count_unknown_persona,
-    }
+	}
 	return render(request, 'main/index.html', context)
 
 ############################################################################################
@@ -537,7 +392,7 @@ def personaMetrics(request, persona):
 	# of Users that have adopted each authentication method
 	persona = persona.replace("-", " ").title()
 	users = UserData.objects.filter(persona=persona)
- 
+	persona_name = Persona.objects.get(id=persona).persona_name.replace("-", " ").title()
    # Aggregate counts for highest and lowest authentication strengths
 	auth_strength_counts = users.aggregate(
         count_phishing_resistant=Count('id', filter=Q(highest_authentication_strength='Phishing Resistant')),
@@ -568,6 +423,7 @@ def personaMetrics(request, persona):
 		'enabled_integrations': getEnabledIntegrations(),
 		'notifications': Notification.objects.all(),
 		'persona': persona,
+		'persona_name': persona_name,
 		'persona_count': users.count(),
 		'percent_mfa': "{:.2f}".format(((auth_strength_counts['count_phishing_resistant'] + auth_strength_counts['count_passwordless'] + auth_strength_counts['count_mfa'] + auth_strength_counts['count_deprecated']) / users.count()) * 100 if users.count() > 0 else 0),
 		'count_mfa': auth_strength_counts['count_phishing_resistant'] + auth_strength_counts['count_passwordless'] + auth_strength_counts['count_mfa'] + auth_strength_counts['count_deprecated'],
