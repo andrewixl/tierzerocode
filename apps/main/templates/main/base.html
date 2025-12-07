@@ -5,14 +5,14 @@
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-	<meta name="description" content="Responsive Admin &amp; Dashboard Template based on Bootstrap 5">
-	<meta name="author" content="AdminKit">
-	<meta name="keywords" content="adminkit, bootstrap, bootstrap 5, admin, dashboard, template, responsive, css, sass, html, theme, front-end, ui kit, web">
+	<meta name="description" content="Tier Zero C.O.D.E is an enterprise-level dashboard for managing your endpoints and users.">
+	<meta name="author" content="Tier Zero C.O.D.E">
+	<meta name="keywords" content="tierzerocode, tierzero, code, enterprise, dashboard, template, responsive, css, sass, html, theme, front-end, ui kit, web">
 
 	<link rel="preconnect" href="https://fonts.gstatic.com">
 	<link rel="shortcut icon" href="{% static 'main/img/icons/icon-48x48.png' %}" />
 
-	<link rel="canonical" href="https://demo.adminkit.io/" />
+	<link rel="canonical" href="https://tierzerocode.com/" />
 
 	<title>Tier Zero C.O.D.E</title>
 
@@ -92,23 +92,7 @@
 						<a class="sidebar-link" href="/endpoints/master-list">
 							<i class="align-middle" data-feather="smartphone"></i> <span class="align-middle">Endpoint List</span>
 						</a>
-					</li>
-
-					{% for enabled_integration in enabled_integrations %}
-
-					{% if page == enabled_integration.integration_type %}
-					<li class="sidebar-item active">
-					{% else %}
-					<li class="sidebar-item">
-					{% endif %}
-
-						<a class="sidebar-link" href="/endpoints/{{enabled_integration.integration_type.split|join:'-'}}">
-							<img src="{% static enabled_integration.image_navbar_path %}" class="align-middle" width="24" height="24" style="margin-right: 5px;" alt="{{enabled_integration.integration_type}}"> <span class="align-middle">{{enabled_integration.integration_type}}</span>
-						</a>
-					</li>
-
-					{% endfor %}
-					
+					</li>				
 
 					<li class="sidebar-header">
 						Users
@@ -131,20 +115,14 @@
 							<i class="align-middle" data-feather="user"></i> <span class="align-middle">User List</span>
 						</a>
 					</li>
-					<!-- {% for enabled_user_integration in enabled_user_integrations %}
 
-					{% if page == enabled_user_integration.integration_type %}
-					<li class="sidebar-item active">
-					{% else %}
-					<li class="sidebar-item">
-					{% endif %}
-
-						<a class="sidebar-link" href="/endpoints/{{enabled_user_integration.integration_type.split|join:'-'}}">
-							<img src="{% static enabled_user_integration.image_navbar_path %}" class="align-middle" width="24" height="24" style="margin-right: 5px;" alt="{{enabled_user_integration.integration_type}}"> <span class="align-middle">{{enabled_user_integration.integration_type}}</span>
-						</a>
+					<li class="sidebar-header">
+						Groups
 					</li>
 
-					{% endfor %} -->
+					<li class="sidebar-header">
+						Applications
+					</li>
 
 					<li class="sidebar-header">
 						Configurations
@@ -277,7 +255,7 @@
 					<div class="row text-muted">
 						<div class="col-6 text-start">
 							<p class="mb-0">
-								<a href="https://awbtech.org/" target="_blank" class="text-muted"><strong>AwB Tech LLC.</strong></a> &copy;
+								<!-- <a href="https://awbtech.org/" target="_blank" class="text-muted"><strong>AwB Tech LLC.</strong></a> &copy; -->
 							</p>
 						</div>
 					</div>

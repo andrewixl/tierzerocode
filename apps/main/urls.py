@@ -71,7 +71,7 @@ urlpatterns = [
     # ============================================================================
     # Utility & Admin Routes
     # ============================================================================
-    path('initial-setup/', views.initialSetup, name='initial-setup'),
+    # path('initial-setup/', views.initialSetup, name='initial-setup'),
     path('migrate/', views.migration, name='migration'),
     path('test/', views.test, name='test'),
     path('error500/', views.error500, name='error500'),

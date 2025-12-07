@@ -121,6 +121,17 @@ def getMicrosoftEntraIDApps(access_token):
         # If parsing fails, return 0
         return 0
 
+def getMicrosoftEntraTenantDetails(access_token):
+    """Fetch tenant details."""
+    url = "https://graph.microsoft.com/v1.0/organization?$select=id,displayName,verifiedDomains"
+    headers = {'Authorization': access_token}
+    response = requests.get(url, headers=headers)
+    try:
+        result = response.json()
+        return result
+    except (ValueError, TypeError):
+        return None
+
 def getMicrosoftEntraIDUserAuthenticationMethods(access_token):
     """Fetch authentication methods for all users."""
     url = f'https://graph.microsoft.com/beta/reports/authenticationMethods/userRegistrationDetails?$select=userPrincipalName,isAdmin,isSsprRegistered,isSsprEnabled,isSsprCapable,isMfaRegistered,isMfaCapable,isPasswordlessCapable,methodsRegistered'
@@ -178,9 +189,14 @@ def _parse_timestamp(timestamp_str):
         return None
 
 def _get_user_persona_group(matching_groups):
-    """Determine user persona group from matching groups."""
+    """Determine user persona group from matching groups.
+    Returns:
+    - PersonaGroup object if exactly one match
+    - 'DUPLICATE' if more than one match
+    - None if no matches
+    """
     if len(matching_groups) > 1:
-        return None  # Return None for duplicates - we'll handle this separately
+        return 'DUPLICATE'  # Return special indicator for duplicates
     if matching_groups:
         return matching_groups[0].get("persona_group")  # Return the PersonaGroup object
     return None
@@ -250,10 +266,21 @@ def _process_user_data(user_data, authentication_data, persona_memberships):
         for membership in persona_memberships
         if membership.get("userPrincipalName", '').lower() == user_data['userPrincipalName'].lower()
     ]
-    persona_group = _get_user_persona_group(matching_groups)
+    persona_group_result = _get_user_persona_group(matching_groups)
     
-    # Get persona from persona_group if it exists
-    persona = persona_group.persona if persona_group else None
+    # Determine persona based on matching groups
+    if persona_group_result == 'DUPLICATE':
+        # User is in multiple persona groups - assign DUPLICATE persona
+        persona, _ = Persona.objects.get_or_create(persona_name='DUPLICATE', defaults={'priority': 999})
+        persona_group = None  # No specific persona group for duplicates
+    elif persona_group_result:
+        # User is in exactly one persona group
+        persona_group = persona_group_result
+        persona = persona_group.persona if persona_group else None
+    else:
+        # No matching persona groups found - assign Unknown persona
+        persona, _ = Persona.objects.get_or_create(persona_name='Unknown', defaults={'priority': 998})
+        persona_group = None  # No persona group for unknown users
 
     # Determine authentication strengths
     auth_method_types = set(user_authentication_data.get('methodsRegistered', []))
@@ -335,13 +362,13 @@ def syncMicrosoftEntraIDUserBackground(request):
         try:
             messages.info(request, 'Microsoft Entra ID User Integration Sync in Progress')
             syncMicrosoftEntraIDUser()
-            createLog(1505, "System Integration", "System Integration Event", "Superuser", True, "System Integration Sync", "Success", "Microsoft Entra ID User", user_email)
+            createLog(1505, "System Integration", "System Integration Event", "Superuser", True, "System Integration Sync", "Success", "Microsoft Entra ID User", user_email, request.META.get('REMOTE_ADDR'), request.META.get('HTTP_USER_AGENT'), request.META.get('HTTP_USER_AGENT'), request.META.get('HTTP_USER_AGENT'))
             obj.status = "Success"
             obj.updated_at = timezone.now()
             obj.save()
             messages.info(request, 'Microsoft Entra ID User Integration Sync Success')
         except Exception as e:
-            createLog(1505, "System Integration", "System Integration Event", "Superuser", True, "System Integration Sync", "Failure", f"Microsoft Entra ID User - {e}", user_email)
+            createLog(1505, "System Integration", "System Integration Event", "Superuser", True, "System Integration Sync", "Failure", f"Microsoft Entra ID User - {e}", user_email, request.META.get('REMOTE_ADDR'), request.META.get('HTTP_USER_AGENT'), request.META.get('HTTP_USER_AGENT'), request.META.get('HTTP_USER_AGENT'))
             obj.status = "Failure"
             obj.updated_at = timezone.now()
             obj.save()

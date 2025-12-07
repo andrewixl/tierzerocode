@@ -33,7 +33,7 @@
                                 <label for="persona-filter" class="form-label fw-bold">Filter by Persona:</label>
                                 <select id="persona-filter" class="form-control" multiple="multiple">
                                     {% for persona in personas %}
-                                    <option value="{{ persona }}">{{ persona }}</option>
+                                    <option value="{{ persona.persona_name }}">{{ persona.persona_name }}</option>
                                     {% endfor %}
                                 </select>
                             </div>

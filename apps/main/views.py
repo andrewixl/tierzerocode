@@ -40,32 +40,12 @@ endpoint_types = ['Client', 'Mobile', 'Server', 'Other']
 def genErrors(request, Emessages):
 	for message in Emessages:
 		messages.warning(request, message)
-
-def checkDeviceIntegrations(request):
-	for integration in integration_names:
-		if Integration.objects.filter(integration_type = integration, integration_context = "Device").exists():
-			return True
-	return False
-
-def checkUserIntegrations(request):
-	for integration in user_integration_names:
-		if Integration.objects.filter(integration_type = integration, integration_context = "User").exists():
-			return True
-	return False
 		
 def checkDeviceComplianceSettings(request):
 	for os_platform in os_platforms:
 		if DeviceComplianceSettings.objects.filter(os_platform = os_platform).exists():
 			return True
 	return False
-		
-def initialChecks(request):
-	results = [checkDeviceIntegrations(request), checkUserIntegrations(request), checkDeviceComplianceSettings(request)]
-	for result in results:
-		if not result:
-			genErrors(request, ["Initial Setup Required"])
-			return '/initial-setup'
-	return None
 	
 def getEnabledIntegrations():
 	return Integration.objects.filter(enabled=True, integration_context="Device")
@@ -102,26 +82,26 @@ integration_short_map = dict(zip(integration_names, integration_names_short))
 user_integration_short_map = dict(zip(user_integration_names, user_integration_names_short))
 
 # Creates blank integration templates if they do not exist
-def initialSetup(request):
-	for integration in integration_names:
-		if not Integration.objects.filter(integration_type=integration, integration_context="Device").exists():
-			image_navbar_path = 'main/img/navbar_icons/webp/' + (integration.replace(" ", "_")).lower() + '_logo_nav.webp'
-			image_integration_path = 'main/img/integration_images/webp/' + (integration.replace(" ", "_")).lower() + '_logo.webp'
-			integration_short = integration_short_map[integration]
-			Integration.objects.create(enabled=False, integration_type=integration, integration_type_short=integration_short, integration_context="Device", image_navbar_path=image_navbar_path, image_integration_path=image_integration_path)
+# def initialSetup(request):
+# 	for integration in integration_names:
+# 		if not Integration.objects.filter(integration_type=integration, integration_context="Device").exists():
+# 			image_navbar_path = 'main/img/navbar_icons/webp/' + (integration.replace(" ", "_")).lower() + '_logo_nav.webp'
+# 			image_integration_path = 'main/img/integration_images/webp/' + (integration.replace(" ", "_")).lower() + '_logo.webp'
+# 			integration_short = integration_short_map[integration]
+# 			Integration.objects.create(enabled=False, integration_type=integration, integration_type_short=integration_short, integration_context="Device", image_navbar_path=image_navbar_path, image_integration_path=image_integration_path)
 	
-	for integration in user_integration_names:
-		if not Integration.objects.filter(integration_type=integration, integration_context="User").exists():
-			image_navbar_path = 'main/img/navbar_icons/webp/' + (integration.replace(" ", "_")).lower() + '_logo_nav.webp'
-			image_integration_path = 'main/img/integration_images/webp/' + (integration.replace(" ", "_")).lower() + '_logo.webp'
-			integration_short = user_integration_short_map[integration]
-			Integration.objects.create(enabled=False, integration_type=integration, integration_type_short=integration_short, integration_context="User", image_navbar_path=image_navbar_path, image_integration_path=image_integration_path)
+# 	for integration in user_integration_names:
+# 		if not Integration.objects.filter(integration_type=integration, integration_context="User").exists():
+# 			image_navbar_path = 'main/img/navbar_icons/webp/' + (integration.replace(" ", "_")).lower() + '_logo_nav.webp'
+# 			image_integration_path = 'main/img/integration_images/webp/' + (integration.replace(" ", "_")).lower() + '_logo.webp'
+# 			integration_short = user_integration_short_map[integration]
+# 			Integration.objects.create(enabled=False, integration_type=integration, integration_type_short=integration_short, integration_context="User", image_navbar_path=image_navbar_path, image_integration_path=image_integration_path)
 
-	for os_platform in os_platforms:
-		if not DeviceComplianceSettings.objects.filter(os_platform=os_platform).exists():
-			DeviceComplianceSettings.objects.create(os_platform=os_platform, cloudflare_zero_trust=True, crowdstrike_falcon=True, microsoft_defender_for_endpoint=True, microsoft_entra_id=True, microsoft_intune=True, sophos_central=True, qualys=True)
+# 	for os_platform in os_platforms:
+# 		if not DeviceComplianceSettings.objects.filter(os_platform=os_platform).exists():
+# 			DeviceComplianceSettings.objects.create(os_platform=os_platform, cloudflare_zero_trust=True, crowdstrike_falcon=True, microsoft_defender_for_endpoint=True, microsoft_entra_id=True, microsoft_intune=True, sophos_central=True, qualys=True)
 
-	return redirect(request.META.get('HTTP_REFERER', '/'))
+# 	return redirect(request.META.get('HTTP_REFERER', '/'))
 
 @login_required
 def add_persona_group(request):
@@ -187,12 +167,15 @@ def migration(request):
 
 @login_required
 def index(request):
-	access_token = getMicrosoftEntraIDAccessToken(Integration.objects.get(integration_type="Microsoft Entra ID", integration_context="User").client_id, Integration.objects.get(integration_type="Microsoft Entra ID", integration_context="User").client_secret, Integration.objects.get(integration_type="Microsoft Entra ID", integration_context="User").tenant_id)
-	guests = getMicrosoftEntraIDGuests(access_token)
-	groups = getMicrosoftEntraIDGroups(access_token)
-	apps = getMicrosoftEntraIDApps(access_token)
-	devices = Device.objects.count()
-	managed = Device.objects.filter(integrationMicrosoftEntraID__isManaged=True).count()
+	try:
+		access_token = getMicrosoftEntraIDAccessToken(Integration.objects.get(integration_type="Microsoft Entra ID", integration_context="User").client_id, Integration.objects.get(integration_type="Microsoft Entra ID", integration_context="User").client_secret, Integration.objects.get(integration_type="Microsoft Entra ID", integration_context="User").tenant_id)
+		guests = getMicrosoftEntraIDGuests(access_token)
+		groups = getMicrosoftEntraIDGroups(access_token)
+		apps = getMicrosoftEntraIDApps(access_token)
+		devices = Device.objects.count()
+		managed = Device.objects.filter(integrationMicrosoftEntraID__isManaged=True).count()
+	except Exception as e:
+		guests, groups, apps, devices, managed = 0, 0, 0, 0, 0
 
 	auth_strength_counts = UserData.objects.aggregate(
         count_phishing_resistant=Count('id', filter=Q(highest_authentication_strength='Phishing Resistant')),
@@ -346,13 +329,28 @@ def index(request):
 	# Ensure it's not negative (shouldn't happen, but safety check)
 	if sk2_count_single_factor_users < 0:
 		sk2_count_single_factor_users = 0
+
+	tenant_details = getMicrosoftEntraTenantDetails(access_token)
+	if tenant_details and tenant_details.get('value') and len(tenant_details['value']) > 0:
+		organization = tenant_details['value'][0]
+		tenant_id = organization.get('id')
+		tenant_name = organization.get('displayName')
+		# Extract the default domain from verifiedDomains array
+		verified_domains = organization.get('verifiedDomains', [])
+		default_domain = None
+		for domain in verified_domains:
+			if domain.get('isDefault', False):
+				default_domain = domain.get('name')
+				break
+		tenant_domain = default_domain
+	else:
+		tenant_id = None
+		tenant_name = None
+		tenant_domain = None
+
+	count_duplicate_persona = UserData.objects.filter(persona__persona_name='DUPLICATE').count() or 0
+	count_unknown_persona = UserData.objects.filter(persona__persona_name='Unknown').count() or 0
 	
-
-
-	
-
-
-
 	context = {
         'page': 'dashboard',
 		'count_users': UserData.objects.count(),
@@ -391,6 +389,13 @@ def index(request):
 		'sk2_count_passkey_users': sk2_count_passkey_users,
 		'sk2_count_whfb_users': sk2_count_whfb_users,
 		'sk2_count_phishing_resistant_users': sk2_count_phishing_resistant_users,
+
+		'tenant_id': tenant_id,
+		'tenant_name': tenant_name,
+		'tenant_domain': tenant_domain,
+
+		'count_duplicate_persona': count_duplicate_persona,
+		'count_unknown_persona': count_unknown_persona,
     }
 	return render(request, 'main/index.html', context)
 
@@ -398,11 +403,6 @@ def index(request):
 
 @login_required
 def indexDevice(request):
-	# Checks User Permissions and Required Models
-	redirect_url = initialChecks(request)
-	if redirect_url:
-		return redirect(redirect_url)
-	
 	# Fetch all enabled integrations in a single query
 	enabled_integrations = getEnabledIntegrations()
 
@@ -439,12 +439,6 @@ def indexDevice(request):
 
 @login_required
 def indexUser(request):
-	# test()
-	# Checks User Permissions and Required Models
-	redirect_url = initialChecks(request)
-	if redirect_url:
-		return redirect(redirect_url)
-
 	# of Users that have adopted each authentication method
 	users = UserData.objects.all()
  
@@ -471,12 +465,33 @@ def indexUser(request):
     ).count()
  
 	persona_counts = UserData.objects.values('persona').annotate(count=Count('id'))
-	persona_map = {item['persona']: item['count'] for item in persona_counts}
+	persona_map = {}
+	for item in persona_counts:
+		persona_id = item['persona']
+		if persona_id:
+			try:
+				persona_obj = Persona.objects.get(id=persona_id)
+				persona_map[persona_obj.persona_name] = item['count']
+			except Persona.DoesNotExist:
+				persona_map['Unknown'] = persona_map.get('Unknown', 0) + item['count']
+		else:
+			persona_map['Unknown'] = persona_map.get('Unknown', 0) + item['count']
+	
+	# Add counts to persona objects
+	personas = Persona.objects.all()
+	for persona in personas:
+		persona.user_count = persona_map.get(persona.persona_name, 0)
+ 
+	# Count duplicate and unknown personas
+	count_duplicate_persona = UserData.objects.filter(persona__persona_name='DUPLICATE').count() or 0
+	count_unknown_persona = UserData.objects.filter(persona__persona_name='Unknown').count() or 0
  
 	context = {
 		'page': 'user-dashboard',
-		'enabled_integrations': getEnabledUserIntegrations(),
+		# 'enabled_integrations': getEnabledUserIntegrations(),
 		'notifications': Notification.objects.all(),
+		'count_duplicate_persona': count_duplicate_persona,
+		'count_unknown_persona': count_unknown_persona,
         'auth_method_labels': ['Phishing Resistant', 'Passwordless', 'MFA', 'Deprecated', 'None'],
         'auth_method_data': [
             auth_strength_counts['count_phishing_resistant'],
@@ -495,18 +510,12 @@ def indexUser(request):
         ],
         'count_passwordless_capable_labels': ['Passwordless', 'Non-Passwordless'],
         'count_passwordless_capable_data': [passwordless_capable_count, non_passwordless_capable_count],
-        'count_internal_worker': persona_map.get('Internal Worker', 0),
-        'count_internal_admin': persona_map.get('Internal Admin', 0),
-        'count_external_worker': persona_map.get('External Worker', 0),
-        'count_external_admin': persona_map.get('External Admin', 0),
-        'count_hourly_worker': persona_map.get('Hourly Worker', 0),
-        'count_test_account': persona_map.get('Test Account', 0),
-        'count_robot_account': persona_map.get('Robot Account', 0),
-        'count_shared_admin': persona_map.get('Shared Admin', 0),
-        'count_service_account': (
-            persona_map.get('Service Account Non-Interactive', 0)
-            + persona_map.get('Service Account Interactive', 0)
-        ),
+
+		'personas': personas,
+		'persona_groups': PersonaGroup.objects.all(),
+
+		'count_total_users': UserData.objects.count(),
+
 		'auth_method_adoption_labels': ['Windows Hello for Business', 'Passkey Device', 'Passkey Authenticator', 'MS Authenticator Passwordless', 'MS Authenticator Push', 'Software OTP', 'Mobile Phone'],
 		'auth_method_adoption_data': [
 			users.filter(windowsHelloforBusiness_authentication_method=True).count(),
@@ -517,8 +526,6 @@ def indexUser(request):
 			users.filter(softwareOneTimePasscode_authentication_method=True).count(),
 			users.filter(mobilePhone_authentication_method=True).count(),
 		],
-        'count_unknown_account': persona_map.get('Unknown', 0),
-        'count_duplicate_account': persona_map.get('DUPLICATE', 0),
     }
 	return render(request, 'main/index-user.html', context)
 
@@ -526,11 +533,6 @@ def indexUser(request):
 
 @login_required
 def personaMetrics(request, persona):
-	# Checks User Permissions and Required Models
-	redirect_url = initialChecks(request)
-	if redirect_url:
-		return redirect(redirect_url)
-
 	# of Users that have adopted each authentication method
 	persona = persona.replace("-", " ").title()
 	users = UserData.objects.filter(persona=persona)
@@ -611,11 +613,6 @@ def personaMetrics(request, persona):
 
 @login_required
 def profileSettings(request):
-	# Checks User Permissions and Required Models
-	redirect_url = initialChecks(request)
-	if redirect_url:
-		return redirect(redirect_url)
-	
 	# Import the new utilities
 	from .utils import ComplianceSettingsManager, DeviceComplianceChecker
 	
@@ -646,11 +643,6 @@ def profileSettings(request):
 
 @login_required
 def update_compliance(request, id):
-	# Checks User Permissions and Required Models
-	redirect_url = initialChecks(request)
-	if redirect_url:
-		return redirect(redirect_url)
-	
 	if request.method == 'POST':
 		from .utils import ComplianceSettingsManager
 		
@@ -685,10 +677,6 @@ def update_compliance(request, id):
 
 @login_required
 def deviceData(request, id):
-	# Checks User Permissions and Required Models
-	redirect_url = initialChecks(request)
-	if redirect_url:
-		return redirect(redirect_url)
 	# X6969
 	# Creates the device object with related data preloaded from each integration
 	devices =  Device.objects.filter(id=id).prefetch_related('integrationCloudflareZeroTrust', 'integrationCrowdStrikeFalcon', 'integrationMicrosoftDefenderForEndpoint', 'integrationMicrosoftEntraID', 'integrationIntune', 'integrationSophos', 'integrationQualys')
@@ -762,11 +750,6 @@ def deviceData(request, id):
 
 @login_required
 def masterList(request):
-	# Checks User Permissions and Required Models
-	redirect_url = initialChecks(request)
-	if redirect_url:
-		return redirect(redirect_url)
-	
 	enabled_integrations = getEnabledIntegrations()
 	endpoint_list = []
 
@@ -802,11 +785,6 @@ def masterList(request):
 
 @login_required
 def userMasterList(request):
-	# Checks User Permissions and Required Models
-	redirect_url = initialChecks(request)
-	if redirect_url:
-		return redirect(redirect_url)
-	
 	user_data_list = UserData.objects.all()
 	user_list = []
 	for user_data in user_data_list:		
@@ -814,10 +792,9 @@ def userMasterList(request):
 
 	context = {
 		'page':"master-list-user",
-		'enabled_integrations': getEnabledIntegrations(),
 		'notifications': Notification.objects.all(),
 		'auth_strengths': ['None', 'MFA', 'Passwordless', 'Phishing Resistant', 'Deprecated'],
-        'personas': ['Internal Worker', 'Internal Admin', 'External Worker', 'External Admin', 'Hourly Worker', 'Test Account', 'Robot Account', 'Shared Admin', 'OnPrem Internal Admin', 'OnPrem External Admin', 'Service Account Non-Interactive', 'Service Account Interactive', 'OnPrem Service Account Non-Interactive', 'OnPrem Service Account Interactive', 'Unknown', 'DUPLICATE'],
+		'personas': Persona.objects.all().order_by('priority', 'persona_name'),
 		'user_list':user_list,
 	}
 	return render( request, 'main/user-master-list.html', context)
@@ -837,7 +814,7 @@ def user_master_list_api(request):
     order_dir = request.GET.get('order[0][dir]', 'asc')
     
     # Column mapping for sorting (must match the order in your table headers)
-    columns = ['upn', 'persona', 'created_at_timestamp', 'last_logon_timestamp', 
+    columns = ['upn', 'persona__persona_name', 'created_at_timestamp', 'last_logon_timestamp', 
                'highest_authentication_strength', 'lowest_authentication_strength',
                'passKeyDeviceBound_authentication_method', 'passKeyDeviceBoundAuthenticator_authentication_method',
                'windowsHelloforBusiness_authentication_method', 'microsoftAuthenticatorPasswordless_authentication_method',
@@ -867,7 +844,7 @@ def user_master_list_api(request):
     if lowest_auth:
         users = users.filter(lowest_authentication_strength__in=lowest_auth)
     if personas:
-        users = users.filter(persona__in=personas)
+        users = users.filter(persona__persona_name__in=personas)
     if search_value:
         users = users.filter(upn__icontains=search_value)
 
@@ -881,9 +858,9 @@ def user_master_list_api(request):
     data = []
     for user_data in page.object_list:
         row = [
-            f'<a href="/device/{user_data.id}">{user_data.upn}</a>',
-            user_data.persona,
-            user_data.created_at_timestamp,
+            user_data.upn or "",
+            user_data.persona.persona_name if user_data.persona else "",
+            user_data.created_at_timestamp.strftime("%Y-%m-%d %H:%M:%S") if user_data.created_at_timestamp else "",
             user_data.last_logon_timestamp.strftime("%Y-%m-%d %H:%M:%S") if user_data.last_logon_timestamp else "",
             user_data.highest_authentication_strength,
             user_data.lowest_authentication_strength,
@@ -923,7 +900,7 @@ def user_master_list_export_api(request):
     if lowest_auth:
         users = users.filter(lowest_authentication_strength__in=lowest_auth)
     if personas:
-        users = users.filter(persona__in=personas)
+        users = users.filter(persona__persona_name__in=personas)
     if search_value:
         users = users.filter(upn__icontains=search_value)
 
@@ -936,7 +913,7 @@ def user_master_list_export_api(request):
             
             row = [
                 user_data.upn or "",  # Handle null UPN
-                user_data.persona or "",  # Handle null persona
+                user_data.persona.persona_name if user_data.persona else "",  # Handle null persona
                 created_at,
                 last_logon,
                 user_data.highest_authentication_strength or "",
@@ -966,11 +943,6 @@ def user_master_list_export_api(request):
 
 @login_required
 def endpointList(request, integration):
-	# Checks User Permissions and Required Models
-	redirect_url = initialChecks(request)
-	if redirect_url:
-		return redirect(redirect_url)
-	
 	integration_clean = integration.replace("-", " ")
 	endpoints = Device.objects.filter(integration__integration_type=integration_clean)
 
@@ -992,11 +964,6 @@ def endpointList(request, integration):
 
 @login_required
 def integrations(request):
-	# Checks User Permissions and Required Models
-	redirect_url = initialChecks(request)
-	if redirect_url:
-		return redirect(redirect_url)
-
 	deviceIntegrationStatuses = []
 
 	for integration_name in integration_names:
@@ -1030,11 +997,6 @@ def integrations(request):
 
 @login_required
 def enableIntegration(request, id):
-	# Checks User Permissions and Required Models
-	redirect_url = initialChecks(request)
-	if redirect_url:
-		return redirect(redirect_url)
-	
 	integration_update = Integration.objects.get(id=id)
 	integration_update.enabled = True
 	integration_update.save()
@@ -1045,11 +1007,6 @@ def enableIntegration(request, id):
 
 @login_required
 def disableIntegration(request, id):
-	# Checks User Permissions and Required Models
-	redirect_url = initialChecks(request)
-	if redirect_url:
-		return redirect(redirect_url)
-	
 	integration_update = Integration.objects.get(id=id)
 	integration_update.enabled = False
 	integration_update.save()
@@ -1060,11 +1017,6 @@ def disableIntegration(request, id):
 
 @login_required
 def updateIntegration(request, id):
-	# Checks User Permissions and Required Models
-	redirect_url = initialChecks(request)
-	if redirect_url:
-		return redirect(redirect_url)
-
 	integration_update = Integration.objects.get(id=id)
 	integration_update.client_id = request.POST['client_id']
 	integration_update.client_secret = request.POST['client_secret']
@@ -1078,20 +1030,11 @@ def updateIntegration(request, id):
 
 @login_required
 def error500(request):
-	# Checks User Permissions and Required Models
-	redirect_url = initialChecks(request)
-	if redirect_url:
-		return redirect(redirect_url)
-	
 	return render( request, 'main/pages-500.html')
 
 ############################################################################################
 @login_required
 def syncDevices(request, integration):
-    # Checks User Permissions and Required Models
-    redirect_url = initialChecks(request)
-    if redirect_url:
-        return redirect(redirect_url)
 	#X6969
     if integration == 'Cloudflare-Zero-Trust':
         syncCloudflareZeroTrust()
@@ -1112,10 +1055,6 @@ def syncDevices(request, integration):
 
 @login_required
 def syncUsers(request, integration):
-	# Checks User Permissions and Required Models
-	redirect_url = initialChecks(request)
-	if redirect_url:
-		return redirect(redirect_url)
 	#X6969
 	print (integration)
 	if integration == 'microsoft-entra-id':

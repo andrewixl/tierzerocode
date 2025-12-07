@@ -28,6 +28,7 @@ Port 8000
     - WindowsDefenderATP - Machine.Read.All - Application Permissions
 - Microsoft Entra ID
     - Microsoft Graph - Device.Read.All
+    - Microsoft Graph - AuditLog.Read.All
 - Microsoft Intune
     - Microsoft Graph - DeviceManagementManagedDevices.Read.All
 - Sophos Central
