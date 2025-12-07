@@ -330,20 +330,21 @@ def index(request):
 	if sk2_count_single_factor_users < 0:
 		sk2_count_single_factor_users = 0
 
-	tenant_details = getMicrosoftEntraTenantDetails(access_token)
-	if tenant_details and tenant_details.get('value') and len(tenant_details['value']) > 0:
-		organization = tenant_details['value'][0]
-		tenant_id = organization.get('id')
-		tenant_name = organization.get('displayName')
-		# Extract the default domain from verifiedDomains array
-		verified_domains = organization.get('verifiedDomains', [])
-		default_domain = None
-		for domain in verified_domains:
-			if domain.get('isDefault', False):
-				default_domain = domain.get('name')
-				break
-		tenant_domain = default_domain
-	else:
+	try:
+		tenant_details = getMicrosoftEntraTenantDetails(access_token)
+		if tenant_details and tenant_details.get('value') and len(tenant_details['value']) > 0:
+			organization = tenant_details['value'][0]
+			tenant_id = organization.get('id')
+			tenant_name = organization.get('displayName')
+			# Extract the default domain from verifiedDomains array
+			verified_domains = organization.get('verifiedDomains', [])
+			default_domain = None
+			for domain in verified_domains:
+				if domain.get('isDefault', False):
+					default_domain = domain.get('name')
+					break
+			tenant_domain = default_domain
+	except Exception as e:
 		tenant_id = None
 		tenant_name = None
 		tenant_domain = None
