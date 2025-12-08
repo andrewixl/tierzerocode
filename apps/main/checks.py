@@ -10,9 +10,9 @@ REQUIRED_SYSTEM_USER_INTEGRATIONS_SHORT = ['Entra ID']
 
 ############################################################################################
 
-def checkUserCount():
-	"""Check if there are any users in the database."""
-	return User.objects.count() > 0
+# def checkUserCount():
+# 	"""Check if there are any users in the database."""
+# 	return User.objects.count() > 0
 
 def checkSystemDeviceIntegrations():
 	"""Check if all required system integrations exist."""
