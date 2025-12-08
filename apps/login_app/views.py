@@ -18,7 +18,7 @@ def getEnabledSSOIntegrations():
 
 def unclaimed(request):
 	if User.objects.all().count() > 0:
-		return redirect('/identity/login')
+		return redirect('login')
 	else:
 		return render(request, 'login_app/unclaimed.html')
 
@@ -26,7 +26,7 @@ def unclaimed(request):
 
 def login_page(request):
     if request.user.is_authenticated:
-        return redirect('/')
+        return redirect('index')
     startSession(request)
     enabled_sso = getEnabledSSOIntegrations()
     context = {
@@ -74,17 +74,3 @@ def accountcreation(request):
 	return redirect(reverse('general-settings') + '#user-management')
 
 ############################################################################################
-
-# @login_required
-# def identity(request):
-# 	# Redirect to unified profile settings page
-# 	# Check if user is superuser and redirect to appropriate tab
-# 	if request.user.is_superuser == False:
-# 		messages.error(request, "You do not have Permission to Access this Resource")
-# 		return redirect('/')
-# 	# Checks User Permissions and Required Models
-# 	redirect_url = initialChecks(request)
-# 	if redirect_url:
-# 		return redirect(redirect_url)
-# 	# Redirect to profile settings (defaults to profile tab)
-# 	return redirect(reverse('general-settings'))

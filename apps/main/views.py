@@ -237,6 +237,7 @@ def index(request):
 	
 	context = {
 		'page': 'dashboard',
+		'notifications': Notification.objects.all(),
 		'count_users': count_users,
 		'count_guests': guests,
 		'count_groups': groups,

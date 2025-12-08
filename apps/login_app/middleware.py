@@ -15,12 +15,8 @@ class ModelVerificationMiddleware:
     def __call__(self, request):
         # Skip verification for setup pages to avoid redirect loops
         setup_paths = [
-            # '/admin/system-initial-setup', 
-            # '/admin/general-setting-initial-setup',
-            # '/admin/login',
-            # '/admin/logout',
             '/identity/unclaimed',
-            # '/debug'
+            '/identity/accountcreation',
         ]
         
         if any(request.path.startswith(path) for path in setup_paths):

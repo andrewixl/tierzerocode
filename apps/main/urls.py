@@ -6,6 +6,7 @@ urlpatterns = [
     # Dashboard & Index Pages
     # ============================================================================
     path('', views.index, name='index'),
+    path('', views.index, name='admin-dashboard'),  # Alias for index
     path('device-dashboard', views.indexDevice, name='device-dashboard'),
     path('user-dashboard', views.indexUser, name='user-dashboard'),
     path('user-dashboard/<str:persona>', views.personaMetrics, name='persona-metrics'),
