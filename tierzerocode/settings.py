@@ -34,7 +34,8 @@ if platform.system() == 'Windows':
     DEBUG = True
 else:
     # Linux or Docker
-    DEBUG = bool(os.environ.get("DEBUG", default=0))
+    # Environment variables are always strings, so parse "True"/"False"
+    DEBUG = os.environ.get("DEBUG", "False").lower() == "true"
 
 # Use hardcoded hosts on Windows, environment variable on Linux/Docker
 if platform.system() == 'Windows':
@@ -76,6 +77,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'apps.main.middleware.ModelVerificationMiddleware', #Verifies the required models exist and redirects to setup if needed
+    'apps.authhandler.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -160,6 +162,8 @@ USE_I18N = True
 
 USE_TZ = True
 
+# Disable automatic trailing slash appending
+APPEND_SLASH = False
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/

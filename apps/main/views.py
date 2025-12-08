@@ -10,6 +10,7 @@ from django.db.models import Count, Prefetch, Q
 from django.forms.models import model_to_dict
 from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
 from django.shortcuts import render, redirect
+from django.urls import reverse
 
 # Local imports
 from .integrations.device_integrations.CloudflareZeroTrust import *
@@ -100,7 +101,7 @@ def add_persona_group(request):
                     persona = Persona.objects.get(id=persona_id)
                 except Persona.DoesNotExist:
                     messages.error(request, 'Selected persona does not exist.')
-                    return redirect(f'/profile-settings#{current_tab}')
+                    return redirect(reverse('general-settings') + f'#{current_tab}')
                 
                 PersonaGroup.objects.create(
                     persona=persona,
@@ -113,7 +114,7 @@ def add_persona_group(request):
     
     # Preserve the tab in the redirect
     current_tab = request.POST.get('current_tab', 'persona-groups')
-    return redirect(f'/profile-settings#{current_tab}')
+    return redirect(reverse('general-settings') + f'#{current_tab}')
 
 @login_required
 def delete_persona_group(request, id):
@@ -130,7 +131,7 @@ def delete_persona_group(request, id):
     
     # Preserve the tab in the redirect - check GET parameter or default
     current_tab = request.GET.get('tab', 'persona-groups')
-    return redirect(f'/profile-settings#{current_tab}')
+    return redirect(reverse('general-settings') + f'#{current_tab}')
 
 ############################################################################################
 
@@ -188,13 +189,24 @@ def index(request):
 	try:
 		# Cache the Integration object to avoid 3 separate database queries
 		integration = Integration.objects.get(integration_type="Microsoft Entra ID", integration_context="User")
-		access_token = getMicrosoftGraphAccessToken(integration.client_id, integration.client_secret, integration.tenant_id, 'https://graph.microsoft.com/.default')
+		
+		# Validate integration fields are not None
+		if not integration.client_id or not integration.client_secret or not integration.tenant_id:
+			raise ValueError("Integration credentials are missing")
+		
+		# Pass scope as a list (MSAL requires a list, not a string)
+		access_token = getMicrosoftGraphAccessToken(integration.client_id, integration.client_secret, integration.tenant_id, ["https://graph.microsoft.com/.default"])
+		# Check if access_token is an error dictionary
+		if isinstance(access_token, dict) and 'error' in access_token:
+			raise Exception(f"Failed to get access token: {access_token['error']}")
+
 		guests = getMicrosoftEntraIDGuests(access_token)
 		groups = getMicrosoftEntraIDGroups(access_token)
 		apps = getMicrosoftEntraIDApps(access_token)
 		devices = Device.objects.count()
 		managed = Device.objects.filter(integrationMicrosoftEntraID__isManaged=True).count()
 	except Exception as e:
+		print(f"Error in index view: {e}")
 		guests, groups, apps, devices, managed = 0, 0, 0, 0, 0
 
 	# Calculate authentication method counts for privileged users (sk1)
@@ -470,7 +482,7 @@ def personaMetrics(request, persona):
 ############################################################################################
 
 @login_required
-def profileSettings(request):
+def generalSettings(request):
 	# Import the new utilities
 	from .utils import ComplianceSettingsManager, DeviceComplianceChecker
 	from django.contrib.auth.models import User
@@ -502,7 +514,7 @@ def profileSettings(request):
 				pass
 
 	context = {
-		'page': "profile-settings",
+		'page': "general-settings",
 		'enabled_integrations': getEnabledIntegrations(),
 		'notifications': Notification.objects.all(),
 		'devicecomps': compliance_settings,  # Use the new structured data
@@ -516,7 +528,7 @@ def profileSettings(request):
 		'is_superuser': request.user.is_superuser,
 	}
 	
-	return render(request, 'main/profile-settings.html', context)
+	return render(request, 'main/general-settings.html', context)
 
 @login_required
 def update_compliance(request, id):
@@ -548,7 +560,7 @@ def update_compliance(request, id):
 		else:
 			messages.error(request, 'Failed to update compliance settings.')
 	
-	return redirect('/profile-settings')
+	return redirect('general-settings')
 
 ############################################################################################
 
@@ -1087,7 +1099,7 @@ def add_persona(request):
                         priority_int = int(priority)
                     except ValueError:
                         messages.error(request, 'Priority must be a valid number.')
-                        return redirect(f'/profile-settings#{current_tab}')
+                        return redirect(reverse('general-settings') + f'#{current_tab}')
                 
                 Persona.objects.create(
                     persona_name=persona_name,
@@ -1099,7 +1111,7 @@ def add_persona(request):
     
     # Preserve the tab in the redirect
     current_tab = request.POST.get('current_tab', 'personas')
-    return redirect(f'/profile-settings#{current_tab}')
+    return redirect(reverse('general-settings') + f'#{current_tab}')
 
 @login_required
 def delete_persona(request, id):
@@ -1116,6 +1128,6 @@ def delete_persona(request, id):
     
     # Preserve the tab in the redirect - check GET parameter or default
     current_tab = request.GET.get('tab', 'personas')
-    return redirect(f'/profile-settings#{current_tab}')
+    return redirect(reverse('general-settings') + f'#{current_tab}')
 
 ############################################################################################

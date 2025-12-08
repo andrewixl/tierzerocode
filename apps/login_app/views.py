@@ -1,5 +1,6 @@
 # Import Django Modules
 from django.shortcuts import render, redirect
+from django.urls import reverse
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -153,11 +154,11 @@ def accountcreation(request):
 
 	if not user_email or not user_first_name or not user_last_name:
 		messages.warning(request, 'Info Missing from User Creation Form')
-		return redirect('/profile-settings#user-management')  # Redirect to an error page if required data is missing
+		return redirect(reverse('general-settings') + '#user-management')  # Redirect to an error page if required data is missing
 	
 	if User.objects.filter(email = user_email):
 		messages.warning(request, 'User with Email Already Exists (Ensure SSO Users are not Local Users)')
-		return redirect('/profile-settings#user-management')
+		return redirect(reverse('general-settings') + '#user-management')
 	
 	user = User.objects.create_superuser(user_email, user_email)
 	user.first_name = user_first_name
@@ -171,7 +172,7 @@ def accountcreation(request):
 		else:
 			messages.warning(request, 'Passwords do not match')
 			user.delete()
-			return redirect('/profile-settings#user-management')
+			return redirect(reverse('general-settings') + '#user-management')
 	else:
 		user_password = generate_random_password()
 		user.set_password(user_password)
@@ -180,7 +181,7 @@ def accountcreation(request):
 	except Exception as e:
 		messages.warning(request, 'User Created Successfully')
 	user.save()
-	return redirect('/profile-settings#user-management')
+	return redirect(reverse('general-settings') + '#user-management')
 
 ############################################################################################
 
@@ -244,6 +245,11 @@ def accountcreation(request):
 # 		return redirect('/identity/login')
 # 	return redirect('/')
 
+def azure_callback(request):
+    backend = MicrosoftEntraIDBackend()
+    return backend.handle_entra_id_callback(request)
+
+
 ############################################################################################
 
 # def logout_page(request):
@@ -277,7 +283,7 @@ def identity(request):
 	if redirect_url:
 		return redirect(redirect_url)
 	# Redirect to profile settings (defaults to profile tab)
-	return redirect('/profile-settings')
+	return redirect(reverse('general-settings'))
 
 ############################################################################################
 

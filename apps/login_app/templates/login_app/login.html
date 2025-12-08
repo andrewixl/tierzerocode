@@ -62,7 +62,7 @@
 										{% endfor %}
 									{% endif %}
 									{% if sso == True %}
-									<form action="{% url 'azure_login' %}" method='post'>
+									<form action="{% url 'login-user' %}" method='post'>
 										{% csrf_token %}
 										<div class="mb-3">
 											<label class="form-label">Email</label>

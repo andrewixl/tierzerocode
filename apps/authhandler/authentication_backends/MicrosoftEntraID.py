@@ -61,7 +61,7 @@ class MicrosoftEntraIDBackend(BaseBackend):
                 
                 # Store the redirect URL in session for after SSO callback
                 if hasattr(request, 'session'):
-                    request.session['sso_redirect_url'] = request.GET.get('next', '/admin')
+                    request.session['sso_redirect_url'] = request.GET.get('next', '/')
                 
                 # Return a special response that indicates SSO redirect needed
                 # We'll use a custom attribute to signal this
@@ -84,9 +84,11 @@ class MicrosoftEntraIDBackend(BaseBackend):
             # Build redirect URI
             DEBUG = settings.DEBUG
             if DEBUG:
-                redirect_uri = urlunparse(urlparse(request.build_absolute_uri("/admin/azure/callback/"))._replace(scheme="http"))
+                # redirect_uri = urlunparse(urlparse(request.build_absolute_uri("/admin/azure/callback/"))._replace(scheme="http"))
+                redirect_uri = urlunparse(urlparse(request.build_absolute_uri("/identity/azure/callback/"))._replace(scheme="http"))
             else:
-                redirect_uri = urlunparse(urlparse(request.build_absolute_uri("/admin/azure/callback/"))._replace(scheme="https"))
+                # redirect_uri = urlunparse(urlparse(request.build_absolute_uri("/admin/azure/callback/"))._replace(scheme="https"))
+                redirect_uri = urlunparse(urlparse(request.build_absolute_uri("/identity/azure/callback/"))._replace(scheme="https"))
             
             # OAuth2 parameters
             params = {
@@ -245,9 +247,11 @@ class MicrosoftEntraIDBackend(BaseBackend):
             # Build redirect URI (must match the one used in authorization URL)
             DEBUG = settings.DEBUG
             if DEBUG:
-                redirect_uri = urlunparse(urlparse(request.build_absolute_uri("/admin/azure/callback/"))._replace(scheme="http"))
+                # redirect_uri = urlunparse(urlparse(request.build_absolute_uri("/admin/azure/callback/"))._replace(scheme="http"))
+                redirect_uri = urlunparse(urlparse(request.build_absolute_uri("/identity/azure/callback/"))._replace(scheme="http"))
             else:
-                redirect_uri = urlunparse(urlparse(request.build_absolute_uri("/admin/azure/callback/"))._replace(scheme="https"))
+                # redirect_uri = urlunparse(urlparse(request.build_absolute_uri("/admin/azure/callback/"))._replace(scheme="https"))
+                redirect_uri = urlunparse(urlparse(request.build_absolute_uri("/identity/azure/callback/"))._replace(scheme="https"))
             
             # Exchange code for token
             token_data = self.exchange_code_for_token(sso_config, code, redirect_uri)
@@ -300,7 +304,7 @@ class MicrosoftEntraIDBackend(BaseBackend):
                     print (f"User {user.username} logged in successfully")
                 
                 # Get redirect URL from session
-                redirect_url = request.session.get('sso_redirect_url', '/admin')
+                redirect_url = request.session.get('sso_redirect_url', '/')
                 if 'sso_redirect_url' in request.session:
                     del request.session['sso_redirect_url']
                 
@@ -347,7 +351,6 @@ class MicrosoftEntraIDBackend(BaseBackend):
             return {'status': True, 'message': 'Microsoft Entra ID - Logout Successful', 'logout_url': logout_url}
         except Exception as e:
             logout(request)
-            # return redirect('/admin/login')
             return {'status': False, 'message': 'Microsoft Entra ID - Logout Failed (' + str(e) + ')'}
 
     def suspend_user(self, user_id):

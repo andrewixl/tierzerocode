@@ -43,12 +43,20 @@ def _fetch_paginated_data(url, headers, max_retries=5, retry_delay=1):
 
 def getMicrosoftEntraIDUsers(access_token):
     """Fetch all enabled Microsoft Entra ID users."""
+    # Check if access_token is an error dictionary
+    if isinstance(access_token, dict) and 'error' in access_token:
+        raise Exception(f"Failed to get access token: {access_token['error']}")
+    
     url = "https://graph.microsoft.com/v1.0/users?$select=userPrincipalName,id,employeeId,givenName,surname,accountEnabled,jobTitle,department,createdDateTime,signInActivity&$filter=accountEnabled eq true and userType eq 'Member'"
     headers = {'Authorization': access_token}
     return _fetch_paginated_data(url, headers)
 
 def getMicrosoftEntraIDGuests(access_token):
     """Fetch all enabled Microsoft Entra ID guests."""
+    # Check if access_token is an error dictionary
+    if isinstance(access_token, dict) and 'error' in access_token:
+        raise Exception(f"Failed to get access token: {access_token['error']}")
+    
     url = "https://graph.microsoft.com/v1.0/users/$count?$filter=userType eq 'guest'"
     headers = {'Authorization': access_token, 'ConsistencyLevel': 'eventual'}
     response = requests.get(url, headers=headers)
@@ -92,6 +100,10 @@ def getMicrosoftEntraIDGroups(access_token):
 
 def getMicrosoftEntraIDApps(access_token):
     """Fetch all enabled Microsoft Entra ID apps."""
+    # Check if access_token is an error dictionary
+    if isinstance(access_token, dict) and 'error' in access_token:
+        raise Exception(f"Failed to get access token: {access_token['error']}")
+    
     url = "https://graph.microsoft.com/v1.0/applications?$count=true&$top=1"
     headers = {'Authorization': access_token, 'ConsistencyLevel': 'eventual'}
     response = requests.get(url, headers=headers)
@@ -110,6 +122,10 @@ def getMicrosoftEntraIDApps(access_token):
 
 def getMicrosoftEntraTenantDetails(access_token):
     """Fetch tenant details."""
+    # Check if access_token is an error dictionary
+    if isinstance(access_token, dict) and 'error' in access_token:
+        raise Exception(f"Failed to get access token: {access_token['error']}")
+    
     url = "https://graph.microsoft.com/v1.0/organization?$select=id,displayName,verifiedDomains"
     headers = {'Authorization': access_token}
     response = requests.get(url, headers=headers)
@@ -121,12 +137,20 @@ def getMicrosoftEntraTenantDetails(access_token):
 
 def getMicrosoftEntraIDUserAuthenticationMethods(access_token):
     """Fetch authentication methods for all users."""
+    # Check if access_token is an error dictionary
+    if isinstance(access_token, dict) and 'error' in access_token:
+        raise Exception(f"Failed to get access token: {access_token['error']}")
+    
     url = f'https://graph.microsoft.com/beta/reports/authenticationMethods/userRegistrationDetails?$select=userPrincipalName,isAdmin,isSsprRegistered,isSsprEnabled,isSsprCapable,isMfaRegistered,isMfaCapable,isPasswordlessCapable,methodsRegistered'
     headers = {'Authorization': access_token}
     return _fetch_paginated_data(url, headers)
 
 def getPersonaGroupMembership(access_token, object_id):
     """Fetch members of a specific persona group."""
+    # Check if access_token is an error dictionary
+    if isinstance(access_token, dict) and 'error' in access_token:
+        raise Exception(f"Failed to get access token: {access_token['error']}")
+    
     url = f'https://graph.microsoft.com/v1.0/groups/{object_id}/members?$select=userPrincipalName'
     headers = {'Authorization': access_token}
     return _fetch_paginated_data(url, headers)
@@ -323,7 +347,17 @@ def updateMicrosoftEntraIDUserDatabase(users, authentication_data, access_token)
 def syncMicrosoftEntraIDUser():
     """Synchronize Microsoft Entra ID users and update the local database."""
     data = Integration.objects.get(integration_type="Microsoft Entra ID", integration_context="User")
-    access_token = getMicrosoftGraphAccessToken(data.client_id, data.client_secret, data.tenant_id, 'https://graph.microsoft.com/.default')
+    
+    # Validate integration data
+    if not data.client_id or not data.client_secret or not data.tenant_id:
+        raise Exception("Microsoft Entra ID integration is not properly configured. Missing client_id, client_secret, or tenant_id.")
+    
+    access_token = getMicrosoftGraphAccessToken(data.client_id, data.client_secret, data.tenant_id, ["https://graph.microsoft.com/.default"])
+    
+    # Check if access_token is an error dictionary
+    if isinstance(access_token, dict) and 'error' in access_token:
+        error_msg = str(access_token['error'])
+        raise Exception(f"Failed to get access token: {error_msg}")
     
     users = getMicrosoftEntraIDUsers(access_token)
     authentication_data = getMicrosoftEntraIDUserAuthenticationMethods(access_token)
@@ -335,8 +369,12 @@ def syncMicrosoftEntraIDUser():
 
 def syncMicrosoftEntraIDUserBackground(request):
     """Run Microsoft Entra ID user sync in a background thread."""
-    # Capture user email before starting thread (request.session may not be thread-safe)
+    # Capture request data before starting thread (request.session may not be thread-safe)
     user_email = request.session.get('user_email', 'unknown') if hasattr(request, 'session') else 'unknown'
+    ip_address = request.META.get('REMOTE_ADDR', 'unknown') if hasattr(request, 'META') else 'unknown'
+    user_agent = request.META.get('HTTP_USER_AGENT', 'unknown') if hasattr(request, 'META') else 'unknown'
+    browser = request.META.get('HTTP_USER_AGENT', 'unknown') if hasattr(request, 'META') else 'unknown'
+    operating_system = request.META.get('HTTP_USER_AGENT', 'unknown') if hasattr(request, 'META') else 'unknown'
     
     def run():
         obj = Notification.objects.create(
@@ -349,13 +387,13 @@ def syncMicrosoftEntraIDUserBackground(request):
         try:
             messages.info(request, 'Microsoft Entra ID User Integration Sync in Progress')
             syncMicrosoftEntraIDUser()
-            createLog(1505, "System Integration", "System Integration Event", "Superuser", True, "System Integration Sync", "Success", "Microsoft Entra ID User", user_email, request.META.get('REMOTE_ADDR'), request.META.get('HTTP_USER_AGENT'), request.META.get('HTTP_USER_AGENT'), request.META.get('HTTP_USER_AGENT'))
+            createLog(1505, "System Integration", "System Integration Event", "Superuser", True, True, "System Integration Sync", "Success", "Microsoft Entra ID User", user_email, ip_address, user_agent, browser, operating_system)
             obj.status = "Success"
             obj.updated_at = timezone.now()
             obj.save()
             messages.info(request, 'Microsoft Entra ID User Integration Sync Success')
         except Exception as e:
-            createLog(1505, "System Integration", "System Integration Event", "Superuser", True, "System Integration Sync", "Failure", f"Microsoft Entra ID User - {e}", user_email, request.META.get('REMOTE_ADDR'), request.META.get('HTTP_USER_AGENT'), request.META.get('HTTP_USER_AGENT'), request.META.get('HTTP_USER_AGENT'))
+            createLog(1505, "System Integration", "System Integration Event", "Superuser", True, True, "System Integration Sync", "Failure", f"Microsoft Entra ID User - {e}", user_email, ip_address, user_agent, browser, operating_system)
             obj.status = "Failure"
             obj.updated_at = timezone.now()
             obj.save()

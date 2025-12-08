@@ -19,7 +19,7 @@ urlpatterns = [
     # URL for SSO User Authentication
     path('login/sso', views.login_page_sso),
     # path('azure/login/', views.azure_login, name='azure_login'),
-    # path('azure/callback/', views.azure_callback, name='azure_callback'),
+    path('azure/callback/', views.azure_callback, name='azure_callback'),
     # URL for SSO User Logout
     # path('azure/logout/', views.azure_logout, name='azure_logout'),
 

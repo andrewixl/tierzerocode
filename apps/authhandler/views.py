@@ -1,6 +1,7 @@
 from .authentication_backends.MicrosoftEntraID import MicrosoftEntraIDBackend
 from .decorators import permission_required_with_message
 from django.shortcuts import redirect
+from django.urls import reverse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from .models import SSOIntegration
@@ -115,7 +116,7 @@ def suspendUser(request, id):
         else:
             messages.error(request, response['message'])
             createLog(request.session['session_id'], '1006', 'User Management', 'User Suspension Event', "Admin", True, 'User Suspension', 'Failure', response['message'], request.session['user_id'], request.session['ip_address'], request.session['user_agent'], request.session['browser'], request.session['operating_system'])
-        return redirect('/admin/general-settings#user-management')
+        return redirect(reverse('general-settings') + '#user-management')
     except Exception as e:
         try:
             messages.error(request, '(' + User.objects.get(id=id).email + ')' + ' (' + str(e) + ')')
@@ -123,7 +124,7 @@ def suspendUser(request, id):
         except User.DoesNotExist:
             messages.error(request, 'User ID: ' + id + ' (' + str(e) + ')')
             createLog(request.session['session_id'], '1006', 'User Management', 'User Suspension Event', "Admin", True, 'User Suspension', 'Failure', 'User ID: ' + id + ' (' + str(e) + ')', request.session['user_id'], request.session['ip_address'], request.session['user_agent'], request.session['browser'], request.session['operating_system'])
-        return redirect('/admin/general-settings#user-management')
+        return redirect(reverse('general-settings') + '#user-management')
 
 # Class Messages and Success / Error Logging Completed
 @permission_required_with_message('auth.change_user',"You do not have Permission to Access this Resource", redirect_url='/admin')
@@ -136,7 +137,7 @@ def activateUser(request, id):
         else:
             messages.error(request, response['message'])
             createLog(request.session['session_id'], '1008', 'User Management', 'User Activation Event', "Admin", True, 'User Activation', 'Failure', response['message'], request.session['user_id'], request.session['ip_address'], request.session['user_agent'], request.session['browser'], request.session['operating_system'])
-        return redirect('/admin/general-settings#user-management')
+        return redirect(reverse('general-settings') + '#user-management')
     except Exception as e:
         try:
             messages.error(request, '(' + User.objects.get(id=id).email + ')' + ' (' + str(e) + ')')
@@ -144,7 +145,7 @@ def activateUser(request, id):
         except User.DoesNotExist:
             messages.error(request, 'User ID: ' + id + ' (' + str(e) + ')')
             createLog(request.session['session_id'], '1008', 'User Management', 'User Activation Event', "Admin", True, 'User Activation', 'Failure', 'User ID: ' + id + ' (' + str(e) + ')', request.session['user_id'], request.session['ip_address'], request.session['user_agent'], request.session['browser'], request.session['operating_system'])
-        return redirect('/admin/general-settings#user-management')
+        return redirect(reverse('general-settings') + '#user-management')
 
 # Class Messages and Success / Error Logging Completed
 @permission_required_with_message('auth.delete_user',"You do not have Permission to Access this Resource", redirect_url='/admin')
@@ -157,7 +158,7 @@ def deleteUser(request, id):
         else:
             messages.error(request, response['message'])
             createLog(request.session['session_id'], '1010', 'User Management', 'User Deletion Event', "Admin", True, 'User Deletion', 'Failure', response['message'], request.session['user_id'], request.session['ip_address'], request.session['user_agent'], request.session['browser'], request.session['operating_system'])
-        return redirect('/admin/general-settings#user-management')
+        return redirect(reverse('general-settings') + '#user-management')
     except Exception as e:
         try:
             messages.error(request, '(' + User.objects.get(id=id).email + ')' + ' (' + str(e) + ')')
@@ -165,7 +166,7 @@ def deleteUser(request, id):
         except User.DoesNotExist:
             messages.error(request, 'User ID: ' + id + ' (' + str(e) + ')')
             createLog(request.session['session_id'], '1010', 'User Management', 'User Deletion Event', "Admin", True, 'User Deletion', 'Failure', 'User ID: ' + id + ' (' + str(e) + ')', request.session['user_id'], request.session['ip_address'], request.session['user_agent'], request.session['browser'], request.session['operating_system'])
-        return redirect('/admin/general-settings#user-management')
+        return redirect(reverse('general-settings') + '#user-management')
 
 ############################################################################################
 
@@ -179,7 +180,7 @@ def enableSSOIntegration(request, id):
         message = 'SSO Integration Enabled Successfully (' + integration_update.integration_type + ')'
         messages.success(request, message)
         createLog(request.session['session_id'], '1201', 'SSO Integration', 'SSO Integration Event', "Admin", True, 'SSO Integration Enabled', 'Success', message, request.session['user_id'], request.session['ip_address'], request.session['user_agent'], request.session['browser'], request.session['operating_system'])
-        return redirect ('/admin/general-settings#sso-integrations')
+        return redirect(reverse('general-settings') + '#sso-integrations')
     except Exception as e:
         try:
             messages.error(request, '(' + integration_update.integration_type + ')' + ' (' + str(e) + ')' )
@@ -187,7 +188,7 @@ def enableSSOIntegration(request, id):
         except SSOIntegration.DoesNotExist:
             messages.error(request, 'SSO Integration ID: ' + id + ' (' + str(e) + ')')
             createLog(request.session['session_id'], '1202', 'SSO Integration', 'SSO Integration Event', "Admin", True, 'SSO Integration Disabled', 'Failure', 'SSO Integration ID: ' + id + ' (' + str(e) + ')', request.session['user_id'], request.session['ip_address'], request.session['user_agent'], request.session['browser'], request.session['operating_system'])
-        return redirect ('/admin/general-settings#sso-integrations')
+        return redirect(reverse('general-settings') + '#sso-integrations')
 
 # Class Messages and Success / Error Logging Completed
 @permission_required_with_message('auth.change_ssointegration',"You do not have Permission to Access this Resource", redirect_url='/admin')
@@ -199,7 +200,7 @@ def disableSSOIntegration(request, id):
         message = 'SSO Integration Disabled Successfully (' + integration_update.integration_type + ')'
         messages.success(request, message)
         createLog(request.session['session_id'], '1203', 'SSO Integration', 'SSO Integration Event', "Admin", True, 'SSO Integration Disabled', 'Success', message, request.session['user_id'], request.session['ip_address'], request.session['user_agent'], request.session['browser'], request.session['operating_system'])
-        return redirect ('/admin/general-settings#sso-integrations')
+        return redirect(reverse('general-settings') + '#sso-integrations')
     except Exception as e:
         try:
             messages.error(request, '(' + integration_update.integration_type + ')' + ' (' + str(e) + ')' )
@@ -207,7 +208,7 @@ def disableSSOIntegration(request, id):
         except SSOIntegration.DoesNotExist:
             messages.error(request, 'SSO Integration ID: ' + id + ' (' + str(e) + ')')
             createLog(request.session['session_id'], '1204', 'SSO Integration', 'SSO Integration Event', "Admin", True, 'SSO Integration Disabled', 'Failure', 'SSO Integration ID: ' + id + ' (' + str(e) + ')', request.session['user_id'], request.session['ip_address'], request.session['user_agent'], request.session['browser'], request.session['operating_system'])
-        return redirect ('/admin/general-settings#sso-integrations')
+        return redirect(reverse('general-settings') + '#sso-integrations')
 
 # Class Messages and Success / Error Logging Completed
 @permission_required_with_message('auth.change_ssointegration',"You do not have Permission to Access this Resource", redirect_url='/admin')
@@ -222,7 +223,7 @@ def updateSSOIntegration(request, id):
         message = 'SSO Integration Configured Successfully (' + integration_update.integration_type + ')'
         messages.success(request, message)
         createLog(request.session['session_id'], '1205', 'SSO Integration', 'SSO Integration Event', "Admin", True, 'SSO Integration Configured', 'Success', message, request.session['user_id'], request.session['ip_address'], request.session['user_agent'], request.session['browser'], request.session['operating_system'])
-        return redirect ('/admin/general-settings#sso-integrations')
+        return redirect(reverse('general-settings') + '#sso-integrations')
     except Exception as e:
         try:
             messages.error(request, '(' + integration_update.integration_type + ')' + ' (' + str(e) + ')' )
@@ -230,4 +231,4 @@ def updateSSOIntegration(request, id):
         except SSOIntegration.DoesNotExist:
             messages.error(request, 'SSO Integration ID: ' + id + ' (' + str(e) + ')')
             createLog(request.session['session_id'], '1206', 'SSO Integration', 'SSO Integration Event', "Admin", True, 'SSO Integration Configured', 'Failure', 'SSO Integration ID: ' + id + ' (' + str(e) + ')', request.session['user_id'], request.session['ip_address'], request.session['user_agent'], request.session['browser'], request.session['operating_system'])
-        return redirect ('/admin/general-settings#sso-integrations')
+        return redirect(reverse('general-settings') + '#sso-integrations')

@@ -19,24 +19,24 @@
                                 <i class="fas fa-user"></i> Profile
                             </h5>
                         </div>
-                        <a class="list-group-item list-group-item-action active" data-bs-toggle="list" href="#profile" role="tab">
+                        <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#profile" role="tab" id="profile-tab-link">
                             <i class="fas fa-user-circle me-2"></i>Account Information
                         </a>
                         
+                        {% if is_superuser %}
                         <!-- System Settings Section -->
                         <div class="card-header bg-secondary mt-3">
                             <h5 class="card-title text-white mb-0">
                                 <i class="fas fa-cogs"></i> System Settings
                             </h5>
                         </div>
-                        {% if is_superuser %}
                         <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#user-management" role="tab">
                             <i class="fas fa-users-cog me-2"></i>User Management
                         </a>
                         <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#sso-integrations" role="tab">
                             <i class="fas fa-key me-2"></i>SSO Integrations
                         </a>
-                        {% endif %}
+                        
                         <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#compliance" role="tab">
                             <i class="fas fa-shield-alt me-2"></i>Compliance Policies
                         </a>
@@ -52,6 +52,7 @@
                         <a class="list-group-item list-group-item-action" data-bs-toggle="list" href="#integrations" role="tab">
                             <i class="fas fa-plug me-2"></i>Integrations
                         </a>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -274,7 +275,7 @@
                     {% endif %}
 
                     <!-- Profile Tab -->
-                    <div class="tab-pane fade show active" id="profile" role="tabpanel">
+                    <div class="tab-pane fade" id="profile" role="tabpanel">
                         <div class="card">
                             <div class="card-header">
                                 <h5 class="card-title mb-0">
@@ -527,7 +528,7 @@
                                                         <td><strong>{{ persona.persona_name }}</strong></td>
                                                         <td>{{ persona.created_at|date:"M d, Y" }}</td>
                                                         <td>
-                                                            <a href="/delete-persona/{{ persona.id }}/?tab=personas" 
+                                                            <a href="{% url 'delete_persona' persona.id %}?tab=personas" 
                                                                class="btn btn-sm btn-danger" 
                                                                onclick="return confirm('Are you sure you want to delete the persona &quot;{{ persona.persona_name }}&quot;?');">
                                                                 <i class="fas fa-trash me-1"></i>Delete
@@ -567,7 +568,7 @@
                                     </div>
                                     <div class="card-body">
                                         {% if personas %}
-                                        <form method="POST" action="/add-persona-group/" id="add-persona-group-form">
+                                        <form method="POST" action="/add-persona-group" id="add-persona-group-form">
                                             {% csrf_token %}
                                             <input type="hidden" name="current_tab" id="current_tab_persona_group" value="persona-groups">
                                             <div class="row">
@@ -631,7 +632,7 @@
                                                         <td>{{ group.object_id|default:"—" }}</td>
                                                         <td>{{ group.created_at|date:"M d, Y" }}</td>
                                                         <td>
-                                                            <a href="/delete-persona-group/{{ group.id }}/?tab=persona-groups" 
+                                                            <a href="{% url 'delete_persona_group' group.id %}?tab=persona-groups" 
                                                                class="btn btn-sm btn-danger" 
                                                                onclick="return confirm('Are you sure you want to delete the persona group &quot;{{ group.group_name }}&quot;?');">
                                                                 <i class="fas fa-trash me-1"></i>Delete
@@ -706,24 +707,122 @@
         </div>
     </div>
 </main>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Include jQuery and DataTables -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.css">
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
 
 <!-- Settings Management JavaScript -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize DataTables for user management table (if it exists)
+    // Wait for jQuery and DataTables to be available
     if (document.getElementById('userTable')) {
-        $('#userTable').DataTable({
-            order: [[0, 'asc']],
-            pageLength: 25,
-            responsive: true
-        });
+        // Check if jQuery and DataTables are loaded
+        if (typeof jQuery !== 'undefined' && typeof jQuery.fn.DataTable !== 'undefined') {
+            jQuery('#userTable').DataTable({
+                order: [[0, 'asc']],
+                pageLength: 25,
+                responsive: true
+            });
+        } else {
+            console.warn('jQuery or DataTables not loaded. Table will not be initialized.');
+        }
     }
     
     // Initialize compliance form handlers
     initializeComplianceForms();
     
-    // Initialize tab functionality
-    initializeTabs();
+    // --- Activate tab from URL hash and update hash on tab click ---
+    function activateTabFromHash(hash) {
+        var tabTrigger = document.querySelector('a[href="' + hash + '"]');
+        if (tabTrigger) {
+            var tabList = document.querySelectorAll('.list-group-item');
+            tabList.forEach(function(tab) {
+                tab.classList.remove('active');
+            });
+            tabTrigger.classList.add('active');
+
+            var tabPanes = document.querySelectorAll('.tab-pane');
+            tabPanes.forEach(function(pane) {
+                pane.classList.remove('show', 'active');
+            });
+            var targetPane = document.querySelector(hash);
+            if (targetPane) {
+                targetPane.classList.add('show', 'active');
+            }
+        }
+    }
+
+    // --- Parse hash and query parameters ---
+    function parseHashAndQuery() {
+        var hash = window.location.hash || '#profile';
+        var tab = hash;
+        var query = '';
+        if (hash.includes('?')) {
+            tab = hash.split('?')[0];
+            query = hash.split('?')[1];
+        }
+        return { tab, query };
+    }
+
+    // --- Initialize tab from URL hash ---
+    var parsed = parseHashAndQuery();
+    activateTabFromHash(parsed.tab);
+
+    // --- Update URL hash when tab is clicked ---
+    // Use event delegation to catch all tab clicks
+    document.addEventListener('click', function(e) {
+        var target = e.target.closest('a.list-group-item[data-bs-toggle="list"]');
+        if (target) {
+            var href = target.getAttribute('href');
+            if (href && href.startsWith('#')) {
+                // Update URL hash immediately
+                var newUrl = window.location.pathname + href;
+                if (history.pushState) {
+                    history.pushState(null, null, newUrl);
+                } else {
+                    window.location.hash = href;
+                }
+            }
+        }
+    });
+    
+    // Listen for hash changes (e.g., after redirect or browser back/forward)
+    window.addEventListener('hashchange', function() {
+        var parsed = parseHashAndQuery();
+        activateTabFromHash(parsed.tab);
+    });
+    
+    // Update fields when forms are submitted (capture current tab at submit time)
+    const personaForm = document.getElementById('add-persona-form');
+    if (personaForm) {
+        personaForm.addEventListener('submit', function(e) {
+            const activeTab = document.querySelector('.list-group-item.active');
+            if (activeTab) {
+                const href = activeTab.getAttribute('href');
+                if (href && href.startsWith('#')) {
+                    updateTabFields(href.replace('#', ''));
+                }
+            }
+        });
+    }
+    
+    const personaGroupForm = document.getElementById('add-persona-group-form');
+    if (personaGroupForm) {
+        personaGroupForm.addEventListener('submit', function(e) {
+            const activeTab = document.querySelector('.list-group-item.active');
+            if (activeTab) {
+                const href = activeTab.getAttribute('href');
+                if (href && href.startsWith('#')) {
+                    updateTabFields(href.replace('#', ''));
+                }
+            }
+        });
+    }
 });
 
 function initializeComplianceForms() {
@@ -875,137 +974,15 @@ function showNotification(message, type = 'info') {
     }, 5000);
 }
 
-function initializeTabs() {
-    // Function to update hidden fields based on current tab
-    function updateTabFields(tabName) {
-        const personaTabField = document.getElementById('current_tab_persona');
-        if (personaTabField && tabName === 'personas') {
-            personaTabField.value = 'personas';
-        }
-        const personaGroupTabField = document.getElementById('current_tab_persona_group');
-        if (personaGroupTabField && tabName === 'persona-groups') {
-            personaGroupTabField.value = 'persona-groups';
-        }
+// Function to update hidden fields based on current tab (for form submissions)
+function updateTabFields(tabName) {
+    const personaTabField = document.getElementById('current_tab_persona');
+    if (personaTabField && tabName === 'personas') {
+        personaTabField.value = 'personas';
     }
-    
-    // Function to get current active tab name
-    function getCurrentTabName() {
-        const activeTab = document.querySelector('[data-bs-toggle="list"].active');
-        if (activeTab) {
-            const href = activeTab.getAttribute('href');
-            if (href && href.startsWith('#')) {
-                return href.replace('#', '');
-            }
-        }
-        // Fallback: check which tab pane is visible
-        const activePane = document.querySelector('.tab-pane.show.active');
-        if (activePane) {
-            return activePane.id;
-        }
-        return null;
-    }
-    
-    // Listen to tab clicks and update URL hash
-    const tabLinks = document.querySelectorAll('[data-bs-toggle="list"]');
-    tabLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-            const href = this.getAttribute('href');
-            if (href && href.startsWith('#')) {
-                const tabName = href.replace('#', '');
-                // Update URL hash to preserve tab on refresh
-                if (window.location.hash !== href) {
-                    window.location.hash = href;
-                }
-                // Use setTimeout to ensure tab is activated before updating
-                setTimeout(() => {
-                    updateTabFields(tabName);
-                }, 100);
-            }
-        });
-    });
-    
-    // Also listen to Bootstrap's shown event to ensure hash is updated
-    const tabPanes = document.querySelectorAll('.tab-pane');
-    tabPanes.forEach(pane => {
-        pane.addEventListener('shown.bs.tab', function(e) {
-            const paneId = this.id;
-            if (paneId) {
-                const hash = '#' + paneId;
-                if (window.location.hash !== hash) {
-                    window.location.hash = hash;
-                }
-                updateTabFields(paneId);
-            }
-        });
-    });
-    
-    // Function to activate tab from hash
-    function activateTabFromHash() {
-        const hash = window.location.hash;
-        if (hash) {
-            const tabName = hash.replace('#', '');
-            updateTabFields(tabName);
-            
-            // Activate the tab if it exists
-            const targetTab = document.querySelector(`[href="${hash}"]`);
-            if (targetTab) {
-                // Remove active from all tabs and panes
-                tabLinks.forEach(l => l.classList.remove('active'));
-                document.querySelectorAll('.tab-pane').forEach(p => {
-                    p.classList.remove('show', 'active');
-                });
-                
-                // Activate the target tab
-                targetTab.classList.add('active');
-                const targetPane = document.querySelector(hash);
-                if (targetPane) {
-                    targetPane.classList.add('show', 'active');
-                }
-            }
-        } else {
-            // If no hash, set hash based on currently active tab
-            const tabName = getCurrentTabName();
-            if (tabName) {
-                const hash = '#' + tabName;
-                if (window.location.hash !== hash) {
-                    window.location.hash = hash;
-                }
-                updateTabFields(tabName);
-            }
-        }
-    }
-    
-    // On page load, activate tab from hash (with delay to ensure DOM is ready)
-    setTimeout(() => {
-        activateTabFromHash();
-    }, 50);
-    
-    // Listen for hash changes (e.g., after redirect or browser back/forward)
-    window.addEventListener('hashchange', function() {
-        setTimeout(() => {
-            activateTabFromHash();
-        }, 50);
-    });
-    
-    // Update fields when forms are submitted (capture current tab at submit time)
-    const personaForm = document.getElementById('add-persona-form');
-    if (personaForm) {
-        personaForm.addEventListener('submit', function(e) {
-            const tabName = getCurrentTabName();
-            if (tabName) {
-                updateTabFields(tabName);
-            }
-        });
-    }
-    
-    const personaGroupForm = document.getElementById('add-persona-group-form');
-    if (personaGroupForm) {
-        personaGroupForm.addEventListener('submit', function(e) {
-            const tabName = getCurrentTabName();
-            if (tabName) {
-                updateTabFields(tabName);
-            }
-        });
+    const personaGroupTabField = document.getElementById('current_tab_persona_group');
+    if (personaGroupTabField && tabName === 'persona-groups') {
+        personaGroupTabField.value = 'persona-groups';
     }
 }
 </script>
@@ -1085,4 +1062,4 @@ function initializeTabs() {
     }
 }
 </style>
-{% endblock %}
+{% endblock extra_js %}
