@@ -9,11 +9,9 @@ urlpatterns = [
     path('unclaimed', views.unclaimed, name='unclaimed'),
     path('initial-setup', views.initialSetup),
     # URL for Local User Authentication
-    path('login', views.login_page_local, name='login'),
+    path('login', views.login_page, name='login'),
     # URl for Local User Account Creation
     path('accountcreation', views.accountcreation),
     # URL for Local User Account Suspension
-    path('accountsuspended', views.accountsuspended),
-    # URL for SSO User Authentication
-    path('login/sso', views.login_page_sso),
+    # path('accountsuspended', views.accountsuspended),
 ]

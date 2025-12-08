@@ -61,48 +61,55 @@
 										</div>
 										{% endfor %}
 									{% endif %}
-									{% if sso == True %}
-									<form action="{% url 'login-user' %}" method='post'>
-										{% csrf_token %}
-										<div class="mb-3">
-											<label class="form-label">Email</label>
-											<input class="form-control form-control-lg" type="email" name="email" placeholder="Enter your email" required/>
-										</div>
-										<div class="text-center mt-3">
-											<button type="submit" class="btn btn-lg btn-primary"><img src="{% static 'login_app/img/microsoft.webp' %}" class="align-middle" width="24" height="24" style="margin-right: 5px;" alt="{{enabled_integration.integration_type}}"> Entra ID Sign in</button>
-											<a href="/identity/login" class="btn btn-lg btn-secondary">Local Log On?</a>
-										</div>
-									</form>
-									{% elif sso == False %}
-									<form action='{% url 'login-user' %}' method='post'>
-										{% csrf_token %}
-										<div class="mb-3">
-											<label class="form-label">Email</label>
-											<input class="form-control form-control-lg" type="email" name="email" placeholder="Enter your email" />
-										</div>
-										<div class="mb-3">
-											<label class="form-label">Password</label>
-											<input class="form-control form-control-lg" type="password" name="password" placeholder="Enter your password" />
-											<!-- <small>
-												<a href="pages-reset-password.html">Forgot password?</a>
-											</small> -->
-										</div>
-										<!-- <div>
-											<label class="form-check">
-												<input class="form-check-input" type="checkbox" value="remember-me" name="remember-me" checked>
-												<span class="form-check-label">
-													Remember me next time
-												</span>
-											</label>
-										</div> -->
-										<div class="text-center mt-3">
-											<button type="submit" class="btn btn-lg btn-primary">Sign in</button>
-											{% if enabledSSOIntegrations %}
-												<a href="/identity/login/sso" class="btn btn-lg btn-secondary">Single Sign On?</a>
-											{% endif %}
-										</div>
-									</form>
+									
+									<!-- SSO Login Form -->
+									{% if enabledSSOIntegrations %}
+									<div id="sso-login-form">
+										<form action="{% url 'login-user' %}" method='post'>
+											{% csrf_token %}
+											<div class="mb-3">
+												<label class="form-label">Email</label>
+												<input class="form-control form-control-lg" type="email" name="email" placeholder="Enter your email" required/>
+											</div>
+											<div class="text-center mt-3">
+												<button type="submit" class="btn btn-lg btn-primary"><img src="{% static 'login_app/img/microsoft.webp' %}" class="align-middle" width="24" height="24" style="margin-right: 5px;" alt="Microsoft Entra ID"> Entra ID Sign in</button>
+												<button type="button" class="btn btn-lg btn-secondary" onclick="toggleLoginForm()">Local Log On?</button>
+											</div>
+										</form>
+									</div>
 									{% endif %}
+									
+									<!-- Local Login Form -->
+									<div id="local-login-form" {% if enabledSSOIntegrations %}style="display: none;"{% endif %}>
+										<form action='{% url 'login-user' %}' method='post'>
+											{% csrf_token %}
+											<div class="mb-3">
+												<label class="form-label">Email</label>
+												<input class="form-control form-control-lg" type="email" name="email" placeholder="Enter your email" />
+											</div>
+											<div class="mb-3">
+												<label class="form-label">Password</label>
+												<input class="form-control form-control-lg" type="password" name="password" placeholder="Enter your password" />
+												<!-- <small>
+													<a href="pages-reset-password.html">Forgot password?</a>
+												</small> -->
+											</div>
+											<!-- <div>
+												<label class="form-check">
+													<input class="form-check-input" type="checkbox" value="remember-me" name="remember-me" checked>
+													<span class="form-check-label">
+														Remember me next time
+													</span>
+												</label>
+											</div> -->
+											<div class="text-center mt-3">
+												<button type="submit" class="btn btn-lg btn-primary">Sign in</button>
+												{% if enabledSSOIntegrations %}
+													<button type="button" class="btn btn-lg btn-secondary" onclick="toggleLoginForm()">Single Sign On?</button>
+												{% endif %}
+											</div>
+										</form>
+									</div>
 								</div>
 							</div>
 						</div>
@@ -114,6 +121,23 @@
 	</main>
 
 	<script src="{% static 'login_app/js/app.js' %}"></script>
+	<script>
+		function toggleLoginForm() {
+			var ssoForm = document.getElementById('sso-login-form');
+			var localForm = document.getElementById('local-login-form');
+			
+			if (ssoForm && localForm) {
+				var ssoDisplay = window.getComputedStyle(ssoForm).display;
+				if (ssoDisplay === 'none') {
+					ssoForm.style.display = 'block';
+					localForm.style.display = 'none';
+				} else {
+					ssoForm.style.display = 'none';
+					localForm.style.display = 'block';
+				}
+			}
+		}
+	</script>
 
 </body>
 

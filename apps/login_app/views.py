@@ -78,42 +78,25 @@ def unclaimed(request):
 
 ############################################################################################
 
-def accountsuspended(request):
-	logout(request)
-	messages.warning(request, 'Account Suspended.')
-	return redirect('/identity/login')
+# def accountsuspended(request):
+# 	logout(request)
+# 	messages.warning(request, 'Account Suspended.')
+# 	return redirect('/identity/login')
 
 ############################################################################################
 
-def login_page_local(request):
-	startSession(request)
-	if request.user.is_authenticated:
-		return redirect('/')
-	if User.objects.all().count() == 0:
-		return redirect('/identity/unclaimed')
-	else:
-		return render( request, 'login_app/login.html', {'sso': False, 'enabledSSOIntegrations': getEnabledSSOIntegrations()})
-
-def login_page_sso(request):
-	startSession(request)
-	if request.user.is_authenticated:
-		return redirect('/')
-	if User.objects.all().count() == 0:
-		return redirect('/identity/unclaimed')
-	else:
-		if getEnabledSSOIntegrations():
-			return render( request, 'login_app/login.html', {'sso': True})
-		else:
-			return redirect('/identity/login')
+def login_page(request):
+    if request.user.is_authenticated:
+        return redirect('/')
+    startSession(request)
+    enabled_sso = getEnabledSSOIntegrations()
+    context = {
+        'sso': bool(enabled_sso),
+        'enabledSSOIntegrations': enabled_sso
+    }
+    return render(request, 'login_app/login.html', context)
 		
 ############################################################################################
-
-def generate_random_password(length=12):
-    # Define the character set for the password
-    characters = string.ascii_letters + string.digits + string.punctuation
-    # Generate a random password
-    password = ''.join(secrets.choice(characters) for _ in range(length))
-    return password
 
 def accountcreation(request):
 	user_email = request.POST.get('email').lower()

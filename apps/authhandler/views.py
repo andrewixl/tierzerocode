@@ -236,3 +236,11 @@ def updateSSOIntegration(request, id):
             messages.error(request, 'SSO Integration ID: ' + id + ' (' + str(e) + ')')
             createLog(request.session['session_id'], '1206', 'SSO Integration', 'SSO Integration Event', "Admin", True, 'SSO Integration Configured', 'Failure', 'SSO Integration ID: ' + id + ' (' + str(e) + ')', request.session['user_id'], request.session['ip_address'], request.session['user_agent'], request.session['browser'], request.session['operating_system'])
         return redirect(reverse('general-settings') + '#sso-integrations')
+
+############################################################################################
+
+# Function to generate a random password
+def generate_random_password(length=15):
+    characters = string.ascii_letters + string.digits + string.punctuation
+    password = ''.join(secrets.choice(characters) for _ in range(length))
+    return password
