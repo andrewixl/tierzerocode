@@ -153,12 +153,6 @@ def accountcreation(request):
 
 ############################################################################################
 
-def azure_callback(request):
-    backend = MicrosoftEntraIDBackend()
-    return backend.handle_entra_id_callback(request)
-
-############################################################################################
-
 @login_required
 def identity(request):
 	# Redirect to unified profile settings page

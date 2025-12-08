@@ -11,6 +11,7 @@ from . import views
 urlpatterns = [
     # Authentication endpoints
     path('login-user', views.loginUser, name='login-user'),  # User login endpoint
+    path('azure/callback/', views.azure_callback, name='azure_callback'),
     path('logout', views.logoutUser, name='logout-user'),    # User logout endpoint
 
     # User management endpoints

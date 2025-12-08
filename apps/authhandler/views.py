@@ -68,6 +68,10 @@ def loginUser(request):
         createLog(request.session['session_id'], '1102', 'User Authentication Handler', 'User Login Event', "Admin", True, 'User Login', 'Failure', 'Invalid Credentials (' + str(e) + ')', username, request.session['ip_address'], request.session['user_agent'], request.session['browser'], request.session['operating_system'])
         return redirect('login')
 
+def azure_callback(request):
+    backend = MicrosoftEntraIDBackend()
+    return backend.handle_entra_id_callback(request)
+
 def logoutUser(request):
     try:
         data = {
