@@ -76,6 +76,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'apps.login_app.middleware.ModelVerificationMiddleware', #Verifies the required models exist and redirects to setup if needed
     'apps.main.middleware.ModelVerificationMiddleware', #Verifies the required models exist and redirects to setup if needed
     'apps.authhandler.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -175,6 +176,8 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 STATIC_ROOT = os.path.join(BASE_DIR, "static/")
+# Ensure static directory exists
+os.makedirs(STATIC_ROOT, exist_ok=True)
 
 LOGIN_URL = '/identity/login'
 

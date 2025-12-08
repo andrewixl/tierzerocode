@@ -51,11 +51,16 @@ WORKDIR /app
  
 # Copy application code
 COPY --chown=appuser:appuser . .
- 
+
+# Create static directory and collect static files
+RUN mkdir -p /app/static && \
+    chown -R appuser:appuser /app/static && \
+    python manage.py collectstatic --noinput || true
+
 # Set environment variables to optimize Python
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1 
- 
+
 # Switch to non-root user
 USER appuser
  
