@@ -13,6 +13,9 @@ from django.contrib.auth.models import User
 # Import Models
 from .models import SSOIntegration
 from ..logger.views import *
+from ..authhandler.models import SSOIntegration
+from ..authhandler.views import *
+
 
 ############################################################################################
 
@@ -58,7 +61,7 @@ def initialSetup(request):
 				integration_short = 'Entra ID'
 			SSOIntegration.objects.create(enabled = False, integration_type = integration, integration_type_short = integration_short, image_navbar_path=image_navbar_path, image_integration_path=image_integration_path)
 
-	return redirect('/identity/identity')
+	return redirect('/profile-settings#user-management')
 
 ############################################################################################
 
@@ -86,6 +89,7 @@ def accountsuspended(request):
 ############################################################################################
 
 def login_page_local(request):
+	startSession(request)
 	if request.user.is_authenticated:
 		return redirect('/')
 	if User.objects.all().count() == 0:
@@ -94,6 +98,7 @@ def login_page_local(request):
 		return render( request, 'login_app/login.html', {'sso': False, 'enabledSSOIntegrations': getEnabledSSOIntegrations()})
 
 def login_page_sso(request):
+	startSession(request)
 	if request.user.is_authenticated:
 		return redirect('/')
 	if User.objects.all().count() == 0:
@@ -104,33 +109,33 @@ def login_page_sso(request):
 		else:
 			return redirect('/identity/login')
 
-@csrf_exempt
-def azure_login(request):
-	try:
-		user = User.objects.get(email=request.POST.get('email').lower())
-		if user and not user.has_usable_password() and user.is_active:
-			sso_integration = SSOIntegration.objects.get(integration_type = 'Microsoft Entra ID')
+# @csrf_exempt
+# def azure_login(request):
+# 	try:
+# 		user = User.objects.get(email=request.POST.get('email').lower())
+# 		if user and not user.has_usable_password() and user.is_active:
+# 			sso_integration = SSOIntegration.objects.get(integration_type = 'Microsoft Entra ID')
             
-			params = {
-				'client_id': sso_integration.client_id,
-				'response_type': 'code',
-				'redirect_uri': urlunparse(urlparse(request.build_absolute_uri("/identity/azure/callback/"))._replace(scheme="https")),
-				'response_mode': 'query',
-				'scope': 'openid email profile',
-				'state': 'random_state_string'
-			}
-			auth_url = 'https://login.microsoftonline.com/{}/oauth2/v2.0/authorize?login_hint={}&{}'.format(
-				sso_integration.tenant_id,
-				request.POST.get('email'),
-				urlencode(params, quote_via=quote_plus)
-			)
-			return redirect(auth_url)
-		else:
-			messages.error(request, 'Invalid Credentials')
-			return redirect('/identity/login/sso')
-	except User.DoesNotExist:
-		messages.error(request, 'Invalid Credentials')
-		return redirect('/identity/login/sso')
+# 			params = {
+# 				'client_id': sso_integration.client_id,
+# 				'response_type': 'code',
+# 				'redirect_uri': urlunparse(urlparse(request.build_absolute_uri("/identity/azure/callback/"))._replace(scheme="https")),
+# 				'response_mode': 'query',
+# 				'scope': 'openid email profile',
+# 				'state': 'random_state_string'
+# 			}
+# 			auth_url = 'https://login.microsoftonline.com/{}/oauth2/v2.0/authorize?login_hint={}&{}'.format(
+# 				sso_integration.tenant_id,
+# 				request.POST.get('email'),
+# 				urlencode(params, quote_via=quote_plus)
+# 			)
+# 			return redirect(auth_url)
+# 		else:
+# 			messages.error(request, 'Invalid Credentials')
+# 			return redirect('/identity/login/sso')
+# 	except User.DoesNotExist:
+# 		messages.error(request, 'Invalid Credentials')
+# 		return redirect('/identity/login/sso')
 		
 ############################################################################################
 
@@ -148,11 +153,11 @@ def accountcreation(request):
 
 	if not user_email or not user_first_name or not user_last_name:
 		messages.warning(request, 'Info Missing from User Creation Form')
-		return redirect('/identity/identity')  # Redirect to an error page if required data is missing
+		return redirect('/profile-settings#user-management')  # Redirect to an error page if required data is missing
 	
 	if User.objects.filter(email = user_email):
 		messages.warning(request, 'User with Email Already Exists (Ensure SSO Users are not Local Users)')
-		return redirect('/identity/identity')
+		return redirect('/profile-settings#user-management')
 	
 	user = User.objects.create_superuser(user_email, user_email)
 	user.first_name = user_first_name
@@ -166,7 +171,7 @@ def accountcreation(request):
 		else:
 			messages.warning(request, 'Passwords do not match')
 			user.delete()
-			return redirect('/identity/identity')
+			return redirect('/profile-settings#user-management')
 	else:
 		user_password = generate_random_password()
 		user.set_password(user_password)
@@ -175,93 +180,95 @@ def accountcreation(request):
 	except Exception as e:
 		messages.warning(request, 'User Created Successfully')
 	user.save()
-	return redirect('/identity/identity')
+	return redirect('/profile-settings#user-management')
 
 ############################################################################################
 
-def checklogin(request):
-	# Checks User Permissions and Required Models
-	redirect_url = initialChecks(request)
-	if redirect_url:
-		return redirect(redirect_url)
-	user_email = request.POST.get('email').lower()
-	user_password = request.POST.get('password')
-	user = authenticate(request, username=user_email, password=user_password)
-	if user is not None:
-		login(request, user)
-		request.session['active'] = user.is_active
-		request.session['user_id'] = user.id
-		request.session['user_email'] = user.email
-		return redirect('/')
-	else:
-		messages.error(request, 'Invalid Credentials')
-		return redirect('/identity/login')
+# def checklogin(request):
+# 	# Checks User Permissions and Required Models
+# 	redirect_url = initialChecks(request)
+# 	if redirect_url:
+# 		return redirect(redirect_url)
+# 	user_email = request.POST.get('email').lower()
+# 	user_password = request.POST.get('password')
+# 	user = authenticate(request, username=user_email, password=user_password)
+# 	if user is not None:
+# 		login(request, user)
+# 		request.session['active'] = user.is_active
+# 		request.session['user_id'] = user.id
+# 		request.session['user_email'] = user.email
+# 		return redirect('/')
+# 	else:
+# 		messages.error(request, 'Invalid Credentials')
+# 		return redirect('/identity/login')
 	
-@csrf_exempt
-def azure_callback(request):
-	print("Started Callback")
-	sso_integration = SSOIntegration.objects.get(integration_type = 'Microsoft Entra ID')
-	code = request.GET.get('code')
-	token_url = 'https://login.microsoftonline.com/{}/oauth2/v2.0/token'.format(sso_integration.tenant_id)
-	token_data = {
-		'grant_type': 'authorization_code',
-		'code': code,
-		'redirect_uri': urlunparse(urlparse(request.build_absolute_uri("/identity/azure/callback/"))._replace(scheme="https")),
-		'client_id': sso_integration.client_id,
-		'client_secret': sso_integration.client_secret,
-	}
-	token_response = requests.post(token_url, data=token_data)
-	token_json = token_response.json()
-	access_token = token_json.get('access_token')
+# @csrf_exempt
+# def azure_callback(request):
+# 	print("Started Callback")
+# 	sso_integration = SSOIntegration.objects.get(integration_type = 'Microsoft Entra ID')
+# 	code = request.GET.get('code')
+# 	token_url = 'https://login.microsoftonline.com/{}/oauth2/v2.0/token'.format(sso_integration.tenant_id)
+# 	token_data = {
+# 		'grant_type': 'authorization_code',
+# 		'code': code,
+# 		'redirect_uri': urlunparse(urlparse(request.build_absolute_uri("/identity/azure/callback/"))._replace(scheme="https")),
+# 		'client_id': sso_integration.client_id,
+# 		'client_secret': sso_integration.client_secret,
+# 	}
+# 	token_response = requests.post(token_url, data=token_data)
+# 	token_json = token_response.json()
+# 	access_token = token_json.get('access_token')
     
-	user_info_url = 'https://graph.microsoft.com/v1.0/me'
-	user_info_headers = {'Authorization': f'Bearer {access_token}'}
-	user_info_response = requests.get(user_info_url, headers=user_info_headers)
-	user_info = user_info_response.json()
+# 	user_info_url = 'https://graph.microsoft.com/v1.0/me'
+# 	user_info_headers = {'Authorization': f'Bearer {access_token}'}
+# 	user_info_response = requests.get(user_info_url, headers=user_info_headers)
+# 	user_info = user_info_response.json()
     
-	email = str(user_info.get('userPrincipalName')).lower()
-	print (email)
-	if User.objects.filter(email = email):
-		user = User.objects.get(email = email)
-		login(request, user)
-		request.session['admin_upn'] = user.email
-		request.session['active'] = user.is_active
-		request.session['user_id'] = user.id
-		request.session['user_email'] = user.email
-        # START LOG EVENT
-		if user.is_superuser:
-			createLog('1101', 'User Authentication', 'User Login Event', "Superuser", True, 'Superuser User Login Success', 'Success', "SSO - " + request.session['admin_upn'], request.session['user_id'])
-		elif user.is_staff:
-			createLog('1103', 'User Authentication', 'User Login Event', "Staff", True, 'Staff User Login Success', 'Success', "SSO - " + request.session['admin_upn'], request.session['user_id'])
-        # END LOG EVENT
-	else:
-		messages.add_message(request, messages.ERROR, 'SSO Misconfiguration - Please Contact your Administrator')
-		return redirect('/identity/login')
-	return redirect('/')
+# 	email = str(user_info.get('userPrincipalName')).lower()
+# 	print (email)
+# 	if User.objects.filter(email = email):
+# 		user = User.objects.get(email = email)
+# 		login(request, user)
+# 		request.session['admin_upn'] = user.email
+# 		request.session['active'] = user.is_active
+# 		request.session['user_id'] = user.id
+# 		request.session['user_email'] = user.email
+#         # START LOG EVENT
+# 		if user.is_superuser:
+# 			createLog('1101', 'User Authentication', 'User Login Event', "Superuser", True, 'Superuser User Login Success', 'Success', "SSO - " + request.session['admin_upn'], request.session['user_id'])
+# 		elif user.is_staff:
+# 			createLog('1103', 'User Authentication', 'User Login Event', "Staff", True, 'Staff User Login Success', 'Success', "SSO - " + request.session['admin_upn'], request.session['user_id'])
+#         # END LOG EVENT
+# 	else:
+# 		messages.add_message(request, messages.ERROR, 'SSO Misconfiguration - Please Contact your Administrator')
+# 		return redirect('/identity/login')
+# 	return redirect('/')
 
 ############################################################################################
 
-def logout_page(request):
-	if request.user.has_usable_password():
-		logout(request)
-		return redirect('/identity/login')
-	else:
-		return redirect('/identity/azure/logout/')
+# def logout_page(request):
+# 	if request.user.has_usable_password():
+# 		logout(request)
+# 		return redirect('/identity/login')
+# 	else:
+# 		return redirect('/identity/azure/logout/')
 
-@csrf_exempt
-def azure_logout(request):
-	sso_integration = SSOIntegration.objects.get(integration_type = 'Microsoft Entra ID')
-	logout(request)
-	logout_url = 'https://login.microsoftonline.com/{}/oauth2/v2.0/logout?post_logout_redirect_uri={}'.format(
-        sso_integration.tenant_id,
-        urlunparse(urlparse(request.build_absolute_uri("/identity/login"))._replace(scheme="https"))
-    )
-	return redirect(logout_url)
+# @csrf_exempt
+# def azure_logout(request):
+# 	sso_integration = SSOIntegration.objects.get(integration_type = 'Microsoft Entra ID')
+# 	logout(request)
+# 	logout_url = 'https://login.microsoftonline.com/{}/oauth2/v2.0/logout?post_logout_redirect_uri={}'.format(
+#         sso_integration.tenant_id,
+#         urlunparse(urlparse(request.build_absolute_uri("/identity/login"))._replace(scheme="https"))
+#     )
+# 	return redirect(logout_url)
 
 ############################################################################################
 
 @login_required
 def identity(request):
+	# Redirect to unified profile settings page
+	# Check if user is superuser and redirect to appropriate tab
 	if request.user.is_superuser == False:
 		messages.error(request, "You do not have Permission to Access this Resource")
 		return redirect('/')
@@ -269,99 +276,84 @@ def identity(request):
 	redirect_url = initialChecks(request)
 	if redirect_url:
 		return redirect(redirect_url)
-	users = User.objects.all()
+	# Redirect to profile settings (defaults to profile tab)
+	return redirect('/profile-settings')
 
-	integrationStatuses = []
+############################################################################################
 
-	for integration_name in integration_names:
-		integration = SSOIntegration.objects.get(integration_type = integration_name)
-		if integration.tenant_domain:
-			integrationStatuses.append([integration.integration_type, integration.image_integration_path, integration.enabled, True, integration.id, integration.client_id, integration.tenant_id, integration.tenant_domain, integration.last_synced_at])
-		else:
-			integrationStatuses.append([integration.integration_type, integration.image_integration_path, integration.enabled, False, integration.id, integration.client_id, integration.tenant_id, integration.tenant_domain, integration.last_synced_at])
+# @login_required
+# def enableSSOIntegration(request, id):
+# 	# Checks User Permissions and Required Models
+# 	redirect_url = initialChecks(request)
+# 	if redirect_url:
+# 		return redirect(redirect_url)
 	
-	context = {
-		'users': users,
-		'integrationStatuses': integrationStatuses,
-		'enabledSSOIntegrations': getEnabledSSOIntegrations()
-	}
-	return render(request, 'login_app/identity.html', context)
+# 	integration_update = SSOIntegration.objects.get(id=id)
+# 	integration_update.enabled = True
+# 	integration_update.save()
+
+# 	return redirect ('/identity/identity')
 
 ############################################################################################
 
-@login_required
-def enableSSOIntegration(request, id):
-	# Checks User Permissions and Required Models
-	redirect_url = initialChecks(request)
-	if redirect_url:
-		return redirect(redirect_url)
+# @login_required
+# def disableSSOIntegration(request, id):
+# 	# Checks User Permissions and Required Models
+# 	redirect_url = initialChecks(request)
+# 	if redirect_url:
+# 		return redirect(redirect_url)
 	
-	integration_update = SSOIntegration.objects.get(id=id)
-	integration_update.enabled = True
-	integration_update.save()
+# 	integration_update = SSOIntegration.objects.get(id=id)
+# 	integration_update.enabled = False
+# 	integration_update.save()
 
-	return redirect ('/identity/identity')
-
-############################################################################################
-
-@login_required
-def disableSSOIntegration(request, id):
-	# Checks User Permissions and Required Models
-	redirect_url = initialChecks(request)
-	if redirect_url:
-		return redirect(redirect_url)
-	
-	integration_update = SSOIntegration.objects.get(id=id)
-	integration_update.enabled = False
-	integration_update.save()
-
-	return redirect ('/identity/identity')
+# 	return redirect ('/identity/identity')
 
 ############################################################################################
 
-@login_required
-def updateSSOIntegration(request, id):
-	# Checks User Permissions and Required Models
-	redirect_url = initialChecks(request)
-	if redirect_url:
-		return redirect(redirect_url)
+# @login_required
+# def updateSSOIntegration(request, id):
+# 	# Checks User Permissions and Required Models
+# 	redirect_url = initialChecks(request)
+# 	if redirect_url:
+# 		return redirect(redirect_url)
 
-	integration_update = SSOIntegration.objects.get(id=id)
-	integration_update.client_id = request.POST['client_id']
-	integration_update.client_secret = request.POST['client_secret']
-	integration_update.tenant_id = request.POST['tenant_id']
-	integration_update.tenant_domain = request.POST['tenant_domain']
-	integration_update.save()
+# 	integration_update = SSOIntegration.objects.get(id=id)
+# 	integration_update.client_id = request.POST['client_id']
+# 	integration_update.client_secret = request.POST['client_secret']
+# 	integration_update.tenant_id = request.POST['tenant_id']
+# 	integration_update.tenant_domain = request.POST['tenant_domain']
+# 	integration_update.save()
 
-	return redirect ('/identity/identity')
+# 	return redirect ('/identity/identity')
 
 ############################################################################################
 
-@login_required
-def suspendUser(request, id):
-	if request.user.is_superuser == False:
-		messages.error(request, "You do not have Permission to Access this Resource")
-		return redirect('/')
-	user = User.objects.get(id = id)
-	user.is_active = False
-	user.save()
-	return redirect('/identity/identity')
+# @login_required
+# def suspendUser(request, id):
+# 	if request.user.is_superuser == False:
+# 		messages.error(request, "You do not have Permission to Access this Resource")
+# 		return redirect('/')
+# 	user = User.objects.get(id = id)
+# 	user.is_active = False
+# 	user.save()
+# 	return redirect('/profile-settings#user-management')
 
-@login_required
-def activateUser(request, id):
-	if request.user.is_superuser == False:
-		messages.error(request, "You do not have Permission to Access this Resource")
-		return redirect('/')
-	user = User.objects.get(id = id)
-	user.is_active = True
-	user.save()
-	return redirect('/identity/identity')
+# @login_required
+# def activateUser(request, id):
+# 	if request.user.is_superuser == False:
+# 		messages.error(request, "You do not have Permission to Access this Resource")
+# 		return redirect('/')
+# 	user = User.objects.get(id = id)
+# 	user.is_active = True
+# 	user.save()
+# 	return redirect('/profile-settings#user-management')
 
-@login_required
-def deleteUser(request, id):
-	if request.user.is_superuser == False:
-		messages.error(request, "You do not have Permission to Access this Resource")
-		return redirect('/')
-	user = User.objects.get(id = id)
-	user.delete()
-	return redirect('/identity/identity')
+# @login_required
+# def deleteUser(request, id):
+# 	if request.user.is_superuser == False:
+# 		messages.error(request, "You do not have Permission to Access this Resource")
+# 		return redirect('/')
+# 	user = User.objects.get(id = id)
+# 	user.delete()
+# 	return redirect('/profile-settings#user-management')

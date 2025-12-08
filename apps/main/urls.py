@@ -35,7 +35,7 @@ urlpatterns = [
     # ============================================================================
     # Compliance & Settings
     # ============================================================================
-    path('profile-settings/', views.profileSettings, name='profile-settings'),
+    path('identity/general-settings/', views.profileSettings, name='general-settings'),
     path('update_compliance/<int:id>/', views.update_compliance, name='update_compliance'),
     
     # ============================================================================

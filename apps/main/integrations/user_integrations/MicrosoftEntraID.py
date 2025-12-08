@@ -9,6 +9,7 @@ from apps.main.models import Integration, UserData, Persona, PersonaGroup, Notif
 # Import Function Scripts
 from apps.main.integrations.device_integrations.ReusedFunctions import *
 from apps.logger.views import createLog
+from apps.code_packages.microsoft import getMicrosoftGraphAccessToken
 
 AUTHENTICATION_STRENGTHS = {
     "Phishing Resistant": {'passKeyDeviceBound', 'passKeyDeviceBoundAuthenticator', 'windowsHelloForBusiness'},
@@ -17,20 +18,6 @@ AUTHENTICATION_STRENGTHS = {
     "Deprecated": {'mobilePhone', 'email', 'securityQuestion'},
     "None": set()
 }
-
-def getMicrosoftEntraIDAccessToken(client_id, client_secret, tenant_id):
-    """Acquire an access token for Microsoft Entra ID using MSAL."""
-    authority = f'https://login.microsoftonline.com/{tenant_id}'
-    scope = ['https://graph.microsoft.com/.default']
-    client = msal.ConfidentialClientApplication(client_id, authority=authority, client_credential=client_secret)
-    
-    token_result = client.acquire_token_silent(scope, account=None)
-    if not token_result:
-        token_result = client.acquire_token_for_client(scopes=scope)
-    if not token_result or 'access_token' not in token_result:
-        raise Exception("Failed to acquire access token")
-
-    return 'Bearer ' + token_result['access_token']
 
 def _fetch_paginated_data(url, headers, max_retries=5, retry_delay=1):
     """Generic function to fetch paginated data with retry logic."""
@@ -336,7 +323,7 @@ def updateMicrosoftEntraIDUserDatabase(users, authentication_data, access_token)
 def syncMicrosoftEntraIDUser():
     """Synchronize Microsoft Entra ID users and update the local database."""
     data = Integration.objects.get(integration_type="Microsoft Entra ID", integration_context="User")
-    access_token = getMicrosoftEntraIDAccessToken(data.client_id, data.client_secret, data.tenant_id)
+    access_token = getMicrosoftGraphAccessToken(data.client_id, data.client_secret, data.tenant_id, 'https://graph.microsoft.com/.default')
     
     users = getMicrosoftEntraIDUsers(access_token)
     authentication_data = getMicrosoftEntraIDUserAuthenticationMethods(access_token)

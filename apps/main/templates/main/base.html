@@ -49,11 +49,10 @@
 								{{request.user.first_name}} {{request.user.last_name}}
 							</a>
 							<div class="dropdown-menu dropdown-menu-start">
-								<a class="dropdown-item" href="/profile-settings"><i class="align-middle me-1" data-feather="settings"></i> Profile Settings</a>
-								<a class="dropdown-item" href="/identity/identity"><i class="align-middle me-1" data-feather="settings"></i> Identity Settings</a>
+								<a class="dropdown-item" href="{% url 'general-settings' %}"><i class="align-middle me-1" data-feather="settings"></i> Settings</a>
 								<a class="dropdown-item" href="#"><i class="align-middle me-1" data-feather="help-circle"></i> Help Center</a>
 								<div class="dropdown-divider"></div>
-								<a class="dropdown-item" href="/identity/logout">Log out</a>
+								<a class="dropdown-item" href="{% url 'logout-user' %}">Log out</a>
 							</div>
 
 							<div class="sidebar-user-subtitle">Administrator</div>
@@ -236,11 +235,10 @@
 								<img src="{% static 'main/img/avatars/avatar-blank.webp' %}" class="avatar img-fluid rounded" alt="Charles Hall" />
 							</a>
 							<div class="dropdown-menu dropdown-menu-end">
-								<a class="dropdown-item" href="/profile-settings"><i class="align-middle me-1" data-feather="settings"></i> Profile Settings</a>
-								<a class="dropdown-item" href="/identity/identity"><i class="align-middle me-1" data-feather="settings"></i> Identity Settings</a>
+								<a class="dropdown-item" href="{% url 'general-settings' %}"><i class="align-middle me-1" data-feather="settings"></i> Settings</a>
 								<a class="dropdown-item" href="#"><i class="align-middle me-1" data-feather="help-circle"></i> Help Center</a>
 								<div class="dropdown-divider"></div>
-								<a class="dropdown-item" href="/identity/logout">Log out</a>
+								<a class="dropdown-item" href="{% url 'logout-user' %}">Log out</a>
 							</div>
 						</li>
 					</ul>

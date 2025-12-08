@@ -21,6 +21,7 @@ from .integrations.device_integrations.Qualys import *
 from .integrations.device_integrations.SophosCentral import *
 from .integrations.user_integrations.MicrosoftEntraID import *
 from .models import Device, DeviceComplianceSettings, Integration, Notification, UserData, PersonaGroup, Persona
+from ..code_packages.microsoft import getMicrosoftGraphAccessToken
 
 ############################################################################################
 
@@ -186,8 +187,8 @@ def index(request):
 	access_token = None
 	try:
 		# Cache the Integration object to avoid 3 separate database queries
-		entra_integration = Integration.objects.get(integration_type="Microsoft Entra ID", integration_context="User")
-		access_token = getMicrosoftEntraIDAccessToken(entra_integration.client_id, entra_integration.client_secret, entra_integration.tenant_id)
+		integration = Integration.objects.get(integration_type="Microsoft Entra ID", integration_context="User")
+		access_token = getMicrosoftGraphAccessToken(integration.client_id, integration.client_secret, integration.tenant_id, 'https://graph.microsoft.com/.default')
 		guests = getMicrosoftEntraIDGuests(access_token)
 		groups = getMicrosoftEntraIDGroups(access_token)
 		apps = getMicrosoftEntraIDApps(access_token)
@@ -472,6 +473,8 @@ def personaMetrics(request, persona):
 def profileSettings(request):
 	# Import the new utilities
 	from .utils import ComplianceSettingsManager, DeviceComplianceChecker
+	from django.contrib.auth.models import User
+	from ..authhandler.models import SSOIntegration
 	
 	# Get compliance settings using the new manager
 	compliance_settings = ComplianceSettingsManager.get_all_compliance_settings()
@@ -482,6 +485,22 @@ def profileSettings(request):
 	# Get compliance report for insights
 	compliance_report = DeviceComplianceChecker.get_compliance_report()
 
+	# Get identity settings data (only for superusers)
+	users = None
+	integrationStatuses = []
+	if request.user.is_superuser:
+		users = User.objects.all()
+		integration_names = ['Microsoft Entra ID']
+		for integration_name in integration_names:
+			try:
+				integration = SSOIntegration.objects.get(integration_type=integration_name)
+				if integration.tenant_domain:
+					integrationStatuses.append([integration.integration_type, integration.image_integration_path, integration.enabled, True, integration.id, integration.client_id, integration.tenant_id, integration.tenant_domain, integration.last_synced_at])
+				else:
+					integrationStatuses.append([integration.integration_type, integration.image_integration_path, integration.enabled, False, integration.id, integration.client_id, integration.tenant_id, integration.tenant_domain, integration.last_synced_at])
+			except SSOIntegration.DoesNotExist:
+				pass
+
 	context = {
 		'page': "profile-settings",
 		'enabled_integrations': getEnabledIntegrations(),
@@ -491,10 +510,11 @@ def profileSettings(request):
 		'compliance_report': compliance_report,
         'persona_groups': PersonaGroup.objects.all().order_by('group_name'),
         'personas': Persona.objects.all().order_by('priority', 'persona_name'),
+		# Identity settings data (only for superusers)
+		'users': users,
+		'integrationStatuses': integrationStatuses,
+		'is_superuser': request.user.is_superuser,
 	}
-	
-	# Use the new structured format
-	context['devicecomps'] = compliance_settings
 	
 	return render(request, 'main/profile-settings.html', context)
 

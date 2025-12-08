@@ -57,6 +57,8 @@ SECURE_HSTS_PRELOAD = True
 INSTALLED_APPS = [
     'apps.main',
     'apps.login_app',
+    'apps.authhandler',
+    'apps.emailhandler',
     'apps.logger',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -140,6 +142,11 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
+]
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',                    # Default backend
+    'apps.authhandler.authentication_backends.MicrosoftEntraID.MicrosoftEntraIDBackend',  # Microsoft Entra ID backend
 ]
 
 # Internationalization

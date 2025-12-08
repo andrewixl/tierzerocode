@@ -5,7 +5,7 @@ class Log(models.Model):
     """
     Log model to store event logs with details such as event code, type, group, user level, privilege, action, outcome, additional data, user ID, and creation timestamp.
     """
-    # session_id = models.CharField(max_length=100, null=True, blank=True)
+    session_id = models.CharField(max_length=100, null=True, blank=True)
     event_code = models.CharField(max_length=4)
     event_type = models.CharField(max_length=50)
     event_group = models.CharField(max_length=50)
