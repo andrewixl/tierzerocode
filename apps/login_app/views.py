@@ -78,13 +78,6 @@ def unclaimed(request):
 
 ############################################################################################
 
-# def accountsuspended(request):
-# 	logout(request)
-# 	messages.warning(request, 'Account Suspended.')
-# 	return redirect('/identity/login')
-
-############################################################################################
-
 def login_page(request):
     if request.user.is_authenticated:
         return redirect('/')

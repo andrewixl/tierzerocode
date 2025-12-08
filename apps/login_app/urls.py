@@ -12,6 +12,4 @@ urlpatterns = [
     path('login', views.login_page, name='login'),
     # URl for Local User Account Creation
     path('accountcreation', views.accountcreation),
-    # URL for Local User Account Suspension
-    # path('accountsuspended', views.accountsuspended),
 ]
