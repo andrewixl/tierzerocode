@@ -51,7 +51,7 @@
                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
                                 <div class="modal-body m-3">
-                                    <form action="/update-integration/{{deviceIntegrationStatus.4}}/" method="post">
+                                    <form action="/update-integration/{{deviceIntegrationStatus.4}}" method="post">
                                         {% csrf_token %}
                                         <div class="mb-3">
                                             <label class="form-label">Client ID <span style="color: red;">*</span></label>
@@ -131,7 +131,7 @@
                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
                                 <div class="modal-body m-3">
-                                    <form action="/update-integration/{{userIntegrationStatus.4}}/" method="post">
+                                    <form action="/update-integration/{{userIntegrationStatus.4}}" method="post">
                                         {% csrf_token %}
                                         <div class="mb-3">
                                             <label class="form-label">Client ID <span style="color: red;">*</span></label>
