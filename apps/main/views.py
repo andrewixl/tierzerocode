@@ -794,6 +794,9 @@ def user_master_list_export_api(request):
     if search_value:
         users = users.filter(upn__icontains=search_value)
 
+    # Use select_related to avoid N+1 queries when accessing persona
+    users = users.select_related('persona')
+
     data = []
     for user_data in users:
         try:
