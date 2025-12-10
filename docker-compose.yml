@@ -1,0 +1,85 @@
+version: '3.8'
+
+services:
+  web:
+    image: docker.io/andrewixl/tierzerocode:latest
+    # Alternative: use a specific tag
+    # image: docker.io/andrewixl/tierzerocode:v1.0.0
+    ports:
+      - "${WEB_PORT:-8000}:8000"
+    environment:
+      # Django settings
+      - SECRET_KEY=${SECRET_KEY}
+      - DEBUG=${DEBUG:-False}
+      - DJANGO_ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}
+      # Database settings
+      - DATABASE_HOST=db
+      - DATABASE_NAME=${DATABASE_NAME:-dockerdjango}
+      - DATABASE_USER=${DATABASE_USER:-dbuser}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD:-dbpassword}
+      - DATABASE_PORT=${DATABASE_PORT:-5432}
+      - DATABASE_ENGINE=${DATABASE_ENGINE:-postgresql_psycopg2}
+      # Redis settings
+      - REDIS_HOST=redis
+      - REDIS_PORT=${REDIS_PORT:-6379}
+      - REDIS_DB=${REDIS_DB:-0}
+    depends_on:
+      - db
+      - redis
+    restart: unless-stopped
+    command: python -m gunicorn --bind 0.0.0.0:8000 --workers ${GUNICORN_WORKERS:-3} tierzerocode.wsgi:application
+
+  worker:
+    image: docker.io/andrewixl/tierzerocode:latest
+    # Alternative: use a specific tag
+    # image: docker.io/andrewixl/tierzerocode:v1.0.0
+    environment:
+      # Django settings
+      - SECRET_KEY=${SECRET_KEY}
+      - DEBUG=${DEBUG:-False}
+      - DJANGO_ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}
+      # Database settings
+      - DATABASE_HOST=db
+      - DATABASE_NAME=${DATABASE_NAME:-dockerdjango}
+      - DATABASE_USER=${DATABASE_USER:-dbuser}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD:-dbpassword}
+      - DATABASE_PORT=${DATABASE_PORT:-5432}
+      - DATABASE_ENGINE=${DATABASE_ENGINE:-postgresql_psycopg2}
+      # Redis settings
+      - REDIS_HOST=redis
+      - REDIS_PORT=${REDIS_PORT:-6379}
+      - REDIS_DB=${REDIS_DB:-0}
+    depends_on:
+      - db
+      - redis
+    restart: unless-stopped
+    command: python manage.py rqworker default --job-class django_tasks.backends.rq.Job
+
+  db:
+    image: postgres:17-bookworm
+    environment:
+      - POSTGRES_DB=${DATABASE_NAME:-dockerdjango}
+      - POSTGRES_USER=${DATABASE_USER:-dbuser}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD:-dbpassword}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    # Uncomment to expose PostgreSQL port (not recommended for production)
+    # ports:
+    #   - "5432:5432"
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    # Uncomment to expose Redis port (not recommended for production)
+    # ports:
+    #   - "6379:6379"
+    # Optional: Add Redis persistence
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+
+volumes:
+  postgres_data:
+  redis_data:
+

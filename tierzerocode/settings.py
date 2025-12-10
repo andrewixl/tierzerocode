@@ -28,6 +28,8 @@ else:
     # Linux or Docker
     SECRET_KEY = os.environ.get("SECRET_KEY")
 
+# SECRET_KEY = 'django-insecure--xvxmpo#%!0be#gh466p)4a-v3k56-8#=(^k7%ww@gmhbkuudq'
+
 # SECURITY WARNING: don't run with debug turned on in production!
 # Use DEBUG=True on Windows, environment variable on Linux/Docker
 if platform.system() == 'Windows':
@@ -36,6 +38,8 @@ else:
     # Linux or Docker
     # Environment variables are always strings, so parse "True"/"False"
     DEBUG = os.environ.get("DEBUG", "False").lower() == "true"
+
+# DEBUG=True
 
 # Use hardcoded hosts on Windows, environment variable on Linux/Docker
 if platform.system() == 'Windows':
@@ -67,6 +71,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_tasks',
+    # 'django_tasks.backends.database',
+    'django_rq'
 ]
 
 MIDDLEWARE = [
@@ -119,15 +126,26 @@ else:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.{}'.format(
-                os.getenv('DATABASE_ENGINE', 'sqlite3')
+                os.getenv('DATABASE_ENGINE', 'postgresql_psycopg2')
             ),
-            'NAME': os.getenv('DATABASE_NAME', 'tierzerocode'),
-            'USER': os.getenv('DATABASE_USERNAME', 'tierzerocodeadmin'),
-            'PASSWORD': os.getenv('DATABASE_PASSWORD', 'tierzerocodepassword'),
-            'HOST': os.getenv('DATABASE_HOST', '127.0.0.1'),
+            'NAME': os.getenv('DATABASE_NAME', 'dockerdjango'),
+            'USER': os.getenv('DATABASE_USER', 'dbuser'),
+            'PASSWORD': os.getenv('DATABASE_PASSWORD', 'dbpassword'),
+            'HOST': os.getenv('DATABASE_HOST', 'db'),
             'PORT': os.getenv('DATABASE_PORT', 5432),
         }
     }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#         'NAME': 'dockerdjango',
+#         'USER': 'dbuser',
+#         'PASSWORD': 'dbpassword',
+#         'HOST': '172.17.0.2',
+#         'PORT': 5432,
+#     }
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -151,6 +169,44 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',                    # Default backend
     'apps.authhandler.authentication_backends.MicrosoftEntraID.MicrosoftEntraIDBackend',  # Microsoft Entra ID backend
 ]
+
+TASKS = {
+    'default': {
+        # 'BACKEND': 'django_tasks.backends.database.DatabaseBackend',
+        'BACKEND': 'django_tasks.backends.rq.RQBackend',
+        'QUEUES': ['default'],
+    }
+}
+
+# Redis Queue configuration - use environment variables in Docker, hardcoded on Windows
+if platform.system() == 'Windows':
+    RQ_QUEUES = {
+        'default': {
+            'HOST': '172.17.0.3',  # or 'localhost'
+            'PORT': 6379,
+            'DB': 0,
+            'DEFAULT_TIMEOUT': 7200,  # 2 hours - max time a job can run before being killed
+            'DEFAULT_RESULT_TTL': 10800,  # 3 hours - how long job results are kept in Redis
+        }
+    }
+else:
+    # Linux or Docker - use environment variables
+    RQ_QUEUES = {
+        'default': {
+            'HOST': os.getenv('REDIS_HOST', 'redis'),
+            'PORT': int(os.getenv('REDIS_PORT', '6379')),
+            'DB': int(os.getenv('REDIS_DB', '0')),
+            'DEFAULT_TIMEOUT': 7200,  # 2 hours - max time a job can run before being killed
+            'DEFAULT_RESULT_TTL': 10800,  # 3 hours - how long job results are kept in Redis
+        }
+    }
+
+
+# Ensure django-rq admin link is shown (default is True, but explicit for clarity)
+RQ_SHOW_ADMIN_LINK = True
+
+# TASKS_BACKEND = 'django.tasks.backends.database.DatabaseBackend'
+# TASKS_QUEUES = ['entraidusersync']
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/

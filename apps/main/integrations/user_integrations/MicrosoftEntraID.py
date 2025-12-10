@@ -8,7 +8,6 @@ from django.utils.timezone import make_aware
 from apps.main.models import Integration, UserData, Persona, PersonaGroup, Notification
 # Import Function Scripts
 from apps.main.integrations.device_integrations.ReusedFunctions import *
-from apps.logger.views import createLog
 from apps.code_packages.microsoft import getMicrosoftGraphAccessToken
 
 AUTHENTICATION_STRENGTHS = {
@@ -345,6 +344,7 @@ def updateMicrosoftEntraIDUserDatabase(users, authentication_data, access_token)
             existing_user.delete()
 
 def syncMicrosoftEntraIDUser():
+    print("Synchronizing Microsoft Entra ID users class started")
     """Synchronize Microsoft Entra ID users and update the local database."""
     data = Integration.objects.get(integration_type="Microsoft Entra ID", integration_context="User")
     
@@ -366,38 +366,3 @@ def syncMicrosoftEntraIDUser():
     data.last_synced_at = timezone.now()
     data.save()
     return True
-
-def syncMicrosoftEntraIDUserBackground(request):
-    """Run Microsoft Entra ID user sync in a background thread."""
-    # Capture request data before starting thread (request.session may not be thread-safe)
-    user_email = request.session.get('user_email', 'unknown') if hasattr(request, 'session') else 'unknown'
-    ip_address = request.META.get('REMOTE_ADDR', 'unknown') if hasattr(request, 'META') else 'unknown'
-    user_agent = request.META.get('HTTP_USER_AGENT', 'unknown') if hasattr(request, 'META') else 'unknown'
-    browser = request.META.get('HTTP_USER_AGENT', 'unknown') if hasattr(request, 'META') else 'unknown'
-    operating_system = request.META.get('HTTP_USER_AGENT', 'unknown') if hasattr(request, 'META') else 'unknown'
-    
-    def run():
-        obj = Notification.objects.create(
-            title="Microsoft Entra ID User Integration Sync",
-            status="In Progress",
-            created_at=timezone.now(),
-            updated_at=timezone.now(),
-        )
-        
-        try:
-            messages.info(request, 'Microsoft Entra ID User Integration Sync in Progress')
-            syncMicrosoftEntraIDUser()
-            createLog(1505, "System Integration", "System Integration Event", "Superuser", True, True, "System Integration Sync", "Success", "Microsoft Entra ID User", user_email, ip_address, user_agent, browser, operating_system)
-            obj.status = "Success"
-            obj.updated_at = timezone.now()
-            obj.save()
-            messages.info(request, 'Microsoft Entra ID User Integration Sync Success')
-        except Exception as e:
-            createLog(1505, "System Integration", "System Integration Event", "Superuser", True, True, "System Integration Sync", "Failure", f"Microsoft Entra ID User - {e}", user_email, ip_address, user_agent, browser, operating_system)
-            obj.status = "Failure"
-            obj.updated_at = timezone.now()
-            obj.save()
-            messages.error(request, f'Microsoft Entra ID User Integration Sync Failed: {e}')
-    
-    thread = threading.Thread(target=run)
-    thread.start()

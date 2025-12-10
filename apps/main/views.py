@@ -923,6 +923,9 @@ def error500(request):
 	return render( request, 'main/pages-500.html')
 
 ############################################################################################
+
+from apps.main.tasks import microsoftEntraIDUserSyncTask
+
 @login_required
 def syncDevices(request, integration):
 	#X6969
@@ -945,11 +948,18 @@ def syncDevices(request, integration):
 
 @login_required
 def syncUsers(request, integration):
+	user_email = request.session.get('user_email', 'unknown') if hasattr(request, 'session') else 'unknown'
+	ip_address = request.META.get('REMOTE_ADDR', 'unknown') if hasattr(request, 'META') else 'unknown'
+	user_agent = request.META.get('HTTP_USER_AGENT', 'unknown') if hasattr(request, 'META') else 'unknown'
+	browser = request.META.get('HTTP_USER_AGENT', 'unknown') if hasattr(request, 'META') else 'unknown'
+	operating_system = request.META.get('HTTP_USER_AGENT', 'unknown') if hasattr(request, 'META') else 'unknown'
 	#X6969
 	print (integration)
 	if integration == 'microsoft-entra-id':
 		print ("Syncing Microsoft Entra ID Users")
-		syncMicrosoftEntraIDUserBackground(request)
+		messages.info(request, 'Microsoft Entra ID User Integration Sync in Progress')
+		result = microsoftEntraIDUserSyncTask.enqueue(user_email, ip_address, user_agent, browser, operating_system)
+		print(f'Task ID: {result.id}')
 	print("Redirecting to Integrations")
 	return redirect('/integrations')
 

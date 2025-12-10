@@ -21,6 +21,80 @@ andrewixl/tierzerocode:latest-dev
 
 Port 8000
 
+## Production Deployment with Docker Compose
+
+### Option 1: Full Stack (Web + Worker + Database + Redis)
+
+This setup runs everything in Docker Compose, including PostgreSQL and Redis:
+
+1. Create a `.env` file with your configuration:
+```bash
+SECRET_KEY=your-secret-key-here
+DEBUG=False
+DJANGO_ALLOWED_HOSTS=yourdomain.com,www.yourdomain.com
+DATABASE_NAME=dockerdjango
+DATABASE_USER=dbuser
+DATABASE_PASSWORD=dbpassword
+GUNICORN_WORKERS=3
+WEB_PORT=8000
+```
+
+2. Pull and start all services:
+```bash
+docker-compose pull
+docker-compose up -d
+```
+
+3. Run migrations:
+```bash
+docker-compose exec web python manage.py migrate
+```
+
+4. Create superuser (if needed):
+```bash
+docker-compose exec web python manage.py createsuperuser
+```
+
+### Option 2: Production (External Database/Redis)
+
+If you have external database and Redis services, use `docker-compose.prod.yml`:
+
+1. Create a `.env` file:
+```bash
+SECRET_KEY=your-secret-key-here
+DEBUG=False
+DJANGO_ALLOWED_HOSTS=yourdomain.com,www.yourdomain.com
+DATABASE_HOST=your-db-host.com
+DATABASE_NAME=your_db_name
+DATABASE_USER=your_db_user
+DATABASE_PASSWORD=your_db_password
+DATABASE_PORT=5432
+REDIS_HOST=your-redis-host.com
+REDIS_PORT=6379
+GUNICORN_WORKERS=3
+WEB_PORT=8000
+```
+
+2. Start services:
+```bash
+docker-compose -f docker-compose.prod.yml pull
+docker-compose -f docker-compose.prod.yml up -d
+```
+
+### Managing Services
+
+- View logs: `docker-compose logs -f web` or `docker-compose logs -f worker`
+- Stop services: `docker-compose down`
+- Restart a service: `docker-compose restart web`
+- Scale workers: Edit `docker-compose.yml` and use `docker-compose up -d --scale worker=3`
+
+### Image Tags
+
+The docker-compose files use `docker.io/andrewixl/tierzerocode:latest` by default. To use a specific version:
+```yaml
+image: docker.io/andrewixl/tierzerocode:v1.0.0
+```
+
 ## Required Permissions per Integration
 - CrowdStrike Falcon
     - Hosts - Read

@@ -7,7 +7,7 @@ def createLog(session_id, event_code, event_type, event_group, user_level, privi
     Log.objects.create(session_id=session_id, event_code=event_code, event_type=event_type, event_group=event_group, user_level=user_level, privileged=privileged, action=action, outcome=outcome, additional_data=additional_data, user_id=user_id, ip_address=ip_address, user_agent=user_agent, browser=browser, operating_system=operating_system)
     # Determine log file path based on OS
     if platform.system() == 'Linux':
-        log_path = os.path.join('/db', 'tierzerocode.log')
+        log_path = os.path.join('/app', 'tierzerocode.log')
     else:
         log_path = 'tierzerocode.log'
     with open(log_path, 'a') as f:

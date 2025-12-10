@@ -52,6 +52,10 @@ WORKDIR /app
 # Copy application code
 COPY --chown=appuser:appuser . .
 
+# Copy and make startup script executable
+COPY --chown=appuser:appuser start.sh /app/start.sh
+RUN chmod +x /app/start.sh
+
 # Create static directory and collect static files
 RUN mkdir -p /app/static && \
     chown -R appuser:appuser /app/static && \
@@ -67,5 +71,5 @@ USER appuser
 # Expose the application port
 EXPOSE 8000 
  
-# Start the application using Gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "tierzerocode.wsgi:application"]
+# Start both gunicorn and rqworker using the startup script
+CMD ["/app/start.sh"]
