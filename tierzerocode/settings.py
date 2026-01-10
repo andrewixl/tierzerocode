@@ -72,8 +72,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_tasks',
-    # 'django_tasks.backends.database',
-    'django_rq'
+    'django_rq',
 ]
 
 MIDDLEWARE = [
