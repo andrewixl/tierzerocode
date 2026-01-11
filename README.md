@@ -134,9 +134,9 @@ volumes:
 
 2. Create a `.env` file with your configuration:
 ```bash
-SECRET_KEY=your-secret-key-here
+SECRET_KEY=your-secret-key-here # Generate with: openssl rand -base64 32
 DEBUG=False
-DJANGO_ALLOWED_HOSTS=yourdomain.com,www.yourdomain.com
+DJANGO_ALLOWED_HOSTS=ipaddress,yourdomain.com,
 DATABASE_NAME=dockerdjango
 DATABASE_USER=dbuser
 DATABASE_PASSWORD=dbpassword
@@ -169,7 +169,7 @@ sudo docker compose exec web python manage.py createsuperuser
 The following environment variables can be configured in your `.env` file:
 
 #### Django Settings
-- `SECRET_KEY` - Django secret key (required for production)
+- `SECRET_KEY` - Django secret key (required for production) Generate with: openssl rand -base64 32
 - `DEBUG` - Enable debug mode (default: `False`)
 - `DJANGO_ALLOWED_HOSTS` - Comma-separated list of allowed hostnames
 
