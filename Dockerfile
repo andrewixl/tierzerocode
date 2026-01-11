@@ -1,13 +1,3 @@
-# Run this command to build the image
-# docker build -t andrewixl/tierzerocode .
-# docker build -t andrewixl/tierzerocode:latest-dev .
-
-# Other Commands:
-# sudo docker exec -it awb-ctr-tzc-ep1 sh
-# python manage.py makemigrations
-# python manage.py migrate
-# python manage.py createsuperuser
-
 # Stage 1: Base build stage
 FROM dhi.io/python:3-alpine3.23-dev AS builder
 

@@ -1,11 +1,40 @@
+![Tier Zero C.O.D.E Logo](https://hersheys.tierzerocode.com/static/login_app/img/Tier%20Zero%20CO.D.E-logos_black.png)
+# Tier Zero C.O.D.E (Tier Zero Correlation of Distributed Endpoints)
+
+Tier Zero C.O.D.E is an enterprise-level security dashboard designed to correlate and manage endpoint data from multiple distributed security tools and platforms. It provides a unified view of your organization's endpoints, users, and security posture by integrating with leading security solutions including Microsoft Entra ID, CrowdStrike Falcon, Microsoft Defender for Endpoint, Microsoft Intune, Sophos Central, and Qualys.
+
+## Key Features
+
+- **Unified Endpoint Management**: Centralize endpoint data from multiple security platforms into a single dashboard
+- **User and Device Correlation**: Track and correlate user and device information across your security ecosystem
+- **Multi-Platform Integration**: Seamlessly integrate with major security vendors and platforms
+- **Real-time Monitoring**: Monitor endpoint compliance, security status, and user activity in real-time
+- **Enterprise-Ready**: Built with Django and designed for enterprise-scale deployments
+
+## Repository Stats
+
 <a href="https://github.com/andrewixl/tierzerocode/blob/master/LICENSE"><img alt="GitHub license" src="https://img.shields.io/github/license/andrewixl/tierzerocode"></a>
 <img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/andrewixl/tierzerocode">
 <a href="https://github.com/andrewixl/tierzerocode/issues"><img alt="GitHub issues" src="https://img.shields.io/github/issues/andrewixl/tierzerocode"></a>
+<a href="https://hub.docker.com/r/andrewixl/tierzerocode"><img alt="Docker pulls" src="https://img.shields.io/docker/pulls/andrewixl/tierzerocode"></a>
 
-# Tier Zero C.O.D.E (Tier Zero Correlation of Distributed Endpoints)
+## Repository Technologies
+
+<img alt="Python" src="https://img.shields.io/badge/Python-3.12-blue?logo=python&logoColor=white">
+<img alt="Django" src="https://img.shields.io/badge/Django-6.0.1-green?logo=django&logoColor=white">
+<img alt="PostgreSQL" src="https://img.shields.io/badge/PostgreSQL-17-blue?logo=postgresql&logoColor=white">
+<img alt="Redis" src="https://img.shields.io/badge/Redis-7-red?logo=redis&logoColor=white">
+<img alt="Docker" src="https://img.shields.io/badge/Docker-Alpine-blue?logo=docker&logoColor=white">
 
 ## Minimum Requirements
+- [ ] 2 CPU Cores
 - [ ] 4 GB RAM
+- [ ] 32 GB SSD
+
+## Recommended Requirements
+- [ ] 4 CPU Cores
+- [ ] 8 GB RAM
+- [ ] 64 GB SSD
 
 ## Getting started
 
@@ -19,15 +48,92 @@ Docker Install: Latest - Dev
 andrewixl/tierzerocode:latest-dev
 ```
 
-Port 8000
-
 ## Production Deployment with Docker Compose
 
-### Option 1: Full Stack (Web + Worker + Database + Redis)
+### Full Stack (Web + Worker + Database + Redis)
 
 This setup runs everything in Docker Compose, including PostgreSQL and Redis:
 
-1. Create a `.env` file with your configuration:
+1. Create a `docker-compose.yml` file:
+```bash
+services:
+  web:
+    image: docker.io/andrewixl/tierzerocode:latest
+    # Alternative: use a specific tag
+    # image: docker.io/andrewixl/tierzerocode:v1.0.0
+    ports:
+      - "${WEB_PORT:-8000}:8000"
+    environment:
+      # Django settings
+      - SECRET_KEY=${SECRET_KEY}
+      - DEBUG=${DEBUG:-False}
+      - DJANGO_ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}
+      # Database settings
+      - DATABASE_HOST=db
+      - DATABASE_NAME=${DATABASE_NAME:-dockerdjango}
+      - DATABASE_USER=${DATABASE_USER:-dbuser}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD:-dbpassword}
+      - DATABASE_PORT=${DATABASE_PORT:-5432}
+      - DATABASE_ENGINE=${DATABASE_ENGINE:-postgresql_psycopg2}
+      # Redis settings
+      - REDIS_HOST=redis
+      - REDIS_PORT=${REDIS_PORT:-6379}
+      - REDIS_DB=${REDIS_DB:-0}
+    depends_on:
+      - db
+      - redis
+    restart: unless-stopped
+    command: python -m gunicorn --bind 0.0.0.0:8000 --workers ${GUNICORN_WORKERS:-3} tierzerocode.wsgi:application
+
+  worker:
+    image: docker.io/andrewixl/tierzerocode:latest
+    # Alternative: use a specific tag
+    # image: docker.io/andrewixl/tierzerocode:v1.0.0
+    environment:
+      # Django settings
+      - SECRET_KEY=${SECRET_KEY}
+      - DEBUG=${DEBUG:-False}
+      - DJANGO_ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}
+      # Database settings
+      - DATABASE_HOST=db
+      - DATABASE_NAME=${DATABASE_NAME:-dockerdjango}
+      - DATABASE_USER=${DATABASE_USER:-dbuser}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD:-dbpassword}
+      - DATABASE_PORT=${DATABASE_PORT:-5432}
+      - DATABASE_ENGINE=${DATABASE_ENGINE:-postgresql_psycopg2}
+      # Redis settings
+      - REDIS_HOST=redis
+      - REDIS_PORT=${REDIS_PORT:-6379}
+      - REDIS_DB=${REDIS_DB:-0}
+    depends_on:
+      - db
+      - redis
+    restart: unless-stopped
+    command: python manage.py rqworker default --job-class django_tasks.backends.rq.Job --with-scheduler
+
+  db:
+    image: postgres:17-bookworm
+    environment:
+      - POSTGRES_DB=${DATABASE_NAME:-dockerdjango}
+      - POSTGRES_USER=${DATABASE_USER:-dbuser}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD:-dbpassword}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+
+volumes:
+  postgres_data:
+  redis_data:
+```
+
+2. Create a `.env` file with your configuration:
 ```bash
 SECRET_KEY=your-secret-key-here
 DEBUG=False
@@ -41,44 +147,18 @@ WEB_PORT=8000
 
 2. Pull and start all services:
 ```bash
-docker-compose pull
-docker-compose up -d
+sudo docker compose pull
+sudo docker compose up -d
 ```
 
 3. Run migrations:
 ```bash
-docker-compose exec web python manage.py migrate
+sudo docker compose exec web python manage.py migrate
 ```
 
 4. Create superuser (if needed):
 ```bash
 docker-compose exec web python manage.py createsuperuser
-```
-
-### Option 2: Production (External Database/Redis)
-
-If you have external database and Redis services, use `docker-compose.prod.yml`:
-
-1. Create a `.env` file:
-```bash
-SECRET_KEY=your-secret-key-here
-DEBUG=False
-DJANGO_ALLOWED_HOSTS=yourdomain.com,www.yourdomain.com
-DATABASE_HOST=your-db-host.com
-DATABASE_NAME=your_db_name
-DATABASE_USER=your_db_user
-DATABASE_PASSWORD=your_db_password
-DATABASE_PORT=5432
-REDIS_HOST=your-redis-host.com
-REDIS_PORT=6379
-GUNICORN_WORKERS=3
-WEB_PORT=8000
-```
-
-2. Start services:
-```bash
-docker-compose -f docker-compose.prod.yml pull
-docker-compose -f docker-compose.prod.yml up -d
 ```
 
 ### Managing Services
@@ -92,7 +172,8 @@ docker-compose -f docker-compose.prod.yml up -d
 
 The docker-compose files use `docker.io/andrewixl/tierzerocode:latest` by default. To use a specific version:
 ```yaml
-image: docker.io/andrewixl/tierzerocode:v1.0.0
+image: docker.io/andrewixl/tierzerocode:latest-dev
+image: docker.io/andrewixl/tierzerocode:v1.0.0 (legacy to be updated)
 ```
 
 ## Required Permissions per Integration
@@ -101,19 +182,19 @@ image: docker.io/andrewixl/tierzerocode:v1.0.0
 - Microsoft Defender for Endpoint
     - WindowsDefenderATP - Machine.Read.All - Application Permissions
 - Microsoft Entra ID
-    - Microsoft Graph - Device.Read.All
-    - Microsoft Graph - AuditLog.Read.All
+    - Microsoft Graph - Device.Read.All - Application Permissions
+    - Microsoft Graph - AuditLog.Read.All - Application Permissions
 - Microsoft Intune
-    - Microsoft Graph - DeviceManagementManagedDevices.Read.All
+    - Microsoft Graph - DeviceManagementManagedDevices.Read.All - Application Permissions
 - Sophos Central
     - API Credential - Service Principal Management Role
 
 ## Integrate with your tools
 
+- [ ] Microsoft Entra ID (Devices and Users Data)
 - [ ] Cloudflare Zero Trust
 - [ ] CrowdStrike Falcon
 - [ ] Microsoft Defender for Endpoint
-- [ ] Microsoft Entra ID
 - [ ] Microsoft Intune
 - [ ] Sophos Central
 - [ ] Qualys Vulnerability Management (Limited to First 1000 Devices)
