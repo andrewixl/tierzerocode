@@ -7,7 +7,7 @@ from apps.emailhandler.models import EmailIntegration
 from apps.authhandler.decorators import permission_required_with_message
 
 # Sends Email via Microsoft Graph API
-def sendEmail(email, subject, body, access_token, importance='high', bcc='idam@hersheys.com'):
+def sendEmail(email, subject, body, access_token, importance='high', bcc='idam@email.com'):
     try:
         sender = GeneralSetting.objects.get(setting_name='User Verification - Email Address').setting_value
     except Exception as e:

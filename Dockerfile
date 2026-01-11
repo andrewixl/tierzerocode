@@ -1,5 +1,6 @@
 # Run this command to build the image
 # docker build -t andrewixl/tierzerocode .
+# docker build -t andrewixl/tierzerocode:latest-dev .
 
 # Other Commands:
 # sudo docker exec -it awb-ctr-tzc-ep1 sh
@@ -8,51 +9,45 @@
 # python manage.py createsuperuser
 
 # Stage 1: Base build stage
-FROM python:alpine AS builder
- 
-# Create the app directory
-RUN mkdir /app
- 
-# Set the working directory
+FROM dhi.io/python:3-alpine3.23-dev AS builder
+
 WORKDIR /app
- 
+
 # Set environment variables to optimize Python
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1 
- 
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
 # Upgrade pip and install dependencies
-RUN pip install --upgrade pip 
- 
-# Copy the requirements file first (better caching)
-COPY requirements.txt /app/
- 
-# Install Python dependencies
+RUN pip install --upgrade pip
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy site-packages to a known location for production stage
+RUN SITE_PKG=$(python3 -c "import site; print(site.getsitepackages()[0])") && \
+    cp -r "$SITE_PKG" /tmp/builder-packages
  
 # Stage 2: Production stage
-FROM python:alpine
+FROM dhi.io/python:3-alpine3.23-dev
  
 RUN adduser -D -s /bin/sh appuser && \
    mkdir /app && \
    chown -R appuser /app
  
-# Copy the Python dependencies from the builder stage
-# Copy entire lib and bin directories, then organize by Python version
-COPY --from=builder /usr/local/lib /tmp/builder-lib
-COPY --from=builder /usr/local/bin /tmp/builder-bin
+# Copy Python dependencies from builder stage
+COPY --from=builder /tmp/builder-packages /tmp/builder-packages
 RUN SITE_PKG=$(python3 -c "import site; print(site.getsitepackages()[0])") && \
-    mkdir -p $(dirname $SITE_PKG) && \
-    cp -r /tmp/builder-lib/python*/site-packages/* $SITE_PKG/ && \
-    cp -r /tmp/builder-bin/* /usr/local/bin/ && \
-    rm -rf /tmp/builder-lib /tmp/builder-bin
+    mkdir -p "$(dirname "$SITE_PKG")" && \
+    cp -r /tmp/builder-packages/* "$SITE_PKG"/ && \
+    rm -rf /tmp/builder-packages
  
-# Set the working directory
 WORKDIR /app
- 
-# Copy application code
-COPY --chown=appuser:appuser . .
 
-# Copy and make startup script executable
+# Set environment variables to optimize Python
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+# Copy application code and startup script
+COPY --chown=appuser:appuser . .
 COPY --chown=appuser:appuser start.sh /app/start.sh
 RUN chmod +x /app/start.sh
 
@@ -60,10 +55,6 @@ RUN chmod +x /app/start.sh
 RUN mkdir -p /app/static && \
     chown -R appuser:appuser /app/static && \
     python manage.py collectstatic --noinput || true
-
-# Set environment variables to optimize Python
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1 
 
 # Switch to non-root user
 USER appuser

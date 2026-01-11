@@ -43,11 +43,11 @@ else:
 
 # Use hardcoded hosts on Windows, environment variable on Linux/Docker
 if platform.system() == 'Windows':
-    ALLOWED_HOSTS = ['hersheys.tierzerocode.com','10.10.10.45','localhost']
+    ALLOWED_HOSTS = ['localhost']
 else:
     # Linux or Docker
     ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS","127.0.0.1").split(",")
-CSRF_TRUSTED_ORIGINS = ['https://hersheys.tierzerocode.com']
+CSRF_TRUSTED_ORIGINS = ['http://localhost']
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
