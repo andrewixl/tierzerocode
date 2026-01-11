@@ -20,11 +20,7 @@ Tier Zero C.O.D.E is an enterprise-level security dashboard designed to correlat
 
 ## Repository Technologies
 
-<img alt="Python" src="https://img.shields.io/badge/Python-3.12-blue?logo=python&logoColor=white">
-<img alt="Django" src="https://img.shields.io/badge/Django-6.0.1-green?logo=django&logoColor=white">
-<img alt="PostgreSQL" src="https://img.shields.io/badge/PostgreSQL-17-blue?logo=postgresql&logoColor=white">
-<img alt="Redis" src="https://img.shields.io/badge/Redis-7-red?logo=redis&logoColor=white">
-<img alt="Docker" src="https://img.shields.io/badge/Docker-Alpine-blue?logo=docker&logoColor=white">
+<img alt="Python" src="https://img.shields.io/badge/Python-3.12-blue?logo=python&logoColor=white"> <img alt="Django" src="https://img.shields.io/badge/Django-6.0.1-green?logo=django&logoColor=white"> <img alt="PostgreSQL" src="https://img.shields.io/badge/PostgreSQL-17-blue?logo=postgresql&logoColor=white"> <img alt="Redis" src="https://img.shields.io/badge/Redis-7-red?logo=redis&logoColor=white"> <img alt="Docker" src="https://img.shields.io/badge/Docker-Alpine-blue?logo=docker&logoColor=white">
 
 ## Minimum Requirements
 - [ ] 2 CPU Cores
@@ -35,6 +31,13 @@ Tier Zero C.O.D.E is an enterprise-level security dashboard designed to correlat
 - [ ] 4 CPU Cores
 - [ ] 8 GB RAM
 - [ ] 64 GB SSD
+
+## Prerequisites
+
+Before you begin, ensure you have the following installed:
+- **Docker** (version 20.10 or later)
+- **Docker Compose** (version 2.0 or later)
+- Network access to your security platform APIs (Microsoft Entra ID, CrowdStrike, etc.)
 
 ## Getting started
 
@@ -59,8 +62,6 @@ This setup runs everything in Docker Compose, including PostgreSQL and Redis:
 services:
   web:
     image: docker.io/andrewixl/tierzerocode:latest
-    # Alternative: use a specific tag
-    # image: docker.io/andrewixl/tierzerocode:v1.0.0
     ports:
       - "${WEB_PORT:-8000}:8000"
     environment:
@@ -87,8 +88,6 @@ services:
 
   worker:
     image: docker.io/andrewixl/tierzerocode:latest
-    # Alternative: use a specific tag
-    # image: docker.io/andrewixl/tierzerocode:v1.0.0
     environment:
       # Django settings
       - SECRET_KEY=${SECRET_KEY}
@@ -156,21 +155,51 @@ sudo docker compose up -d
 sudo docker compose exec web python manage.py migrate
 ```
 
-4. Create superuser (if needed):
+4. OPTIONAL Create superuser (if needed):
 ```bash
-docker-compose exec web python manage.py createsuperuser
+sudo docker compose exec web python manage.py createsuperuser
 ```
+
+5. Access the application:
+   - Open your browser and navigate to `http://ipaddress:8000` (or your configured `WEB_PORT`)
+   - Create Administrator Account (or Log in with the superuser credentials you created)
+
+### Configuration
+
+The following environment variables can be configured in your `.env` file:
+
+#### Django Settings
+- `SECRET_KEY` - Django secret key (required for production)
+- `DEBUG` - Enable debug mode (default: `False`)
+- `DJANGO_ALLOWED_HOSTS` - Comma-separated list of allowed hostnames
+
+#### Database Settings
+- `DATABASE_HOST` - PostgreSQL host (default: `db` for Docker Compose)
+- `DATABASE_NAME` - Database name (default: `dockerdjango`)
+- `DATABASE_USER` - Database user (default: `dbuser`)
+- `DATABASE_PASSWORD` - Database password (default: `dbpassword`)
+- `DATABASE_PORT` - Database port (default: `5432`)
+- `DATABASE_ENGINE` - Database engine (default: `postgresql_psycopg2`)
+
+#### Redis Settings
+- `REDIS_HOST` - Redis host (default: `redis` for Docker Compose)
+- `REDIS_PORT` - Redis port (default: `6379`)
+- `REDIS_DB` - Redis database number (default: `0`)
+
+#### Performance Settings
+- `GUNICORN_WORKERS` - Number of Gunicorn worker processes (default: `3`)
+- `WEB_PORT` - Port to expose the web service (default: `8000`)
 
 ### Managing Services
 
-- View logs: `docker-compose logs -f web` or `docker-compose logs -f worker`
-- Stop services: `docker-compose down`
-- Restart a service: `docker-compose restart web`
-- Scale workers: Edit `docker-compose.yml` and use `docker-compose up -d --scale worker=3`
+- View logs: `sudo docker compose logs -f web` or `docker compose logs -f worker`
+- Stop services: `sudo docker compose down`
+- Restart a service: `sudo docker compose restart web`
+- Scale workers: Edit `docker-compose.yml` and use `sudo docker compose up -d --scale worker=3`
 
 ### Image Tags
 
-The docker-compose files use `docker.io/andrewixl/tierzerocode:latest` by default. To use a specific version:
+The docker compose files use `docker.io/andrewixl/tierzerocode:latest` by default. To use a specific version:
 ```yaml
 image: docker.io/andrewixl/tierzerocode:latest-dev
 image: docker.io/andrewixl/tierzerocode:v1.0.0 (legacy to be updated)
@@ -204,12 +233,61 @@ image: docker.io/andrewixl/tierzerocode:v1.0.0 (legacy to be updated)
 - [ ] JAMF Pro (Under Development)
 - [ ] Tenable (Under Development)
 
+## Troubleshooting
+
+### Common Issues
+
+**Database connection errors:**
+- Ensure PostgreSQL container is running: `sudo docker compose ps`
+- Check database credentials in `.env` file
+- Verify network connectivity between containers
+
+**Redis connection errors:**
+- Ensure Redis container is running: `sudo docker compose ps`
+- Check Redis configuration in `.env` file
+
+**Static files not loading:**
+- Run collectstatic: `sudo docker compose exec web python manage.py collectstatic --noinput`
+
+**Worker not processing jobs:**
+- Check worker logs: `sudo docker compose logs -f worker`
+- Ensure Redis is accessible from worker container
+
+**Port already in use:**
+- Change `WEB_PORT` in `.env` file to an available port
+- Or stop the service using port 8000
+
+### Getting Help
+
+If you encounter issues not covered here:
+1. Check the [GitHub Issues](https://github.com/andrewixl/tierzerocode/issues) for similar problems
+2. Review container logs: `sudo docker compose logs -f [service-name]`
+3. Create a new issue with:
+   - Description of the problem
+   - Steps to reproduce
+   - Relevant log output
+   - Your environment (Docker version, OS, etc.)
+
+## Security Considerations
+
+- **Change default credentials**: Always change default database and application credentials
+- **Use strong SECRET_KEY**: Generate a secure Django secret key for production
+- **HTTPS in production**: Use a reverse proxy (nginx, Traefik) with SSL/TLS certificates
+- **Network security**: Restrict access to the application and database containers
+- **Regular updates**: Keep Docker images and dependencies updated
+- **Backup strategy**: Implement regular backups of PostgreSQL data volumes
+- **API credentials**: Store integration API keys securely (consider using secrets management)
+
 ## Support
-Please sumbit any issues into the issues section within this GitHub
+Please submit any issues into the issues section within this GitHub
 
 ## Contribute
 If you are feeling generous, love the project, or just want to show your appreciation please donated at the Patreon Link Below!
 https://www.patreon.com/tierzerocode
+
+## License
+
+Distributed under the Apache License Version 2.0. See [LICENSE](LICENSE) for more information.
 
 <!-- ## Collaborate with your team
 
