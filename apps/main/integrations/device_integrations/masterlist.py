@@ -9,7 +9,6 @@ def updateMasterList(devices, tenant_domain):
 
         hostname = str(device).lower()
         hostname_without_suffix = hostname[:-len(tenant_domain_suffix)] if hostname.endswith(tenant_domain_suffix) else hostname
-        # os_platform_lower = (device.osPlatform).lower()
 
         if device.parentDevice is None:
             if len(Device.objects.filter(hostname=hostname_without_suffix)) == 0:

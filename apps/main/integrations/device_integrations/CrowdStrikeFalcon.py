@@ -6,9 +6,6 @@ from ...models import Integration, Device, CrowdStrikeFalconDeviceData, DeviceCo
 # Import Function Scripts
 from .ReusedFunctions import *
 
-# Set the logger
-# logger = logging.getLogger('custom_logger')
-
 ######################################## Start Get CrowdStrike Falcon Access Token ########################################
 def getCrowdStrikeAccessToken(client_id, client_secret, tenant_id):
     auth_url = 'https://api.crowdstrike.com/oauth2/token'
