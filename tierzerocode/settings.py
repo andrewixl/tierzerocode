@@ -28,8 +28,6 @@ else:
     # Linux or Docker
     SECRET_KEY = os.environ.get("SECRET_KEY")
 
-# SECRET_KEY = 'django-insecure--xvxmpo#%!0be#gh466p)4a-v3k56-8#=(^k7%ww@gmhbkuudq'
-
 # SECURITY WARNING: don't run with debug turned on in production!
 # Use DEBUG=True on Windows, environment variable on Linux/Docker
 if platform.system() == 'Windows':
@@ -47,16 +45,60 @@ if platform.system() == 'Windows':
 else:
     # Linux or Docker
     ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS","127.0.0.1").split(",")
-CSRF_TRUSTED_ORIGINS = ['http://localhost']
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-CSRF_COOKIE_SECURE = True
-SESSION_COOKIE_SECURE = True
 
-# DISABLE CSRF FOR LOCALHOST
-# SECURE_SSL_REDIRECT = True
-SECURE_HSTS_SECONDS = 3600
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-SECURE_HSTS_PRELOAD = True
+# Generate CSRF_TRUSTED_ORIGINS from ALLOWED_HOSTS with both http and https
+# Also include common ports if not already specified
+CSRF_TRUSTED_ORIGINS = []
+WEB_PORT = os.environ.get("WEB_PORT", "8000")
+common_ports = ["", f":{WEB_PORT}", ":80", ":443", ":8000", ":8080"]
+
+for host in ALLOWED_HOSTS:
+    host = host.strip()  # Remove any whitespace
+    if host:  # Only add non-empty hosts
+        # Check if host already includes a port
+        if ':' in host:
+            # Host already has a port, use it as-is
+            CSRF_TRUSTED_ORIGINS.extend([
+                f"http://{host}",
+                f"https://{host}"
+            ])
+        else:
+            # Add host with common ports
+            for port in common_ports:
+                CSRF_TRUSTED_ORIGINS.extend([
+                    f"http://{host}{port}",
+                    f"https://{host}{port}"
+                ])
+
+# Remove duplicates while preserving order
+CSRF_TRUSTED_ORIGINS = list(dict.fromkeys(CSRF_TRUSTED_ORIGINS))
+
+# Reverse proxy SSL configuration
+# When using a reverse proxy (nginx, Traefik, etc.) that handles SSL termination,
+# Django needs to trust the X-Forwarded-Proto header to detect HTTPS
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Only use secure cookies when HTTPS is enabled
+# Set USE_HTTPS=True in environment when using HTTPS in production (behind reverse proxy)
+# For HTTP access (like http://192.168.0.10:8000), set USE_HTTPS=False or leave unset
+USE_HTTPS = os.environ.get("USE_HTTPS", "False").lower() == "true"
+
+# SECURE_SSL_REDIRECT must be False when behind a reverse proxy
+# The reverse proxy should handle HTTP to HTTPS redirection, not Django
+# Enabling this causes redirect loops when behind a reverse proxy
+SECURE_SSL_REDIRECT = False
+
+# Secure cookie settings - only enable when using HTTPS
+# When behind a reverse proxy with SSL, set USE_HTTPS=True
+CSRF_COOKIE_SECURE = USE_HTTPS
+SESSION_COOKIE_SECURE = USE_HTTPS
+
+# HSTS settings - disable when behind reverse proxy to prevent redirect loops
+# HSTS can cause issues with reverse proxies, so we disable it
+# The reverse proxy should handle HSTS headers if needed
+SECURE_HSTS_SECONDS = 0
+SECURE_HSTS_INCLUDE_SUBDOMAINS = False
+SECURE_HSTS_PRELOAD = False
 
 # Application definition
 INSTALLED_APPS = [

@@ -142,6 +142,7 @@ DATABASE_USER=dbuser
 DATABASE_PASSWORD=dbpassword
 GUNICORN_WORKERS=3
 WEB_PORT=8000
+USE_HTTPS=False
 ```
 
 2. Pull and start all services:
@@ -172,6 +173,7 @@ The following environment variables can be configured in your `.env` file:
 - `SECRET_KEY` - Django secret key (required for production) Generate with: openssl rand -base64 32
 - `DEBUG` - Enable debug mode (default: `False`)
 - `DJANGO_ALLOWED_HOSTS` - Comma-separated list of allowed hostnames
+- `USE_HTTPS=False` - True / False
 
 #### Database Settings
 - `DATABASE_HOST` - PostgreSQL host (default: `db` for Docker Compose)
