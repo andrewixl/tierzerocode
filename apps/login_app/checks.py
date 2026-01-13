@@ -1,4 +1,4 @@
-from apps.login_app.models import SSOIntegration
+from apps.authhandler.models import SSOIntegration
 from django.contrib.auth.models import User
 from django.shortcuts import redirect
 

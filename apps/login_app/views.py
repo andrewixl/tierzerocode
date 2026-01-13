@@ -2,7 +2,6 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 # Import Django User Model
 from django.contrib.auth.models import User
 # Import Models

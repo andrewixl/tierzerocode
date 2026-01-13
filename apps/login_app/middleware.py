@@ -1,5 +1,4 @@
 from django.shortcuts import redirect
-# from django.core.cache import cache
 from .checks import checkUserCount, checkSSOIntegrations, systemSSOInitialSetup
 
 
@@ -22,11 +21,6 @@ class ModelVerificationMiddleware:
         if any(request.path.startswith(path) for path in setup_paths):
             response = self.get_response(request)
             return response
-
-        # Check if user is authenticated and is staff (only verify for admin users)
-        # if not (request.user.is_authenticated and request.user.is_staff):
-        #     response = self.get_response(request)
-        #     return response
 
         # Perform verification checks
         verification_status = self._perform_model_verification_checks()
