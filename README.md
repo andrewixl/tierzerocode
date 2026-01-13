@@ -207,17 +207,22 @@ image: docker.io/andrewixl/tierzerocode:latest-dev
 image: docker.io/andrewixl/tierzerocode:v1.0.0 (legacy to be updated)
 ```
 
-## Required Permissions per Integration
-- CrowdStrike Falcon
+## Required Permissions per Integration    
+- Microsoft Entra ID (User)
+    - Microsoft Graph - Directory.Read.All - Application Permissions
+      - Populates Dashboard Tenant Name, Tenant ID, Primary Domain, # of Groups, and # of Apps
+    - Microsoft Graph - User.Read.All - Application Permissions
+    - Microsoft Graph - UserAuthenticationMethod.Read.All - Application Permissions
+- CrowdStrike Falcon (Device)
     - Hosts - Read
-- Microsoft Defender for Endpoint
+- Microsoft Defender for Endpoint (Device)
     - WindowsDefenderATP - Machine.Read.All - Application Permissions
-- Microsoft Entra ID
+- Microsoft Entra ID (Device)
     - Microsoft Graph - Device.Read.All - Application Permissions
     - Microsoft Graph - AuditLog.Read.All - Application Permissions
-- Microsoft Intune
+- Microsoft Intune (Device)
     - Microsoft Graph - DeviceManagementManagedDevices.Read.All - Application Permissions
-- Sophos Central
+- Sophos Central (Device)
     - API Credential - Service Principal Management Role
 
 ## Integrate with your tools
