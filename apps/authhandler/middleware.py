@@ -1,11 +1,10 @@
 from django.shortcuts import redirect
-from apps.authhandler.checks import checkSSOIntegrations, ssoInitialSetup
+from apps.authhandler.checks import checkUserCount, checkSSOIntegrations, ssoInitialSetup
 
 
 class AuthenticationMiddleware:
     """
     Middleware to verify required models exist and redirect to setup if needed.
-    Uses caching to avoid repeated database queries on every request.
     """
     def __init__(self, get_response):
         self.get_response = get_response
@@ -30,7 +29,9 @@ class AuthenticationMiddleware:
         verification_status = self._perform_verification_checks()
         
         # Redirect if verification failed
-        if verification_status:
+        if verification_status['user_count']:
+            return redirect('unclaimed')
+        if verification_status['sso_integrations']:
             ssoInitialSetup()
             return redirect('admin-dashboard')
         
@@ -39,6 +40,12 @@ class AuthenticationMiddleware:
 
     def _perform_verification_checks(self):
         """Perform all verification checks and return status."""
+        results = {
+            'user_count': False,
+            'sso_integrations': False,
+        }
+        if not checkUserCount():
+            results['user_count'] = True
         if not checkSSOIntegrations():
-            return True
-        return False
+            results['sso_integrations'] = True
+        return results

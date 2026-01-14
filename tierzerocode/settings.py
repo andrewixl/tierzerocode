@@ -166,7 +166,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'apps.login_app.middleware.ModelVerificationMiddleware', #Verifies the required models exist and redirects to setup if needed
+    'apps.authhandler.middleware.AuthenticationMiddleware',
     'apps.main.middleware.ModelVerificationMiddleware', #Verifies the required models exist and redirects to setup if needed
     'apps.authhandler.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -218,17 +218,6 @@ else:
             'PORT': os.getenv('DATABASE_PORT', 5432),
         }
     }
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-#         'NAME': 'dockerdjango',
-#         'USER': 'dbuser',
-#         'PASSWORD': 'dbpassword',
-#         'HOST': '172.17.0.2',
-#         'PORT': 5432,
-#     }
-# }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators

@@ -1,10 +1,15 @@
 from apps.authhandler.models import SSOIntegration
 from django.shortcuts import redirect
+from django.contrib.auth.models import User
 
 # Configuration for required integrations and settings
 REQUIRED_SSO_INTEGRATIONS = ['Microsoft Entra ID']
 
 ############################################################################################
+
+def checkUserCount():
+	"""Check if there are any users in the database."""
+	return User.objects.count() > 0
 
 def checkSSOIntegrations():
 	"""Check if all required SSO integrations exist."""
