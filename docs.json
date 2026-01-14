@@ -10,7 +10,10 @@
       {
         "dropdown": "Identity Providers",
         "pages": [
-          "setting-up-sso"
+          "identity-providers/add-identity-providers",
+          "identity-providers/microsoft-entra-id",
+          "identity-providers/google-workspace",
+          "identity-providers/okta"
         ]
       }
     ]
