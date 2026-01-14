@@ -32,8 +32,8 @@ def _get_image_paths(integration_name):
 	"""Helper function to generate image paths for integrations."""
 	base_name = integration_name.replace(" ", "_").lower()
 	return {
-		'navbar': f'login_app/img/navbar_icons/webp/{base_name}_logo_nav.webp',
-		'integration': f'login_app/img/integration_images/webp/{base_name}_logo.webp'
+		'navbar': f'main/img/navbar_icons/webp/{base_name}_logo_nav.webp',
+		'integration': f'main/img/integration_images/webp/{base_name}_logo.webp'
 	}
 
 def systemDeviceInitialSetup():
