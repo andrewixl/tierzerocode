@@ -927,27 +927,39 @@ def error500(request):
 
 ############################################################################################
 
-from apps.main.tasks import microsoftEntraIDUserSyncTask
+from apps.main.tasks import microsoftEntraIDUserSyncTask, microsoftEntraIDDeviceSyncTask, microsoftIntuneDeviceSyncTask
 
 @login_required
 def syncDevices(request, integration):
+	user_email = request.session.get('user_email', 'unknown') if hasattr(request, 'session') else 'unknown'
+	ip_address = request.META.get('REMOTE_ADDR', 'unknown') if hasattr(request, 'META') else 'unknown'
+	user_agent = request.META.get('HTTP_USER_AGENT', 'unknown') if hasattr(request, 'META') else 'unknown'
+	browser = request.META.get('HTTP_USER_AGENT', 'unknown') if hasattr(request, 'META') else 'unknown'
+	operating_system = request.META.get('HTTP_USER_AGENT', 'unknown') if hasattr(request, 'META') else 'unknown'
 	#X6969
-    if integration == 'Cloudflare-Zero-Trust':
-        syncCloudflareZeroTrust()
-    elif integration == 'CrowdStrike-Falcon':
-        syncCrowdStrikeFalconBackground()
-    elif integration == 'microsoft-defender-for-endpoint':
-        syncMicrosoftDefenderforEndpointBackground(request)
-    elif integration == 'microsoft-entra-id':
-        syncMicrosoftEntraIDBackground(request)
-    elif integration == 'microsoft-intune':
-        print ("Syncing Microsoft Intune")
-        syncMicrosoftIntuneBackground(request)  # Run the task in the background
-    elif integration == 'Sophos-Central':
-        syncSophos()
-    elif integration == 'Qualys':
-        syncQualys()
-    return redirect('/integrations')
+	print (integration)
+	if integration == 'Cloudflare-Zero-Trust':
+		syncCloudflareZeroTrust()
+	elif integration == 'CrowdStrike-Falcon':
+		syncCrowdStrikeFalconBackground()
+	elif integration == 'microsoft-defender-for-endpoint':
+		syncMicrosoftDefenderforEndpointBackground(request)
+	elif integration == 'microsoft-entra-id':
+		print ("Syncing Microsoft Entra ID Devices")
+		messages.info(request, 'Microsoft Entra ID Device Integration Sync in Progress')
+		result = microsoftEntraIDDeviceSyncTask.enqueue(user_email, ip_address, user_agent, browser, operating_system)
+		print(f'Task ID: {result.id}')
+	elif integration == 'microsoft-intune':
+		print ("Syncing Microsoft Intune Devices")
+		messages.info(request, 'Microsoft Intune Device Integration Sync in Progress')
+		result = microsoftIntuneDeviceSyncTask.enqueue(user_email, ip_address, user_agent, browser, operating_system)
+		print(f'Task ID: {result.id}')
+	elif integration == 'Sophos-Central':
+		syncSophos()
+	elif integration == 'Qualys':
+		syncQualys()
+	print("Redirecting to Integrations")
+	return redirect('/integrations')
 
 @login_required
 def syncUsers(request, integration):

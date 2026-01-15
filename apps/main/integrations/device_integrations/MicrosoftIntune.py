@@ -9,39 +9,41 @@ from ...models import Integration, Device, MicrosoftIntuneDeviceData, DeviceComp
 # Import Function Scripts
 from .ReusedFunctions import *
 from ....logger.views import createLog
+from apps.code_packages.microsoft import getMicrosoftGraphAccessToken
 
-######################################## Start Get Microsoft Intune Access Token ########################################
-def getMicrosoftIntuneAccessToken(client_id, client_secret, tenant_id):
-    """Acquire an access token for Microsoft Entra ID using MSAL."""
-    authority = f'https://login.microsoftonline.com/{tenant_id}'
-    scope = ['https://graph.microsoft.com/.default']
-    client = msal.ConfidentialClientApplication(client_id, authority=authority, client_credential=client_secret)
-
-    token_result = client.acquire_token_silent(scope, account=None)
-    if not token_result:
-        token_result = client.acquire_token_for_client(scopes=scope)
-    if not token_result or 'access_token' not in token_result:
-        raise Exception("Failed to acquire access token")
-
-    access_token = 'Bearer ' + token_result['access_token']
-    return access_token
-######################################## End Get Microsoft Intune Access Token ########################################
+def _fetch_paginated_data(url, headers, max_retries=5, retry_delay=1):
+    """Generic function to fetch paginated data with retry logic."""
+    results = []
+    
+    while url:
+        for attempt in range(max_retries):
+            response = requests.get(url, headers=headers)
+            if response.status_code == 200:
+                data = response.json()
+                results.extend(data.get('value', []))
+                url = data.get('@odata.nextLink')
+                break
+            elif response.status_code == 429:  # Throttling error
+                retry_after = int(response.headers.get('Retry-After', retry_delay))
+                time.sleep(retry_after)
+            else:
+                raise Exception(f"Failed to fetch data: {response.status_code} - {response.text}")
+        else:
+            raise Exception("Max retries exceeded while fetching data.")
+        
+    return results
 
 ######################################## Start Get Microsoft Intune Devices ########################################
 def getMicrosoftIntuneDevices(access_token):
+    """Fetch all enabled Microsoft Intune devices."""
+    # Check if access_token is an error dictionary
+    if isinstance(access_token, dict) and 'error' in access_token:
+        raise Exception(f"Failed to get access token: {access_token['error']}")
+
     url = 'https://graph.microsoft.com/v1.0/deviceManagement/managedDevices'
     headers = {'Authorization': access_token}
-    graph_results_clean = []
+    return _fetch_paginated_data(url, headers)
 
-    while url:
-        response = requests.get(url, headers=headers)
-        if response.status_code != 200:
-            raise Exception(f"Failed to fetch devices: {response.status_code} - {response.text}")
-        data = response.json()
-        graph_results_clean.extend(data.get('value', []))
-        url = data.get('@odata.nextLink')
-
-    return graph_results_clean
 ######################################## End Get Microsoft Intune Devices ########################################
 
 ######################################## Start Update/Create Microsoft Intune Devices ########################################
@@ -153,39 +155,18 @@ def updateMicrosoftIntuneDeviceDatabase(json_data):
 ######################################## End Update/Create Microsoft Intune Devices ########################################
 
 ######################################## Start Sync Microsoft Intune ########################################
-def syncMicrosoftIntune():
-    """Synchronize Microsoft Intune Devices and update the local database."""
+def syncMicrosoftIntuneDevice():
     data = Integration.objects.get(integration_type="Microsoft Intune")
-    updateMicrosoftIntuneDeviceDatabase(getMicrosoftIntuneDevices(getMicrosoftIntuneAccessToken(data.client_id, data.client_secret, data.tenant_id)))
+    if not data.client_id or not data.client_secret or not data.tenant_id:
+        raise Exception("Microsoft Intune integration is not properly configured. Missing client_id, client_secret, or tenant_id.")
+    access_token = getMicrosoftGraphAccessToken(data.client_id, data.client_secret, data.tenant_id, ["https://graph.microsoft.com/.default"])
+    
+    if isinstance(access_token, dict) and 'error' in access_token:
+        error_msg = str(access_token['error'])
+        raise Exception(f"Failed to get access token: {error_msg}")
+
+    updateMicrosoftIntuneDeviceDatabase(getMicrosoftIntuneDevices(access_token))
     data.last_synced_at = timezone.now()
     data.save()
     return True
 ######################################## End Sync Microsoft Intune ########################################
-
-######################################## Start Background Sync Microsoft Intune ########################################
-def syncMicrosoftIntuneBackground(request):
-    """Run Microsoft Intune device sync in a background thread."""
-    def run():
-        obj = Notification.objects.create(
-                title="Microsoft Intune Device Integration Sync",
-                status="In Progress",
-                created_at=timezone.now(),
-                updated_at=timezone.now(),
-            )  # type: ignore[attr-defined]
-        try:
-            messages.info(request, 'Microsoft Intune Device Integration Sync in Progress')
-            syncMicrosoftIntune()
-            createLog(1505,"System Integration","System Integration Event","Superuser",True,"System Integration Sync","Success","Microsoft Intune - Device",request.session.get('user_email', 'unknown'))
-            obj.status = "Success"
-            obj.updated_at = timezone.now()
-            obj.save()
-            messages.info(request, 'Microsoft Intune Device Integration Sync Success')
-        except Exception as e:
-            createLog(1505,"System Integration","System Integration Event","Superuser",True,"System Integration Sync","Failure",f"Microsoft Intune - Device - {e}",request.session.get('user_email', 'unknown'))
-            obj.status = "Failure"
-            obj.updated_at = timezone.now()
-            obj.save()
-            messages.error(request, f'Microsoft Intune Device Integration Sync Failed: {e}')
-    thread = threading.Thread(target=run)
-    thread.start()
-######################################## End Background Sync Microsoft Intune ########################################
