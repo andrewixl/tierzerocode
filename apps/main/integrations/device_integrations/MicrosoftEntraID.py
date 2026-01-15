@@ -2,15 +2,14 @@
 import requests, time
 from django.utils import timezone
 # Import Models
-from ...models import Integration, Device, MicrosoftEntraIDDeviceData, DeviceComplianceSettings, Notification
+from apps.main.models import Integration, Device, MicrosoftEntraIDDeviceData, DeviceComplianceSettings
 # Import Function Scripts
-from .ReusedFunctions import *
+from apps.main.integrations.device_integrations.ReusedFunctions import *
 from apps.code_packages.microsoft import getMicrosoftGraphAccessToken
 
 def _fetch_paginated_data(url, headers, max_retries=5, retry_delay=1):
     """Generic function to fetch paginated data with retry logic."""
     results = []
-    
     while url:
         for attempt in range(max_retries):
             response = requests.get(url, headers=headers)
@@ -26,16 +25,11 @@ def _fetch_paginated_data(url, headers, max_retries=5, retry_delay=1):
                 raise Exception(f"Failed to fetch data: {response.status_code} - {response.text}")
         else:
             raise Exception("Max retries exceeded while fetching data.")
-        
     return results
 
 ######################################## Start Get Microsoft Entra ID Devices ########################################
 def getMicrosoftEntraIDDevices(access_token):
     """Fetch all enabled Microsoft Entra ID devices."""
-    # Check if access_token is an error dictionary
-    if isinstance(access_token, dict) and 'error' in access_token:
-        raise Exception(f"Failed to get access token: {access_token['error']}")
-
     url = 'https://graph.microsoft.com/v1.0/devices'
     headers = {'Authorization': access_token}
     return _fetch_paginated_data(url, headers)
@@ -127,13 +121,12 @@ def syncMicrosoftEntraIDDevice():
     data = Integration.objects.get(integration_type="Microsoft Entra ID", integration_context="Device")
     if not data.client_id or not data.client_secret or not data.tenant_id:
         raise Exception("Microsoft Entra ID integration is not properly configured. Missing client_id, client_secret, or tenant_id.")
+    
     access_token = getMicrosoftGraphAccessToken(data.client_id, data.client_secret, data.tenant_id, ["https://graph.microsoft.com/.default"])
-
-    # Check if access_token is an error dictionary
     if isinstance(access_token, dict) and 'error' in access_token:
         error_msg = str(access_token['error'])
         raise Exception(f"Failed to get access token: {error_msg}")
-
+    
     updateMicrosoftEntraIDDeviceDatabase(getMicrosoftEntraIDDevices(access_token))
     data.last_synced_at = timezone.now()
     data.save()

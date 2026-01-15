@@ -42,10 +42,6 @@ def _fetch_paginated_data(url, headers, max_retries=5, retry_delay=1):
 
 def getMicrosoftEntraIDUsers(access_token):
     """Fetch all enabled Microsoft Entra ID users."""
-    # Check if access_token is an error dictionary
-    if isinstance(access_token, dict) and 'error' in access_token:
-        raise Exception(f"Failed to get access token: {access_token['error']}")
-    
     url = "https://graph.microsoft.com/v1.0/users?$select=userPrincipalName,id,employeeId,givenName,surname,accountEnabled,jobTitle,department,createdDateTime,signInActivity&$filter=accountEnabled eq true and userType eq 'Member'"
     headers = {'Authorization': access_token}
     return _fetch_paginated_data(url, headers)
