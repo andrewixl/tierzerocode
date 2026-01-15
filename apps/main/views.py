@@ -874,7 +874,6 @@ def integrations(request):
 			userIntegrationStatuses.append([integration.integration_type, integration.image_integration_path, integration.enabled, True, integration.id, integration.client_id, integration.tenant_id, integration.tenant_domain, integration.last_synced_at])
 		else:
 			userIntegrationStatuses.append([integration.integration_type, integration.image_integration_path, integration.enabled, False, integration.id, integration.client_id, integration.tenant_id, integration.tenant_domain, integration.last_synced_at])
-	
 	context = {
 		'page':'integrations',
 		'notifications': Notification.objects.all(),
@@ -927,7 +926,7 @@ def error500(request):
 
 ############################################################################################
 
-from apps.main.tasks import microsoftEntraIDUserSyncTask, microsoftEntraIDDeviceSyncTask, microsoftIntuneDeviceSyncTask, microsoftDefenderforEndpointDeviceSyncTask
+from apps.main.tasks import microsoftEntraIDUserSyncTask, microsoftEntraIDDeviceSyncTask, microsoftIntuneDeviceSyncTask, microsoftDefenderforEndpointDeviceSyncTask, crowdStrikeFalconDeviceSyncTask
 
 @login_required
 def syncDevices(request, integration):
@@ -937,11 +936,13 @@ def syncDevices(request, integration):
 	browser = request.META.get('HTTP_USER_AGENT', 'unknown') if hasattr(request, 'META') else 'unknown'
 	operating_system = request.META.get('HTTP_USER_AGENT', 'unknown') if hasattr(request, 'META') else 'unknown'
 	#X6969
-	print (integration)
 	if integration == 'Cloudflare-Zero-Trust':
 		syncCloudflareZeroTrust()
-	elif integration == 'CrowdStrike-Falcon':
-		syncCrowdStrikeFalconBackground()
+	elif integration == 'crowdstrike-falcon':
+		print ("Syncing CrowdStrike Falcon Devices")
+		messages.info(request, 'CrowdStrike Falcon Device Integration Sync in Progress')
+		result = crowdStrikeFalconDeviceSyncTask.enqueue(user_email, ip_address, user_agent, browser, operating_system)
+		print(f'Task ID: {result.id}')
 	elif integration == 'microsoft-defender-for-endpoint':
 		print ("Syncing Microsoft Defender for Endpoint Devices")
 		messages.info(request, 'Microsoft Defender for Endpoint Device Integration Sync in Progress')
@@ -972,7 +973,6 @@ def syncUsers(request, integration):
 	browser = request.META.get('HTTP_USER_AGENT', 'unknown') if hasattr(request, 'META') else 'unknown'
 	operating_system = request.META.get('HTTP_USER_AGENT', 'unknown') if hasattr(request, 'META') else 'unknown'
 	#X6969
-	print (integration)
 	if integration == 'microsoft-entra-id':
 		print ("Syncing Microsoft Entra ID Users")
 		messages.info(request, 'Microsoft Entra ID User Integration Sync in Progress')

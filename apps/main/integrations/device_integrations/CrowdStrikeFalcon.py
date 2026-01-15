@@ -1,14 +1,14 @@
 # Import Dependencies
-import requests, logging
+import requests
 from django.utils import timezone
 # Import Models
-from ...models import Integration, Device, CrowdStrikeFalconDeviceData, DeviceComplianceSettings
+from apps.main.models import Integration, Device, CrowdStrikeFalconDeviceData, DeviceComplianceSettings
 # Import Function Scripts
-from .ReusedFunctions import *
+from apps.main.integrations.device_integrations.ReusedFunctions import *
 
 ######################################## Start Get CrowdStrike Falcon Access Token ########################################
 def getCrowdStrikeAccessToken(client_id, client_secret, tenant_id):
-    auth_url = 'https://api.crowdstrike.com/oauth2/token'
+    auth_url = f'{tenant_id}/oauth2/token'
     auth_payload = {'client_id': client_id, 'client_secret': client_secret}
     try:
         response = requests.post(auth_url, data=auth_payload)
@@ -22,8 +22,8 @@ def getCrowdStrikeAccessToken(client_id, client_secret, tenant_id):
 ######################################## End Get CrowdStrike Falcon Access Token ########################################
 
 ######################################## Start Get CrowdStrike Falcon Devices ########################################
-def getCrowdStrikeDevices(access_token):
-    url = 'https://api.crowdstrike.com/devices/queries/devices-scroll/v1'
+def getCrowdStrikeDevices(access_token, tenant_id):
+    url = f'{tenant_id}/devices/queries/devices-scroll/v1'
     headers = {'Authorization': access_token}
     crowdstrike_aids = ((requests.get(url=url, headers=headers)).json())['resources']
 
@@ -50,7 +50,7 @@ def getCrowdStrikeDevices(access_token):
         if pagination_arr == 0:
             pass
         else:
-            url = 'https://api.crowdstrike.com/devices/entities/devices/v2'
+            url = f'{tenant_id}/devices/entities/devices/v2'
             headers = {
                 'accept': 'application/json',
                 'Authorization': access_token,
@@ -95,8 +95,8 @@ def updateCrowdStrikeDeviceDatabase(total_crowdstrike_results):
                 'osPlatform': clean_data[0],
                 'endpointType': clean_data[1],
             }
-            if not clean_data[1] == 'Mobile':
-                continue
+            # if not clean_data[1] == 'Mobile':
+            #     continue
 
             obj, created = Device.objects.update_or_create(hostname=hostname, defaults=defaults)
             obj.integration.add(Integration.objects.get(integration_type="CrowdStrike Falcon"))
@@ -195,21 +195,17 @@ def updateCrowdStrikeDeviceDatabase(total_crowdstrike_results):
 ######################################## End Update/Create CrowdStrike Falcon Devices ########################################
 
 ######################################## Start Sync CrowdStrike Falcon ########################################
-def syncCrowdStrikeFalcon():
+def syncCrowdStrikeFalconDevice():
     data = Integration.objects.get(integration_type="CrowdStrike Falcon")
-    client_id = data.client_id
-    client_secret = data.client_secret
-    tenant_id = data.tenant_id
-    tenant_domain = data.tenant_domain
-    updateCrowdStrikeDeviceDatabase(getCrowdStrikeDevices(getCrowdStrikeAccessToken(client_id, client_secret, tenant_id)))
+    if not data.client_id or not data.client_secret or not data.tenant_id:
+        raise Exception("CrowdStrike Falcon integration is not properly configured. Missing client_id, client_secret, or tenant_id.")
+
+    access_token = getCrowdStrikeAccessToken(data.client_id, data.client_secret, data.tenant_id)
+    if isinstance(access_token, dict) and 'error' in access_token:
+        error_msg = str(access_token['error'])
+        raise Exception(f"Failed to get access token: {error_msg}")
+
+    updateCrowdStrikeDeviceDatabase(getCrowdStrikeDevices(access_token, data.tenant_id))
     data.last_synced_at = timezone.now()
     data.save()
-
-    print("CrowdStrike Falcon Synced Successfully")
     return True
-
-import threading
-
-def syncCrowdStrikeFalconBackground():
-    thread = threading.Thread(target=syncCrowdStrikeFalcon)
-    thread.start()

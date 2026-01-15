@@ -3,6 +3,7 @@ from apps.main.integrations.user_integrations.MicrosoftEntraID import syncMicros
 from apps.main.integrations.device_integrations.MicrosoftEntraID import syncMicrosoftEntraIDDevice
 from apps.main.integrations.device_integrations.MicrosoftIntune import syncMicrosoftIntuneDevice
 from apps.main.integrations.device_integrations.MicrosoftDefenderforEndpoint import syncMicrosoftDefenderforEndpointDevice
+from apps.main.integrations.device_integrations.CrowdStrikeFalcon import syncCrowdStrikeFalconDevice
 from apps.logger.views import createLog
 from apps.main.models import Notification
 from django.utils import timezone
@@ -101,10 +102,6 @@ def microsoftDefenderforEndpointDeviceSyncTask(user_email, ip_address, user_agen
         obj.status = "Success"
         obj.updated_at = timezone.now()
         obj.save()
-
-        obj.status = "Failure"
-        obj.updated_at = timezone.now()
-        obj.save()
         # messages.error(request, f'Microsoft Defender for Endpoint Device Integration Sync Failed: {e}')
     except Exception as e:
         createLog(None, "1505", "System Integration", "System Integration Event", "Superuser", True, "System Integration Sync", "Failure", f"Microsoft Defender for Endpoint Device - {e}", user_email, ip_address, user_agent, browser, operating_system)
@@ -112,6 +109,32 @@ def microsoftDefenderforEndpointDeviceSyncTask(user_email, ip_address, user_agen
         obj.updated_at = timezone.now()
         obj.save()
         # messages.error(request, f'Microsoft Defender for Endpoint Device Integration Sync Failed: {e}')
+
+
+@task(queue_name='default')
+def crowdStrikeFalconDeviceSyncTask(user_email, ip_address, user_agent, browser, operating_system):
+    """Run CrowdStrike Falcon device sync in a background thread."""
+    obj = Notification.objects.create(
+        title="CrowdStrike Falcon Device Integration Sync",
+        status="In Progress",
+        created_at=timezone.now(),
+        updated_at=timezone.now(),
+    )
+    try:
+        print("Syncing CrowdStrike Falcon devices class started")
+        syncCrowdStrikeFalconDevice()
+        print("Syncing CrowdStrike Falcon devices class completed")
+        createLog(None, "1505", "System Integration", "System Integration Event", "Superuser", True, "System Integration Sync", "Success", "CrowdStrike Falcon Device", user_email, ip_address, user_agent, browser, operating_system)
+        obj.status = "Success"
+        obj.updated_at = timezone.now()
+        obj.save()
+        # messages.info(request, 'CrowdStrike Falcon Device Integration Sync Success')
+    except Exception as e:
+        createLog(None, "1505", "System Integration", "System Integration Event", "Superuser", True, "System Integration Sync", "Failure", f"CrowdStrike Falcon Device - {e}", user_email, ip_address, user_agent, browser, operating_system)
+        obj.status = "Failure"
+        obj.updated_at = timezone.now()
+        obj.save()
+        # messages.error(request, f'CrowdStrike Falcon Device Integration Sync Failed: {e}')
 
 # @task(queue_name='default')
 # def microsoftEntraIDUserSyncTaskScheduled():

@@ -58,12 +58,22 @@
                                             <input type="text" class="form-control" name="client_id" placeholder="Client ID" value="{{deviceIntegrationStatus.5}}">
                                         </div>
                                         <div class="mb-3">
+                                            {% if deviceIntegrationStatus.0 == 'CrowdStrike Falcon' %}
+                                            <label class="form-label">Secret <span style="color: red;">*</span></label>
+                                            <input type="password" class="form-control" name="client_secret" placeholder="Secret" required>
+                                            {% else %}
                                             <label class="form-label">Client Secret <span style="color: red;">*</span></label>
                                             <input type="password" class="form-control" name="client_secret" placeholder="Client Secret" required>
+                                            {% endif %}
                                         </div>
                                         <div class="mb-3">
+                                            {% if deviceIntegrationStatus.0 == 'CrowdStrike Falcon' %}
+                                            <label class="form-label">Base URL <span style="color: red;">*</span></label>
+                                            <input type="text" class="form-control" name="tenant_id" placeholder="Base URL" value="{{deviceIntegrationStatus.6}}">
+                                            {% else %}
                                             <label class="form-label">Tenant ID <span style="color: red;">*</span></label>
                                             <input type="text" class="form-control" name="tenant_id" placeholder="Tenant ID" value="{{deviceIntegrationStatus.6}}">
+                                            {% endif %}
                                         </div>
                                         <div class="mb-3">
                                             <label class="form-label">Tenant Domain <span style="color: red;">*</span></label>
