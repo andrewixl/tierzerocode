@@ -2,6 +2,7 @@ from django_tasks import task
 from apps.main.integrations.user_integrations.MicrosoftEntraID import syncMicrosoftEntraIDUser
 from apps.main.integrations.device_integrations.MicrosoftEntraID import syncMicrosoftEntraIDDevice
 from apps.main.integrations.device_integrations.MicrosoftIntune import syncMicrosoftIntuneDevice
+from apps.main.integrations.device_integrations.MicrosoftDefenderforEndpoint import syncMicrosoftDefenderforEndpointDevice
 from apps.logger.views import createLog
 from apps.main.models import Notification
 from django.utils import timezone
@@ -82,6 +83,35 @@ def microsoftIntuneDeviceSyncTask(user_email, ip_address, user_agent, browser, o
         obj.updated_at = timezone.now()
         obj.save()
         # messages.error(request, f'Microsoft Intune Device Integration Sync Failed: {e}')
+
+@task(queue_name='default')
+def microsoftDefenderforEndpointDeviceSyncTask(user_email, ip_address, user_agent, browser, operating_system):
+    """Run Microsoft Defender for Endpoint device sync in a background thread."""
+    obj = Notification.objects.create(
+        title="Microsoft Defender for Endpoint Device Integration Sync",
+        status="In Progress",
+        created_at=timezone.now(),
+        updated_at=timezone.now(),
+    )
+    try:
+        print("Syncing Microsoft Defender for Endpoint devices class started")
+        syncMicrosoftDefenderforEndpointDevice()
+        print("Syncing Microsoft Defender for Endpoint devices class completed")
+        createLog(None, "1505", "System Integration", "System Integration Event", "Superuser", True, "System Integration Sync", "Success", "Microsoft Defender for Endpoint Device", user_email, ip_address, user_agent, browser, operating_system)
+        obj.status = "Success"
+        obj.updated_at = timezone.now()
+        obj.save()
+
+        obj.status = "Failure"
+        obj.updated_at = timezone.now()
+        obj.save()
+        # messages.error(request, f'Microsoft Defender for Endpoint Device Integration Sync Failed: {e}')
+    except Exception as e:
+        createLog(None, "1505", "System Integration", "System Integration Event", "Superuser", True, "System Integration Sync", "Failure", f"Microsoft Defender for Endpoint Device - {e}", user_email, ip_address, user_agent, browser, operating_system)
+        obj.status = "Failure"
+        obj.updated_at = timezone.now()
+        obj.save()
+        # messages.error(request, f'Microsoft Defender for Endpoint Device Integration Sync Failed: {e}')
 
 # @task(queue_name='default')
 # def microsoftEntraIDUserSyncTaskScheduled():

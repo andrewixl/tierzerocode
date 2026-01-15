@@ -927,7 +927,7 @@ def error500(request):
 
 ############################################################################################
 
-from apps.main.tasks import microsoftEntraIDUserSyncTask, microsoftEntraIDDeviceSyncTask, microsoftIntuneDeviceSyncTask
+from apps.main.tasks import microsoftEntraIDUserSyncTask, microsoftEntraIDDeviceSyncTask, microsoftIntuneDeviceSyncTask, microsoftDefenderforEndpointDeviceSyncTask
 
 @login_required
 def syncDevices(request, integration):
@@ -943,7 +943,10 @@ def syncDevices(request, integration):
 	elif integration == 'CrowdStrike-Falcon':
 		syncCrowdStrikeFalconBackground()
 	elif integration == 'microsoft-defender-for-endpoint':
-		syncMicrosoftDefenderforEndpointBackground(request)
+		print ("Syncing Microsoft Defender for Endpoint Devices")
+		messages.info(request, 'Microsoft Defender for Endpoint Device Integration Sync in Progress')
+		result = microsoftDefenderforEndpointDeviceSyncTask.enqueue(user_email, ip_address, user_agent, browser, operating_system)
+		print(f'Task ID: {result.id}')
 	elif integration == 'microsoft-entra-id':
 		print ("Syncing Microsoft Entra ID Devices")
 		messages.info(request, 'Microsoft Entra ID Device Integration Sync in Progress')

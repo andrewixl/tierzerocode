@@ -1,36 +1,38 @@
 # Import Dependencies
-import msal, requests, threading
+import requests, time
 from django.utils import timezone
 # Import Models
-from ...models import Integration, Device, MicrosoftDefenderforEndpointDeviceData, DeviceComplianceSettings
+from apps.main.models import Integration, Device, MicrosoftDefenderforEndpointDeviceData, DeviceComplianceSettings
 # Import Function Scripts
-from .ReusedFunctions import *
-from ....logger.views import createLog
+from apps.main.integrations.device_integrations.ReusedFunctions import *
+from apps.code_packages.microsoft import getMicrosoftGraphAccessToken
 
-######################################## Start Get Microsoft Defender for Endpoint Access Token ########################################
-def getMicrosoftDefenderforEndpointAccessToken(client_id, client_secret, tenant_id):
-    authority = f'https://login.microsoftonline.com/{tenant_id}'
-    scope = ['https://api.securitycenter.microsoft.com/.default']
-    client = msal.ConfidentialClientApplication(client_id, authority=authority, client_credential=client_secret)
-    
-    token_result = client.acquire_token_silent(scope, account=None)
-    if not token_result:
-        token_result = client.acquire_token_for_client(scopes=scope)
-    if not token_result or 'access_token' not in token_result:
-        raise Exception("Failed to acquire access token")
-
-    access_token = 'Bearer ' + token_result['access_token']
-    return access_token
-######################################## End Get Microsoft Defender for Endpoint Access Token ########################################
+def _fetch_paginated_data(url, headers, max_retries=5, retry_delay=1):
+    """Generic function to fetch paginated data with retry logic."""
+    results = []
+    while url:
+        for attempt in range(max_retries):
+            response = requests.get(url, headers=headers)
+            if response.status_code == 200:
+                data = response.json()
+                results.extend(data.get('value', []))
+                url = data.get('@odata.nextLink')
+                break
+            elif response.status_code == 429:  # Throttling error
+                retry_after = int(response.headers.get('Retry-After', retry_delay))
+                time.sleep(retry_after)
+            else:
+                raise Exception(f"Failed to fetch data: {response.status_code} - {response.text}")
+        else:
+            raise Exception("Max retries exceeded while fetching data.")
+    return results
 
 ######################################## Start Get Microsoft Defender for Endpoint Devices ########################################
 def getMicrosoftDefenderforEndpointDevices(access_token):
+    """Fetch all enabled Microsoft Defender for Endpoint devices."""
     url = 'https://api.securitycenter.microsoft.com/api/machines'
     headers = {'Authorization': access_token}
-    # Make a GET request to the provided url, passing the access token in a header
-    graph_result = requests.get(url=url, headers=headers)
-    # Print the results in a JSON format
-    return graph_result.json()
+    return _fetch_paginated_data(url, headers)
 ######################################## End Get Microsoft Defender for Endpoint Devices ########################################
 
 ######################################## Start Update/Create Microsoft Defender for Endpoint Devices ########################################
@@ -117,22 +119,18 @@ def updateMicrosoftDefenderforEndpointDeviceDatabase(json_data):
 ######################################## End Update/Create Microsoft Defender for Endpoint Devices ########################################
 
 ######################################## Start Sync Microsoft Defender for Endpoint ########################################
-def syncMicrosoftDefenderforEndpoint():
+def syncMicrosoftDefenderforEndpointDevice():
     data = Integration.objects.get(integration_type = "Microsoft Defender for Endpoint")
-    updateMicrosoftDefenderforEndpointDeviceDatabase(getMicrosoftDefenderforEndpointDevices(getMicrosoftDefenderforEndpointAccessToken(data.client_id, data.client_secret, data.tenant_id)))
+    if not data.client_id or not data.client_secret or not data.tenant_id:
+        raise Exception("Microsoft Defender for Endpoint integration is not properly configured. Missing client_id, client_secret, or tenant_id.")
+    
+    access_token = getMicrosoftGraphAccessToken(data.client_id, data.client_secret, data.tenant_id, ["https://api.securitycenter.microsoft.com/.default"])
+    if isinstance(access_token, dict) and 'error' in access_token:
+        error_msg = str(access_token['error'])
+        raise Exception(f"Failed to get access token: {error_msg}")
+    
+    updateMicrosoftDefenderforEndpointDeviceDatabase(getMicrosoftDefenderforEndpointDevices(access_token))
     data.last_synced_at = timezone.now()
     data.save()
     return True
 ######################################## End Sync Microsoft Defender for Endpoint ########################################
-
-######################################## Start Background Sync Microsoft Defender for Endpoint ########################################
-def syncMicrosoftDefenderforEndpointBackground(request):
-    def run():
-        try:
-            syncMicrosoftDefenderforEndpoint()
-            createLog(1505,"System Integration","System Integration Event","Superuser",True,"System Integration Sync","Success","Microsoft Defender for Endpoint",request.session['user_email'])
-        except Exception as e:
-            createLog(1505,"System Integration","System Integration Event","Superuser",True,"System Integration Sync","Failure",f"Microsoft Defender for Endpoint - {e}",request.session['user_email'])
-    thread = threading.Thread(target=run)
-    thread.start()
-######################################## End Background Sync Microsoft Defender for Endpoint ########################################
