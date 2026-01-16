@@ -1,6 +1,5 @@
 from django.shortcuts import redirect
 # from django.core.cache import cache
-# from .checks import checkSystemDeviceIntegrations, checkSystemUserIntegrations, checkUserCount, systemDeviceInitialSetup, systemUserInitialSetup
 from .checks import checkSystemDeviceIntegrations, checkSystemUserIntegrations, systemDeviceInitialSetup, systemUserInitialSetup
 
 class ModelVerificationMiddleware:
@@ -35,9 +34,6 @@ class ModelVerificationMiddleware:
         # Perform verification checks
         verification_status = self._perform_model_verification_checks()
         
-        # Redirect if verification failed
-        # if verification_status['user_count']:
-        #     return redirect('unclaimed')
         if verification_status['system_device_integrations']:
             systemDeviceInitialSetup()
         if verification_status['system_user_integrations']:
@@ -53,10 +49,6 @@ class ModelVerificationMiddleware:
             'system_device_integrations': False,
             'system_user_integrations': False,
         }
-
-        # Check user count
-        # if not checkUserCount():
-        #     results['user_count'] = True
         
         # Check system integrations
         if not checkSystemDeviceIntegrations():

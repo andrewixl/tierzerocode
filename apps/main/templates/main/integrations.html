@@ -54,11 +54,18 @@
                                     <form action="/update-integration/{{deviceIntegrationStatus.4}}" method="post">
                                         {% csrf_token %}
                                         <div class="mb-3">
+                                            {% if deviceIntegrationStatus.0 == 'Cloudflare Zero Trust' %}
+                                            <input type="text" class="form-control" name="client_id" placeholder="Not Required for Cloudflare Zero Trust" value="Not Required for Cloudflare Zero Trust" hidden>
+                                            {% else %}
                                             <label class="form-label">Client ID <span style="color: red;">*</span></label>
                                             <input type="text" class="form-control" name="client_id" placeholder="Client ID" value="{{deviceIntegrationStatus.5}}">
+                                            {% endif %}
                                         </div>
                                         <div class="mb-3">
-                                            {% if deviceIntegrationStatus.0 == 'CrowdStrike Falcon' %}
+                                            {% if deviceIntegrationStatus.0 == 'Cloudflare Zero Trust' %}
+                                            <label class="form-label">API Key <span style="color: red;">*</span></label>
+                                            <input type="password" class="form-control" name="client_secret" placeholder="API Key" required>
+                                            {% elif deviceIntegrationStatus.0 == 'CrowdStrike Falcon' %}
                                             <label class="form-label">Secret <span style="color: red;">*</span></label>
                                             <input type="password" class="form-control" name="client_secret" placeholder="Secret" required>
                                             {% else %}
@@ -67,7 +74,9 @@
                                             {% endif %}
                                         </div>
                                         <div class="mb-3">
-                                            {% if deviceIntegrationStatus.0 == 'CrowdStrike Falcon' %}
+                                            {% if deviceIntegrationStatus.0 == 'Tailscale' %}
+                                            <input type="text" class="form-control" name="tenant_id" placeholder="Not Required for Tailscale" value="Not Required for Tailscale" hidden>
+                                            {% elif deviceIntegrationStatus.0 == 'CrowdStrike Falcon' %}
                                             <label class="form-label">Base URL <span style="color: red;">*</span></label>
                                             <input type="text" class="form-control" name="tenant_id" placeholder="Base URL" value="{{deviceIntegrationStatus.6}}">
                                             {% else %}
@@ -76,8 +85,13 @@
                                             {% endif %}
                                         </div>
                                         <div class="mb-3">
+                                            {% if deviceIntegrationStatus.0 == 'Tailscale' %}
+                                            <label class="form-label">Tailnet ID <span style="color: red;">*</span></label>
+                                            <input type="text" class="form-control" name="tenant_domain" placeholder="example.com" value="{{deviceIntegrationStatus.7}}">
+                                            {% else %}
                                             <label class="form-label">Tenant Domain <span style="color: red;">*</span></label>
                                             <input type="text" class="form-control" name="tenant_domain" placeholder="example.com" value="{{deviceIntegrationStatus.7}}">
+                                            {% endif %}
                                         </div>
                                 </div>
                                 <div class="modal-footer">

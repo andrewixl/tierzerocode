@@ -1,23 +1,16 @@
 # Import Dependencies
-import msal, requests
-from datetime import datetime
+import requests
+from django.utils import timezone
 # Import Models
-from ...models import Integration, Device
+from apps.main.models import Integration, Device
 # Import Function Scripts
-from .ReusedFunctions import *
+from apps.main.integrations.device_integrations.ReusedFunctions import *
 
 ######################################## Start Get Cloudflare Zero Trust Devices ########################################
 def getCloudflareZeroTrustDevices(access_token, tenant_id):
-    # Set the URL for the request
     url = 'https://api.cloudflare.com/client/v4/accounts/' + tenant_id +'/devices'
-    # Set the headers for the request
-    headers = {
-        'Authorization': 'Bearer ' + access_token,
-        'Content-Type': 'application/json',
-    }
-    # Make a GET request to the provided url, passing the access token and content type in a header
+    headers = {'Authorization': 'Bearer ' + access_token,'Content-Type': 'application/json',}
     graph_result = requests.get(url=url, headers=headers)
-    # Return the results in a JSON format
     return graph_result.json()
 ######################################## End Get Cloudflare Zero Trust Devices ########################################
 
@@ -61,25 +54,13 @@ def updateCloudflareZeroTrustDeviceDatabase(json_data):
 ######################################## End Update/Create Cloudflare Zero Trust Devices ########################################
 
 ######################################## Start Sync Cloudflare Zero Trust ########################################
-def syncCloudflareZeroTrust():
-    try:
-        # Get the Cloudflare Zero Trust Integration data
-        data = Integration.objects.get(integration_type = "Cloudflare Zero Trust")
-        # Set the variables for the Cloudflare Zero Trust Integration
-        client_secret = data.client_secret
-        tenant_id = data.tenant_id
-        tenant_domain = data.tenant_domain
-        # Sync the Cloudflare Zero Trust Integration
-        updateCloudflareZeroTrustDeviceDatabase(getCloudflareZeroTrustDevices(client_secret, tenant_id))
-        # Update the last synced time
-        data.last_synced_at = datetime.now()
-        # Save the changes
-        data.save()
-        # Return True to indicate the sync was successful
-        return True
-    except Exception as e:
-        # Print the error
-        print(e)
-        # Return False to indicate the sync was unsuccessful
-        return False, e
+def syncCloudflareZeroTrustDevice():
+    data = Integration.objects.get(integration_type="Cloudflare Zero Trust")
+    if not data.client_secret or not data.tenant_id or not data.tenant_domain:
+        raise Exception("Cloudflare Zero Trust integration is not properly configured. Missing client_secret or tenant_domain.")
+
+    updateCloudflareZeroTrustDeviceDatabase(getCloudflareZeroTrustDevices(data.client_secret, data.tenant_id))
+    data.last_synced_at = timezone.now()
+    data.save()
+    return True
 ######################################## End Sync Cloudflare Zero Trust ########################################

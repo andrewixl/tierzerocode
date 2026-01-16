@@ -28,10 +28,10 @@ from ..code_packages.microsoft import getMicrosoftGraphAccessToken
 
 # Reused Data Sets
 #X6969
-integration_names = ['Cloudflare Zero Trust', 'CrowdStrike Falcon', 'Microsoft Defender for Endpoint', 'Microsoft Entra ID', 'Microsoft Intune', 'Sophos Central', 'Qualys']
+integration_names = ['Cloudflare Zero Trust', 'CrowdStrike Falcon', 'Microsoft Defender for Endpoint', 'Microsoft Entra ID', 'Microsoft Intune', 'Sophos Central', 'Qualys', 'Tailscale']
 user_integration_names = ['Microsoft Entra ID']
 #X6969
-integration_names_short = ['Cloudflare', 'CrowdStrike', 'Defender', 'Entra ID', 'Intune', 'Sophos', 'Qualys']
+integration_names_short = ['Cloudflare', 'CrowdStrike', 'Defender', 'Entra ID', 'Intune', 'Sophos', 'Qualys', 'Tailscale']
 user_integration_names_short = ['Entra ID']
 os_platforms = ['Android', 'iOS/iPadOS', 'MacOS', 'Ubuntu', 'Windows', 'Windows Server', 'Other']
 endpoint_types = ['Client', 'Mobile', 'Server', 'Other']

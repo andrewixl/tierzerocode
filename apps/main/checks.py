@@ -3,16 +3,11 @@ from django.contrib.auth.models import User
 from django.shortcuts import redirect
 
 # Configuration for required integrations and settings
-REQUIRED_SYSTEM_DEVICE_INTEGRATIONS = ['Microsoft Entra ID', 'Qualys', 'Sophos Central', 'Microsoft Intune', 'Microsoft Defender for Endpoint', 'CrowdStrike Falcon', 'Cloudflare Zero Trust']
-REQUIRED_SYSTEM_DEVICE_INTEGRATIONS_SHORT = ['Entra ID', 'Qualys', 'Sophos', 'Intune', 'Defender', 'CrowdStrike', 'Cloudflare']
+#X6969
+REQUIRED_SYSTEM_DEVICE_INTEGRATIONS = ['Microsoft Entra ID', 'Qualys', 'Sophos Central', 'Microsoft Intune', 'Microsoft Defender for Endpoint', 'CrowdStrike Falcon', 'Cloudflare Zero Trust', 'Tailscale']
+REQUIRED_SYSTEM_DEVICE_INTEGRATIONS_SHORT = ['Entra ID', 'Qualys', 'Sophos', 'Intune', 'Defender', 'CrowdStrike', 'Cloudflare', 'Tailscale']
 REQUIRED_SYSTEM_USER_INTEGRATIONS = ['Microsoft Entra ID']
 REQUIRED_SYSTEM_USER_INTEGRATIONS_SHORT = ['Entra ID']
-
-############################################################################################
-
-# def checkUserCount():
-# 	"""Check if there are any users in the database."""
-# 	return User.objects.count() > 0
 
 def checkSystemDeviceIntegrations():
 	"""Check if all required system integrations exist."""
@@ -25,8 +20,6 @@ def checkSystemUserIntegrations():
 	existing_user_integrations = set(Integration.objects.filter(integration_context="User").values_list('integration_type', flat=True))
 	required_user_integrations = set(REQUIRED_SYSTEM_USER_INTEGRATIONS)
 	return required_user_integrations.issubset(existing_user_integrations)
-
-############################################################################################
 
 def _get_image_paths(integration_name):
 	"""Helper function to generate image paths for integrations."""
@@ -69,8 +62,3 @@ def systemUserInitialSetup():
 			image_integration_path=image_paths['integration']
 		)
 	return redirect('index')
-
-############################################################################################
-
-# def getEnabledSystemIntegrations():
-#     return Integration.objects.filter(enabled=True)

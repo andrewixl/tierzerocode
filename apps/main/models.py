@@ -47,6 +47,7 @@ class DeviceComplianceSettings(models.Model):
     
 class Integration(models.Model):
     enabled = models.BooleanField(null=True, default=False)
+    #X6969
     INTEGRATION_CHOICES = (
         ("Cloudflare Zero Trust", "Cloudflare Zero Trust"),
         ("CrowdStrike Falcon", "CrowdStrike Falcon"),
@@ -54,7 +55,8 @@ class Integration(models.Model):
         ("Microsoft Entra ID", "Microsoft Entra ID"),
         ("Microsoft Intune", "Microsoft Intune"),
         ("Sophos Central", "Sophos Central"),
-        ("Qualys", "Qualys"),  
+        ("Qualys", "Qualys"),
+        ("Tailscale", "Tailscale"),
     )
     integration_type = models.CharField(max_length=35, choices=INTEGRATION_CHOICES, null=True)
     integration_type_short = models.CharField(max_length=35, null=True)
@@ -347,6 +349,34 @@ class QualysDevice(models.Model):
     firstFoundDate = models.CharField(max_length=200, null=True)
     ipAddress = models.CharField(max_length=200, null=True)
     parentDevice = models.ForeignKey("Device", on_delete=models.CASCADE, null=True, related_name='integrationQualys')
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
+
+    def __str__(self):
+        return self.hostname
+
+class TailscaleDeviceData(models.Model):
+    id = models.CharField(max_length=50, primary_key=True)
+    nodeId = models.CharField(max_length=50, null=True)
+    hostname = models.CharField(max_length=200, null=True)
+    user = models.EmailField(max_length=50, null=True)
+    name = models.CharField(max_length=200, null=True)
+    clientVersion = models.CharField(max_length=200, null=True)
+    updateAvailable = models.BooleanField(null=True)
+    os = models.CharField(max_length=50, null=True)
+    created = models.DateTimeField(null=True)
+    connectedToControl = models.BooleanField(null=True)
+    lastSeen = models.DateTimeField(null=True)
+    expires = models.DateTimeField(null=True)
+    keyExpiryDisabled = models.BooleanField(null=True)
+    authorized = models.BooleanField(null=True)
+    isExternal = models.BooleanField(null=True)
+    machineKey = models.CharField(max_length=200, null=True)
+    nodeKey = models.CharField(max_length=200, null=True)
+    tailnetLockKey = models.CharField(max_length=200, null=True)
+    blocksIncomingConnections = models.BooleanField(null=True)
+    tailnetLockError = models.CharField(max_length=200, null=True)
+    parentDevice = models.ForeignKey("Device", on_delete=models.CASCADE, null=True, related_name='integrationTailscale')
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
 

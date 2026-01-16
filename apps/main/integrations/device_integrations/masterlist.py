@@ -1,4 +1,4 @@
-from ...models import Device
+from apps.main.models import Device
 
 def updateMasterList(devices, tenant_domain):
     # Sets Tenant Domain Suffix for DNS Computer Names

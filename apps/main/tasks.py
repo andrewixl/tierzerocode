@@ -4,6 +4,8 @@ from apps.main.integrations.device_integrations.MicrosoftEntraID import syncMicr
 from apps.main.integrations.device_integrations.MicrosoftIntune import syncMicrosoftIntuneDevice
 from apps.main.integrations.device_integrations.MicrosoftDefenderforEndpoint import syncMicrosoftDefenderforEndpointDevice
 from apps.main.integrations.device_integrations.CrowdStrikeFalcon import syncCrowdStrikeFalconDevice
+from apps.main.integrations.device_integrations.Tailscale import syncTailscaleDevice
+from apps.main.integrations.device_integrations.CloudflareZeroTrust import syncCloudflareZeroTrustDevice
 from apps.logger.views import createLog
 from apps.main.models import Notification
 from django.utils import timezone
@@ -29,6 +31,10 @@ def deviceIntegrationSyncTask(user_email, ip_address, user_agent, browser, opera
             syncMicrosoftDefenderforEndpointDevice()
         elif integration == 'crowdstrike-falcon':
             syncCrowdStrikeFalconDevice()
+        elif integration == 'tailscale':
+            syncTailscaleDevice()
+        elif integration == 'cloudflare-zero-trust':
+            syncCloudflareZeroTrustDevice()
         print(f"Syncing {integration_clean} devices class completed")
 
         createLog(None, "1505", "System Integration", "System Integration Event", "Superuser", True, "System Integration Sync", "Success", f"{integration_clean} Device", user_email, ip_address, user_agent, browser, operating_system)

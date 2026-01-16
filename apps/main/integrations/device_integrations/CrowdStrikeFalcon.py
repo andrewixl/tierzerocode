@@ -95,8 +95,6 @@ def updateCrowdStrikeDeviceDatabase(total_crowdstrike_results):
                 'osPlatform': clean_data[0],
                 'endpointType': clean_data[1],
             }
-            # if not clean_data[1] == 'Mobile':
-            #     continue
 
             obj, created = Device.objects.update_or_create(hostname=hostname, defaults=defaults)
             obj.integration.add(Integration.objects.get(integration_type="CrowdStrike Falcon"))
