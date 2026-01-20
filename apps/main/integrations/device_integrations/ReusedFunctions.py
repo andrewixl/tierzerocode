@@ -43,6 +43,7 @@ def complianceSettings(os_platform):
             'Microsoft Intune': settings.microsoft_intune,
             'Sophos Central': settings.sophos_central,
             'Qualys': settings.qualys,
+            'Tailscale': settings.tailscale,
         }
 	except DeviceComplianceSettings.DoesNotExist:
 		return {}

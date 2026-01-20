@@ -75,6 +75,7 @@ def complianceSettings(os_platform):
             'Microsoft Intune': settings.microsoft_intune,
             'Sophos Central': settings.sophos_central,
             'Qualys': settings.qualys,
+            'Tailscale': settings.tailscale,
         }
     except DeviceComplianceSettings.DoesNotExist:
         return {}
@@ -99,11 +100,18 @@ def updateCrowdStrikeDeviceDatabase(total_crowdstrike_results):
             obj, created = Device.objects.update_or_create(hostname=hostname, defaults=defaults)
             obj.integration.add(Integration.objects.get(integration_type="CrowdStrike Falcon"))
 
-            enabled_integrations = Integration.objects.filter(enabled=True)
+            # Check compliance: device must have ALL required integrations
             compliance_settings = complianceSettings(clean_data[0])
-            endpoint_data = [obj.integration.filter(integration_type=integration.integration_type).exists() for integration in enabled_integrations]
-            endpoint_match = [compliance_settings.get(integration.integration_type) for integration in enabled_integrations]
-            obj.compliant = endpoint_data == endpoint_match
+            if compliance_settings:
+                # Get all required integrations (where value is True)
+                required_integrations = [name for name, is_required in compliance_settings.items() if is_required]
+                # Get device's current integrations
+                device_integrations = set(obj.integration.values_list('integration_type', flat=True))
+                # Device is compliant if it has all required integrations
+                obj.compliant = all(integration_name in device_integrations for integration_name in required_integrations)
+            else:
+                # No compliance requirements = compliant
+                obj.compliant = True
             obj.save()
 
             defaults_all = {

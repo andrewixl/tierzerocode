@@ -18,6 +18,7 @@ class ComplianceSettingsManager:
                 'Microsoft Intune': settings.microsoft_intune,
                 'Sophos Central': settings.sophos_central,
                 'Qualys': settings.qualys,
+                'Tailscale': settings.tailscale,
             }
         except DeviceComplianceSettings.DoesNotExist:
             return {}
@@ -39,6 +40,7 @@ class ComplianceSettingsManager:
                     'Microsoft Intune': setting.microsoft_intune,
                     'Sophos Central': setting.sophos_central,
                     'Qualys': setting.qualys,
+                    'Tailscale': setting.tailscale,
                 },
                 'created_at': setting.created_at,
                 'updated_at': setting.updated_at,
@@ -62,6 +64,7 @@ class ComplianceSettingsManager:
                 'Microsoft Intune': 'microsoft_intune',
                 'Sophos Central': 'sophos_central',
                 'Qualys': 'qualys',
+                'Tailscale': 'tailscale',
             }
             
             # Update each integration setting
@@ -90,6 +93,7 @@ class ComplianceSettingsManager:
             'Microsoft Intune': 'microsoft_intune',
             'Sophos Central': 'sophos_central',
             'Qualys': 'qualys',
+            'Tailscale': 'tailscale',
         }
         
         for setting in DeviceComplianceSettings.objects.all():
@@ -121,6 +125,7 @@ class ComplianceSettingsManager:
             setting.microsoft_intune = True
             setting.sophos_central = True
             setting.qualys = True
+            setting.tailscale = True
             setting.save()
             updated_count += 1
         
@@ -145,6 +150,7 @@ class ComplianceSettingsManager:
             'Microsoft Intune': 0,
             'Sophos Central': 0,
             'Qualys': 0,
+            'Tailscale': 0,
         }
         
         for setting in DeviceComplianceSettings.objects.all():
@@ -187,6 +193,11 @@ class ComplianceSettingsManager:
             if setting.qualys:
                 integration_counts['Qualys'] += 1
                 platform_integrations.append('Qualys')
+                has_requirements = True
+            
+            if setting.tailscale:
+                integration_counts['Tailscale'] += 1
+                platform_integrations.append('Tailscale')
                 has_requirements = True
             
             if has_requirements:

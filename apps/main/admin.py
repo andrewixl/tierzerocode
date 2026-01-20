@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import (
+from apps.main.models import (
     Device,
     Integration,
     DeviceComplianceSettings,
@@ -9,6 +9,8 @@ from .models import (
     MicrosoftDefenderforEndpointDeviceData,
     CrowdStrikeFalconDeviceData,
     SophosCentralDeviceData,
+    TailscaleDeviceData,
+    CloudflareZeroTrustDeviceData,
     Notification,
     PersonaGroup,
     Persona,
@@ -27,11 +29,13 @@ admin.site.register(DeviceComplianceSettings)
 
 # Device Models
 admin.site.register(Device)
+admin.site.register(CloudflareZeroTrustDeviceData)
 admin.site.register(CrowdStrikeFalconDeviceData)
 admin.site.register(MicrosoftDefenderforEndpointDeviceData)
 admin.site.register(MicrosoftEntraIDDeviceData)
 admin.site.register(MicrosoftIntuneDeviceData)
 admin.site.register(SophosCentralDeviceData)
+admin.site.register(TailscaleDeviceData)
 admin.site.register(UserData, UserDataAdmin)
 admin.site.register(Persona)
 admin.site.register(PersonaGroup)

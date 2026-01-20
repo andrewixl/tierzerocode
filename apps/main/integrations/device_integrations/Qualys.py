@@ -2,7 +2,7 @@
 import requests, json, xmltodict
 from datetime import datetime
 # Import Models
-from ...models import QualysDevice, Integration
+from ...models import QualysDevice, Integration, Device, DeviceComplianceSettings
 # Import Functions Scripts
 from .masterlist import *
 from .ReusedFunctions import *
@@ -95,20 +95,28 @@ def updateQualysDeviceDatabase(json_data):
 
         clean_data = cleanAPIData(os_platform)     
         
-        # Check if the device already exists, if not, create it
-        if not Device.objects.filter(hostname=hostname).exists():
-            device = Device.objects.create(
-                # id=device_id,
-                hostname=hostname,
-                osPlatform=clean_data[0],
-                endpointType = clean_data[1],
-                # firstFoundDate=first_found_date,
-                # ipAddress=ip_address
-            )
-            device.integration.add(Integration.objects.get(integration_type = "Qualys"))
+        defaults = {
+            'hostname': hostname,
+            'osPlatform': clean_data[0],
+            'endpointType': clean_data[1],
+        }
+        
+        device, created = Device.objects.update_or_create(hostname=hostname, defaults=defaults)
+        device.integration.add(Integration.objects.get(integration_type="Qualys"))
+        
+        # Check compliance: device must have ALL required integrations
+        compliance_settings = complianceSettings(clean_data[0])
+        if compliance_settings:
+            # Get all required integrations (where value is True)
+            required_integrations = [name for name, is_required in compliance_settings.items() if is_required]
+            # Get device's current integrations
+            device_integrations = set(device.integration.values_list('integration_type', flat=True))
+            # Device is compliant if it has all required integrations
+            device.compliant = all(integration_name in device_integrations for integration_name in required_integrations)
         else:
-            device = Device.objects.get(hostname=hostname)
-            device.integration.add(Integration.objects.get(integration_type = "Qualys"))
+            # No compliance requirements = compliant
+            device.compliant = True
+        device.save()
 
 def syncQualys():
     data = Integration.objects.get(integration_type = "Qualys")

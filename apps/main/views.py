@@ -65,6 +65,7 @@ def complianceSettings(os_platform):
             'Microsoft Intune': settings.microsoft_intune,
             'Sophos Central': settings.sophos_central,
             'Qualys': settings.qualys,
+            'Tailscale': settings.tailscale,
         }
 	except DeviceComplianceSettings.DoesNotExist:
 		return {}
@@ -487,7 +488,7 @@ def generalSettings(request):
 	# Import the new utilities
 	from .utils import ComplianceSettingsManager, DeviceComplianceChecker
 	from django.contrib.auth.models import User
-	from ..authhandler.models import SSOIntegration
+	from apps.authhandler.models import SSOIntegration
 	
 	# Get compliance settings using the new manager
 	compliance_settings = ComplianceSettingsManager.get_all_compliance_settings()
@@ -545,7 +546,8 @@ def update_compliance(request, id):
 			'Microsoft Entra Id': 'Microsoft Entra Id',
 			'Microsoft Intune': 'Microsoft Intune',
 			'Sophos Central': 'Sophos Central',
-			'Qualys': 'Qualys'
+			'Qualys': 'Qualys',
+			'Tailscale': 'Tailscale'
 		}
 		
 		for integration_name, field_name in integration_mapping.items():
@@ -652,7 +654,7 @@ def masterList(request):
 		for integration in enabled_integrations:
 			integration_type = integration.integration_type
 			compliance_setting = compliance_settings.get(integration_type)
-			if compliance_setting is False:
+			if compliance_setting is False or compliance_setting is None:
 				endpoint_data.append(None)
 			else:
 				is_enabled = endpoint.integration.filter(id=integration.id).exists()
@@ -937,7 +939,7 @@ def syncDevices(request, integration):
 	user_agent = request.META.get('HTTP_USER_AGENT', 'unknown') if hasattr(request, 'META') else 'unknown'
 	browser = request.META.get('HTTP_USER_AGENT', 'unknown') if hasattr(request, 'META') else 'unknown'
 	operating_system = request.META.get('HTTP_USER_AGENT', 'unknown') if hasattr(request, 'META') else 'unknown'
-	integration_clean = integration.replace("-", " ").title()
+	integration_clean = integration.replace("-", " ").title()	
 	print (f'Syncing {integration_clean} Devices')
 	messages.info(request, f'{integration_clean} Device Integration Sync in Progress')
 	result = deviceIntegrationSyncTask.enqueue(user_email, ip_address, user_agent, browser, operating_system, integration, integration_clean)
@@ -1022,7 +1024,8 @@ def bulk_update_compliance_api(request):
             'microsoft_entra_id': 'Microsoft Entra Id',
             'microsoft_intune': 'Microsoft Intune',
             'sophos_central': 'Sophos Central',
-            'qualys': 'Qualys'
+            'qualys': 'Qualys',
+            'tailscale': 'Tailscale'
         }
         
         for field_name, integration_name in integration_mapping.items():

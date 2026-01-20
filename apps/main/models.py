@@ -39,8 +39,13 @@ class DeviceComplianceSettings(models.Model):
     microsoft_intune = models.BooleanField(null=True)
     sophos_central = models.BooleanField(null=True)
     qualys = models.BooleanField(null=True)
+    tailscale = models.BooleanField(null=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
+
+    class Meta:
+        verbose_name = "Device Compliance Setting"
+        verbose_name_plural = "Device Compliance Settings"
 
     def __str__(self):
         return self.os_platform
@@ -79,14 +84,29 @@ class Integration(models.Model):
     def __str__(self):
         return self.integration_type 
 
-class CloudflareZeroTrustDevice(models.Model):
+class CloudflareZeroTrustDeviceData(models.Model):
     id = models.CharField(max_length=200, primary_key=True)
+    key = models.CharField(max_length=200, null=True)
     hostname = models.CharField(max_length=200, null=True)
     osPlatform = models.CharField(max_length=200, null=True)
     endpointType = models.CharField(max_length=25, null=True)
+    version = models.CharField(max_length=200, null=True)
+    updated = models.DateTimeField(null=True)
+    created = models.DateTimeField(null=True)
+    last_seen = models.DateTimeField(null=True)
+    model = models.CharField(max_length=200, null=True)
+    os_version = models.CharField(max_length=200, null=True)
+    manufacturer = models.CharField(max_length=200, null=True)
+    ip = models.CharField(max_length=200, null=True)
+    gateway_device_id = models.CharField(max_length=200, null=True)
+    serial_number = models.CharField(max_length=200, null=True)
     parentDevice = models.ForeignKey("Device", on_delete=models.CASCADE, null=True, related_name='integrationCloudflareZeroTrust')
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
+
+    class Meta:
+        verbose_name = "Cloudflare Zero Trust Device"
+        verbose_name_plural = "Cloudflare Zero Trust Devices"
 
     def __str__(self):
         return self.hostname
@@ -176,6 +196,10 @@ class CrowdStrikeFalconDeviceData(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
 
+    class Meta:
+        verbose_name = "CrowdStrike Falcon Device"
+        verbose_name_plural = "CrowdStrike Falcon Devices"
+
     def __str__(self):
         return self.hostname
 
@@ -214,6 +238,10 @@ class MicrosoftEntraIDDeviceData(models.Model):
     parentDevice = models.ForeignKey("Device", on_delete=models.CASCADE, null=True, related_name='integrationMicrosoftEntraID')
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
+
+    class Meta:
+        verbose_name = "Microsoft Entra ID Device"
+        verbose_name_plural = "Microsoft Entra ID Devices"
 
     def __str__(self):
         return self.displayName 
@@ -277,6 +305,10 @@ class MicrosoftIntuneDeviceData(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
 
+    class Meta:
+        verbose_name = "Microsoft Intune Device"
+        verbose_name_plural = "Microsoft Intune Devices"
+
     def __str__(self):
         return self.deviceName
     
@@ -299,6 +331,10 @@ class SophosCentralDeviceData(models.Model):
     parentDevice = models.ForeignKey("Device", on_delete=models.CASCADE, null=True, related_name='integrationSophos')
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
+
+    class Meta:
+        verbose_name = "Sophos Central Device"
+        verbose_name_plural = "Sophos Central Devices"
 
     def __str__(self):
         return self.hostname
@@ -338,6 +374,10 @@ class MicrosoftDefenderforEndpointDeviceData(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
 
+    class Meta:
+        verbose_name = "Microsoft Defender for Endpoint Device"
+        verbose_name_plural = "Microsoft Defender for Endpoint Devices"
+
     def __str__(self):
         return self.computerDnsName
 
@@ -351,6 +391,10 @@ class QualysDevice(models.Model):
     parentDevice = models.ForeignKey("Device", on_delete=models.CASCADE, null=True, related_name='integrationQualys')
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
+
+    class Meta:
+        verbose_name = "Qualys Device"
+        verbose_name_plural = "Qualys Devices"
 
     def __str__(self):
         return self.hostname
@@ -379,6 +423,10 @@ class TailscaleDeviceData(models.Model):
     parentDevice = models.ForeignKey("Device", on_delete=models.CASCADE, null=True, related_name='integrationTailscale')
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
+
+    class Meta:
+        verbose_name = "Tailscale Device"
+        verbose_name_plural = "Tailscale Devices"
 
     def __str__(self):
         return self.hostname

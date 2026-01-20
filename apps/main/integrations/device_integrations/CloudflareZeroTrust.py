@@ -2,7 +2,7 @@
 import requests
 from django.utils import timezone
 # Import Models
-from apps.main.models import Integration, Device
+from apps.main.models import Integration, Device, CloudflareZeroTrustDeviceData
 # Import Function Scripts
 from apps.main.integrations.device_integrations.ReusedFunctions import *
 
@@ -11,46 +11,76 @@ def getCloudflareZeroTrustDevices(access_token, tenant_id):
     url = 'https://api.cloudflare.com/client/v4/accounts/' + tenant_id +'/devices'
     headers = {'Authorization': 'Bearer ' + access_token,'Content-Type': 'application/json',}
     graph_result = requests.get(url=url, headers=headers)
+    print(graph_result.json())
     return graph_result.json()
 ######################################## End Get Cloudflare Zero Trust Devices ########################################
-
+def complianceSettings(os_platform):
+    try:
+        settings = DeviceComplianceSettings.objects.get(os_platform=os_platform)
+        return {
+            'Cloudflare Zero Trust': settings.cloudflare_zero_trust,
+            'CrowdStrike Falcon': settings.crowdstrike_falcon,
+            'Microsoft Defender for Endpoint': settings.microsoft_defender_for_endpoint,
+            'Microsoft Entra ID': settings.microsoft_entra_id,
+            'Microsoft Intune': settings.microsoft_intune,
+            'Sophos Central': settings.sophos_central,
+            'Qualys': settings.qualys,
+            'Tailscale': settings.tailscale,
+        }
+    except DeviceComplianceSettings.DoesNotExist:
+        return {}
 ######################################## Start Update/Create Cloudflare Zero Trust Devices ########################################
-def updateCloudflareZeroTrustDeviceDatabase(json_data):
-    # Loop through the data provided
-    for device_data in json_data['result']:
-        # Set the hostname and osPlatform variables
-        hostname = device_data['name'].lower()
-        os_platform = device_data['device_type']
-        # [osPlatform_clean, endpointType]
+def updateCloudflareZeroTrustDeviceDatabase(total_cloudflare_zero_trust_results):
+    devices = total_cloudflare_zero_trust_results.get('result', [])
+    for device_data in devices:
+        hostname = (device_data.get('name') or device_data.get('hostname') or '').lower()
+        if not hostname:
+            continue  # Skip devices without a name or hostname
+        os_platform = device_data.get('device_type') or device_data.get('os')
+
         clean_data = cleanAPIData(os_platform)
-        # Prepare data for updating/creating device
         defaults = {
             'hostname': hostname,
             'osPlatform': clean_data[0],
             'endpointType': clean_data[1],
         }
-        # Update or Create the Device object
-        obj, created = Device.objects.update_or_create(hostname=hostname, defaults=defaults)
 
-        enabled_integrations = Integration.objects.filter(enabled=True)
-        os_platform = clean_data[0]
-        compliance_settings = complianceSettings(os_platform)
-        endpoint_data = [
-            obj.integration.filter(integration_type=integration.integration_type).exists()
-            for integration in enabled_integrations
-        ]
-        endpoint_match = [
-            compliance_settings.get(integration.integration_type)
-            for integration in enabled_integrations
-        ]
-        if endpoint_data == endpoint_match:
-            obj.compliant = True
+        obj, created = Device.objects.update_or_create(hostname=hostname, defaults=defaults)
+        obj.integration.add(Integration.objects.get(integration_type="Cloudflare Zero Trust"))
+
+        # Check compliance: device must have ALL required integrations
+        compliance_settings = complianceSettings(clean_data[0])
+        if compliance_settings:
+            # Get all required integrations (where value is True)
+            required_integrations = [name for name, is_required in compliance_settings.items() if is_required]
+            # Get device's current integrations
+            device_integrations = set(obj.integration.values_list('integration_type', flat=True))
+            # Device is compliant if it has all required integrations
+            obj.compliant = all(integration_name in device_integrations for integration_name in required_integrations)
         else:
-            obj.compliant = False
+            # No compliance requirements = compliant
+            obj.compliant = True
         obj.save()
-        
-        # Add the Cloudflare Zero Trust Integration to the Device object
-        obj.integration.add(Integration.objects.get(integration_type = "Cloudflare Zero Trust"))
+
+        defaults_all = {
+            'id': device_data['id'],
+            'key': device_data.get('key'),
+            'hostname': hostname,
+            'osPlatform': clean_data[0],
+            'endpointType': clean_data[1],
+            'version': device_data.get('version'),
+            'updated': device_data.get('updated'),
+            'created': device_data.get('created'),
+            'last_seen': device_data.get('last_seen'),
+            'model': device_data.get('model'),
+            'os_version': device_data.get('os_version'),
+            'manufacturer': device_data.get('manufacturer'),
+            'ip': device_data.get('ip'),
+            'gateway_device_id': device_data.get('gateway_device_id'),
+            'serial_number': device_data.get('serial_number'),
+            'parentDevice': obj
+        }
+        CloudflareZeroTrustDeviceData.objects.update_or_create(id=device_data['id'], defaults=defaults_all)  
 ######################################## End Update/Create Cloudflare Zero Trust Devices ########################################
 
 ######################################## Start Sync Cloudflare Zero Trust ########################################

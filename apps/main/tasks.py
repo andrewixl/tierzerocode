@@ -24,7 +24,7 @@ def deviceIntegrationSyncTask(user_email, ip_address, user_agent, browser, opera
         #X6969
         print(f"Syncing {integration_clean} devices class started")
         if integration == 'microsoft-entra-id':
-            syncMicrosoftEntraIDUser()
+            syncMicrosoftEntraIDDevice()
         elif integration == 'microsoft-intune':
             syncMicrosoftIntuneDevice()
         elif integration == 'microsoft-defender-for-endpoint':
