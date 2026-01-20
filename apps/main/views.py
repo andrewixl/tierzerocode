@@ -1,5 +1,6 @@
 # Standard library imports
 import re, json
+from datetime import date, datetime
 
 # Third-party imports
 from django.contrib import messages
@@ -9,7 +10,7 @@ from django.core.paginator import Paginator
 from django.db.models import Count, Prefetch, Q
 from django.forms.models import model_to_dict
 from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
 
 # Local imports
@@ -54,21 +55,54 @@ def getEnabledIntegrations():
 def getEnabledUserIntegrations():
 	return Integration.objects.filter(enabled=True, integration_context="User")
 
+def _compliance_settings_to_dict(settings):
+	"""Build {integration_type: value} from a DeviceComplianceSettings instance. Used by complianceSettings and masterList bulk load."""
+	return {
+		'Cloudflare Zero Trust': settings.cloudflare_zero_trust,
+		'CrowdStrike Falcon': settings.crowdstrike_falcon,
+		'Microsoft Defender for Endpoint': settings.microsoft_defender_for_endpoint,
+		'Microsoft Entra ID': settings.microsoft_entra_id,
+		'Microsoft Intune': settings.microsoft_intune,
+		'Sophos Central': settings.sophos_central,
+		'Qualys': settings.qualys,
+		'Tailscale': settings.tailscale,
+	}
+
 def complianceSettings(os_platform):
 	try:
 		settings = DeviceComplianceSettings.objects.get(os_platform=os_platform)
-		return {
-            'Cloudflare Zero Trust': settings.cloudflare_zero_trust,
-            'CrowdStrike Falcon': settings.crowdstrike_falcon,
-            'Microsoft Defender for Endpoint': settings.microsoft_defender_for_endpoint,
-            'Microsoft Entra ID': settings.microsoft_entra_id,
-            'Microsoft Intune': settings.microsoft_intune,
-            'Sophos Central': settings.sophos_central,
-            'Qualys': settings.qualys,
-            'Tailscale': settings.tailscale,
-        }
+		return _compliance_settings_to_dict(settings)
 	except DeviceComplianceSettings.DoesNotExist:
 		return {}
+
+def _model_to_display_dict(instance):
+	"""Convert a model instance to a dict with camelCase keys turned into 'Title Case' for display. Returns {} if instance is None.
+	Datetime/date values are converted to ISO strings to avoid OverflowError in Django's localtime when rendering
+	edge-case values (e.g. year 1, year 9999) from APIs like Microsoft Intune."""
+	if instance is None:
+		return {}
+	d = model_to_dict(instance)
+	result = {}
+	for k, v in d.items():
+		key = re.sub(r'([a-z])([A-Z])', r'\1 \2', k).title()
+		if isinstance(v, (datetime, date)):
+			try:
+				result[key] = v.isoformat()
+			except (OverflowError, ValueError):
+				result[key] = str(v)
+		else:
+			result[key] = v
+	return result
+
+# (integration_type, related_name on Device, filter field matching device.hostname, context key)
+INTEGRATION_DEVICE_FETCH = (
+	('CrowdStrike Falcon', 'integrationCrowdStrikeFalcon', 'hostname', 'crowdstrike_device'),
+	('Microsoft Defender for Endpoint', 'integrationMicrosoftDefenderForEndpoint', 'computerDnsName', 'defender_device'),
+	('Microsoft Entra ID', 'integrationMicrosoftEntraID', 'displayName', 'entra_device'),
+	('Microsoft Intune', 'integrationIntune', 'deviceName', 'intune_device'),
+	('Sophos Central', 'integrationSophos', 'hostname', 'sophos_device'),
+	('Tailscale', 'integrationTailscale', 'hostname', 'tailscale_device'),
+)
 
 @login_required
 def test(request):
@@ -569,97 +603,64 @@ def update_compliance(request, id):
 
 @login_required
 def deviceData(request, id):
-	# X6969
-	# Creates the device object with related data preloaded from each integration
-	devices =  Device.objects.filter(id=id).prefetch_related('integrationCloudflareZeroTrust', 'integrationCrowdStrikeFalcon', 'integrationMicrosoftDefenderForEndpoint', 'integrationMicrosoftEntraID', 'integrationIntune', 'integrationSophos', 'integrationQualys')
-	# Selects the 1st and only device since prefetch_related required a filter
-	device =  devices[0]
-	# Gets current integrations for the device
-	integrations = device.integration.all()
-	# Creates a list of the integration types for the device
-	integration_list = []
-	for integration in integrations:
-		integration_list.append(integration.integration_type)
-	
-	cloudflare_device = None
-	crowdstrike_device = None
-	defender_device = None
-	entra_device = None
-	intune_device = None
-	sophos_device = None
-	qualys_device = None
-	for integration in integration_list:
-		# X6969
-		# if integration == 'Cloudflare Zero Trust':
-		# 	device.integrationCloudflareZeroTrust.get(deviceName=device.hostname.upper())
-		if integration == 'CrowdStrike Falcon':
-			crowdstrike_device_list = model_to_dict((device.integrationCrowdStrikeFalcon.filter(hostname=device.hostname))[0])
-			crowdstrike_device = {}
-			for key in crowdstrike_device_list:
-				crowdstrike_device[re.sub(r'([a-z])([A-Z])', r'\1 \2', key).title()] = crowdstrike_device_list[key]
-		elif integration == 'Microsoft Defender for Endpoint':
-			defender_device_list = model_to_dict((device.integrationMicrosoftDefenderForEndpoint.filter(computerDnsName=device.hostname))[0])
-			defender_device = {}
-			for key in defender_device_list:
-				defender_device[re.sub(r'([a-z])([A-Z])', r'\1 \2', key).title()] = defender_device_list[key]
-		elif integration == 'Microsoft Entra ID':
-			entra_device_list = model_to_dict((device.integrationMicrosoftEntraID.filter(displayName=device.hostname))[0])
-			entra_device = {}
-			for key in entra_device_list:
-				entra_device[re.sub(r'([a-z])([A-Z])', r'\1 \2', key).title()] = entra_device_list[key]
-		elif integration == 'Microsoft Intune':
-			intune_device_list = model_to_dict((device.integrationIntune.filter(deviceName=device.hostname))[0])
-			intune_device = {}
-			for key in intune_device_list:
-				intune_device[re.sub(r'([a-z])([A-Z])', r'\1 \2', key).title()] = intune_device_list[key]
-		elif integration == 'Sophos Central':
-			sophos_device_list = model_to_dict((device.integrationSophos.filter(hostname=device.hostname))[0])
-			sophos_device = {}
-			for key in sophos_device_list:
-				sophos_device[re.sub(r'([a-z])([A-Z])', r'\1 \2', key).title()] = sophos_device_list[key]
-		# elif integration == 'Qualys':
-		# 	device.integrationQualys.get(deviceName=device.hostname.upper())
+	prefetch_relations = [
+		'integrationCloudflareZeroTrust', 'integrationCrowdStrikeFalcon', 'integrationMicrosoftDefenderForEndpoint',
+		'integrationMicrosoftEntraID', 'integrationIntune', 'integrationSophos', 'integrationQualys', 'integrationTailscale',
+	]
+	device = get_object_or_404(Device.objects.prefetch_related(*prefetch_relations), id=id)
 
 	integrations = device.integration.all()
-	
+	integration_types = [i.integration_type for i in integrations]
+
+	integration_device_data = {ctx_key: None for _, __, ___, ctx_key in INTEGRATION_DEVICE_FETCH}
+	for itype, related_name, filter_field, ctx_key in INTEGRATION_DEVICE_FETCH:
+		if itype not in integration_types:
+			continue
+		qs = getattr(device, related_name)
+		rec = qs.filter(**{filter_field: device.hostname}).first()
+		integration_device_data[ctx_key] = _model_to_display_dict(rec)
+
 	context = {
-		'page':"device-data",
+		'page': 'device-data',
 		'enabled_integrations': getEnabledIntegrations(),
 		'enabled_user_integrations': getEnabledUserIntegrations(),
 		'notifications': Notification.objects.all(),
-		'device':device,
-		'ints' : integrations,
-		# X6969
-		"crowdstrike_device":crowdstrike_device,
-		"defender_device":defender_device,
-		'entra_device':entra_device,
-		'intune_device':intune_device,
-		'sophos_device':sophos_device,
+		'device': device,
+		'ints': integrations,
+		**integration_device_data,
 	}
-	return render( request, 'main/device-data.html', context)
+	return render(request, 'main/device-data.html', context)
 
 ############################################################################################
 
 @login_required
 def masterList(request):
-	enabled_integrations = getEnabledIntegrations()
+	enabled_integrations = list(getEnabledIntegrations())
 	endpoint_list = []
 
-	endpoints = Device.objects.prefetch_related(Prefetch('integration', queryset=Integration.objects.filter(enabled=True))).all()
+	# Prefetch device integrations only (matches getEnabledIntegrations); .only('id') since we only need membership
+	endpoints = Device.objects.prefetch_related(Prefetch('integration', queryset=Integration.objects.filter(enabled=True, integration_context="Device").only('id'))).all()
+
+	# Load all compliance settings once to avoid N DB lookups (one per endpoint)
+	compliance_by_platform = {
+		s.os_platform: _compliance_settings_to_dict(s)
+		for s in DeviceComplianceSettings.objects.all()
+	}
+
 	for endpoint in endpoints:
 		endpoint_data = [endpoint]
-		os_platform = endpoint.osPlatform
-		compliance_settings = complianceSettings(os_platform)
-	
+		compliance_settings = compliance_by_platform.get(endpoint.osPlatform, {})
+
+		# Use prefetched relation: one set of IDs per endpoint, O(1) lookups
+		endpoint_integration_ids = {i.id for i in endpoint.integration.all()}
+
 		for integration in enabled_integrations:
-			integration_type = integration.integration_type
-			compliance_setting = compliance_settings.get(integration_type)
+			compliance_setting = compliance_settings.get(integration.integration_type)
 			if compliance_setting is False or compliance_setting is None:
 				endpoint_data.append(None)
 			else:
-				is_enabled = endpoint.integration.filter(id=integration.id).exists()
-				endpoint_data.append(is_enabled)
-		
+				endpoint_data.append(integration.id in endpoint_integration_ids)
+
 		endpoint_list.append(endpoint_data)
 
 	context = {
