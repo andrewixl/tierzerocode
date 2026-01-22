@@ -32,6 +32,7 @@ urlpatterns = [
     path('update-integration/<int:id>', views.updateIntegration, name='update-integration'),
     path('sync-<str:integration>-devices', views.syncDevices, name='sync-devices'),
     path('sync-<str:integration>-users', views.syncUsers, name='sync-users'),
+    path('test-connection/<int:id>', views.testConnection, name='test-connection'),
     
     # ============================================================================
     # Compliance & Settings

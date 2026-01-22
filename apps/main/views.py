@@ -23,7 +23,7 @@ from .integrations.device_integrations.Qualys import *
 from .integrations.device_integrations.SophosCentral import *
 from .integrations.user_integrations.MicrosoftEntraID import *
 from .models import Device, DeviceComplianceSettings, Integration, Notification, UserData, PersonaGroup, Persona
-from ..code_packages.microsoft import getMicrosoftGraphAccessToken
+from ..code_packages.microsoft import getMicrosoftGraphAccessToken, testMicrosoftGraphConnection
 
 ############################################################################################
 
@@ -865,18 +865,18 @@ def integrations(request):
 	for integration_name in integration_names:
 		integration = Integration.objects.get(integration_type = integration_name, integration_context = "Device")
 		if integration.client_secret:
-			deviceIntegrationStatuses.append([integration.integration_type, integration.image_integration_path, integration.enabled, True, integration.id, integration.client_id, integration.tenant_id, integration.tenant_domain, integration.last_synced_at])
+			deviceIntegrationStatuses.append([integration.integration_type, integration.image_integration_path, integration.enabled, True, integration.id, integration.client_id, integration.tenant_id, integration.tenant_domain, integration.last_synced_at, integration.last_connection_test_at])
 		else:
-			deviceIntegrationStatuses.append([integration.integration_type, integration.image_integration_path, integration.enabled, False, integration.id, integration.client_id, integration.tenant_id, integration.tenant_domain, integration.last_synced_at])
+			deviceIntegrationStatuses.append([integration.integration_type, integration.image_integration_path, integration.enabled, False, integration.id, integration.client_id, integration.tenant_id, integration.tenant_domain, integration.last_synced_at, integration.last_connection_test_at])
 	
 		userIntegrationStatuses = []
 
 	for integration_name in user_integration_names:
 		integration = Integration.objects.get(integration_type = integration_name, integration_context = "User")
 		if integration.client_secret:
-			userIntegrationStatuses.append([integration.integration_type, integration.image_integration_path, integration.enabled, True, integration.id, integration.client_id, integration.tenant_id, integration.tenant_domain, integration.last_synced_at])
+			userIntegrationStatuses.append([integration.integration_type, integration.image_integration_path, integration.enabled, True, integration.id, integration.client_id, integration.tenant_id, integration.tenant_domain, integration.last_synced_at, integration.last_connection_test_at])
 		else:
-			userIntegrationStatuses.append([integration.integration_type, integration.image_integration_path, integration.enabled, False, integration.id, integration.client_id, integration.tenant_id, integration.tenant_domain, integration.last_synced_at])
+			userIntegrationStatuses.append([integration.integration_type, integration.image_integration_path, integration.enabled, False, integration.id, integration.client_id, integration.tenant_id, integration.tenant_domain, integration.last_synced_at, integration.last_connection_test_at])
 	context = {
 		'page':'integrations',
 		'notifications': Notification.objects.all(),
@@ -929,8 +929,6 @@ def error500(request):
 
 ############################################################################################
 
-# from apps.main.tasks import microsoftEntraIDUserSyncTask, microsoftEntraIDDeviceSyncTask, microsoftIntuneDeviceSyncTask, microsoftDefenderforEndpointDeviceSyncTask, crowdStrikeFalconDeviceSyncTask, sophosDeviceSyncTask, qualysDeviceSyncTask, cloudflareZeroTrustDeviceSyncTask
-
 from apps.main.tasks import deviceIntegrationSyncTask, microsoftEntraIDUserSyncTask
 
 @login_required
@@ -963,6 +961,29 @@ def syncUsers(request, integration):
 		print(f'Task ID: {result.id}')
 	print("Redirecting to Integrations")
 	return redirect('/integrations')
+
+@login_required
+def testConnection(request, id):
+	integration = Integration.objects.get(id=id)
+	if integration.integration_type == 'Microsoft Entra ID':
+		required_permissions = ['Directory.Read.All', 'Device.Read.All', 'Directory.ReadWrite.All']
+		scope = ["https://graph.microsoft.com/.default"]
+	elif integration.integration_type == 'Microsoft Intune':
+		required_permissions = ['DeviceManagementManagedDevices.Read.All']
+		scope = ["https://graph.microsoft.com/.default"]
+	else:
+		required_permissions = []
+		scope = []
+	access_token = getMicrosoftGraphAccessToken(integration.client_id, integration.client_secret, integration.tenant_id, scope)
+	connection_test = testMicrosoftGraphConnection(access_token, required_permissions)
+	if connection_test['has_required_permissions']:
+		messages.success(request, f'{integration.integration_type} Connection Test Passed')
+		integration.last_connection_test_at = datetime.now()
+		integration.save()
+		return redirect('/integrations')
+	else:
+		messages.error(request, f'{integration.integration_type} Connection Test Failed. Please check your integration settings or permissions.')
+		return redirect('/integrations')
 
 ############################################################################################
 # API Views for Settings Management

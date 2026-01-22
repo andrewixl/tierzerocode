@@ -1,5 +1,5 @@
-import msal
-import requests
+from modulefinder import test
+import msal, jwt, requests
 from django.utils import timezone
 from datetime import timedelta
 # from apps.main.models import GeneralSetting
@@ -18,6 +18,39 @@ def getMicrosoftGraphAccessToken(client_id, client_secret, tenant_id, scope):
         return access_token
     except Exception as e:        
         return {'error': e}
+
+def testMicrosoftGraphConnection(access_token, required_permissions):
+    try:
+        token = access_token.replace('Bearer ', '') if access_token.startswith('Bearer ') else access_token
+        # Decode without verification to read the token contents
+        payload = jwt.decode(token, options={"verify_signature": False})
+        # Extract scopes - can be in 'scp' (delegated tokens) or 'roles' (application tokens)
+        # 'scp' can be a string (space-separated) or list, 'roles' is typically a list
+        scp = payload.get('scp', '')
+        roles_claim = payload.get('roles', [])
+        
+        if scp:
+            if isinstance(scp, str):
+                roles = scp.split()
+            elif isinstance(scp, list):
+                roles = scp
+            else:
+                roles = []
+        # Fallback to roles claim if scp is not available
+        elif roles_claim:
+            if isinstance(roles_claim, list):
+                roles = roles_claim
+            elif isinstance(roles_claim, str):
+                roles = roles_claim.split()
+            else:
+                roles = []
+        else:
+            roles = []
+        has_required = any(permission in roles for permission in required_permissions)
+        return {'roles': roles, 'has_required_permissions': has_required}
+    except Exception as e:
+        print(f"Error decoding access token: {str(e)}")
+        return {'roles': [], 'has_required_permissions': False}
 
 class MicrosoftEntraIDUser:
     def __init__(self, userPrincipalName):

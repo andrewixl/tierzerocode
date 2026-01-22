@@ -29,6 +29,9 @@
                                     <a class="dropdown-item" href="/disable-integration/{{deviceIntegrationStatus.4}}">Disable Integration</a>
                                     <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#{{deviceIntegrationStatus.0|slugify}}_modal_device" href="#">Configure Integration</a>
                                     {% if deviceIntegrationStatus.3 %}
+                                    {% if deviceIntegrationStatus.0 == 'Microsoft Entra ID' or deviceIntegrationStatus.0 == 'Microsoft Intune' %}
+                                    <a class="dropdown-item" href="/test-connection/{{deviceIntegrationStatus.4}}">Test Connection</a>
+                                    {% endif %}
                                     <a class="dropdown-item" href="/sync-{{deviceIntegrationStatus.0|slugify}}-devices">Sync Integration</a>
                                     {% endif %}
                                     {% else %}
@@ -40,7 +43,10 @@
                         <h5 class="card-title mb-0">{{deviceIntegrationStatus.0}}</h5>
                         <div class="badge bg-{{ deviceIntegrationStatus.2|yesno:"success,danger" }} my-2">{{ deviceIntegrationStatus.2|yesno:"Enabled,Disabled" }}</div>
                         <div class="badge bg-{{ deviceIntegrationStatus.3|yesno:"success,danger" }} my-2">{{ deviceIntegrationStatus.3|yesno:"Configured,Not Configured" }}</div>
-                        <p>Last Sync: {{deviceIntegrationStatus.8}}</p>
+                        <p>Last Successful Sync: {{deviceIntegrationStatus.8}}</p>
+                        {% if deviceIntegrationStatus.0 == 'Microsoft Entra ID' or deviceIntegrationStatus.0 == 'Microsoft Intune' %}
+                        <p>Last Successful Test: {{deviceIntegrationStatus.9}}</p>
+                        {% endif %}
                     </div>
                     <!-- Configure Integration Modal -->
                     <div class="modal fade" id="{{deviceIntegrationStatus.0|slugify}}_modal_device" tabindex="-1" role="dialog" aria-hidden="true">

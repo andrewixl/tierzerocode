@@ -1,11 +1,14 @@
 # Import Dependencies
 import requests, time
+import jwt
 from django.utils import timezone
 # Import Models
 from apps.main.models import Integration, Device, MicrosoftEntraIDDeviceData, DeviceComplianceSettings
 # Import Function Scripts
 from apps.main.integrations.device_integrations.ReusedFunctions import *
 from apps.code_packages.microsoft import getMicrosoftGraphAccessToken
+
+######################################## Start Generic Function to Fetch Paginated Data ########################################
 
 def _fetch_paginated_data(url, headers, max_retries=5, retry_delay=1):
     """Generic function to fetch paginated data with retry logic."""
