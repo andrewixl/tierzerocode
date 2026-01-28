@@ -6,20 +6,28 @@ from apps.main.integrations.device_integrations.MicrosoftDefenderforEndpoint imp
 from apps.main.integrations.device_integrations.CrowdStrikeFalcon import syncCrowdStrikeFalconDevice
 from apps.main.integrations.device_integrations.Tailscale import syncTailscaleDevice
 from apps.main.integrations.device_integrations.CloudflareZeroTrust import syncCloudflareZeroTrustDevice
+from apps.main.integrations.device_integrations.Qualys import syncQualys
+from apps.main.integrations.device_integrations.SophosCentral import syncSophos
 from apps.logger.views import createLog
 from apps.main.models import Notification
 from django.utils import timezone
 # from django.contrib import messages
 
 @task(queue_name='default')
-def deviceIntegrationSyncTask(user_email, ip_address, user_agent, browser, operating_system, integration, integration_clean):
+def deviceIntegrationSyncTask(user_email, ip_address, user_agent, browser, operating_system, integration, integration_clean, notification_id=None):
     """Run Device Integration Sync in a Background Thread."""
-    obj = Notification.objects.create(
-		title=f"{integration_clean} Device Integration Sync",
-		status="In Progress",
-		created_at=timezone.now(),
-		updated_at=timezone.now(),
-	)
+    if notification_id:
+        obj = Notification.objects.get(id=notification_id)
+        obj.status = "In Progress"
+        obj.updated_at = timezone.now()
+        obj.save()
+    else:
+        obj = Notification.objects.create(
+            title=f"{integration_clean} Device Integration Sync",
+            status="In Progress",
+            created_at=timezone.now(),
+            updated_at=timezone.now(),
+        )
     try:
         #X6969
         print(f"Syncing {integration_clean} devices class started")
@@ -35,6 +43,10 @@ def deviceIntegrationSyncTask(user_email, ip_address, user_agent, browser, opera
             syncTailscaleDevice()
         elif integration == 'cloudflare-zero-trust':
             syncCloudflareZeroTrustDevice()
+        elif integration == 'qualys':
+            syncQualys()
+        elif integration == 'sophos-central':
+            syncSophos()
         print(f"Syncing {integration_clean} devices class completed")
 
         createLog(None, "1505", "System Integration", "System Integration Event", "Superuser", True, "System Integration Sync", "Success", f"{integration_clean} Device", user_email, ip_address, user_agent, browser, operating_system)
@@ -49,14 +61,20 @@ def deviceIntegrationSyncTask(user_email, ip_address, user_agent, browser, opera
 
 
 @task(queue_name='default')
-def microsoftEntraIDUserSyncTask(user_email, ip_address, user_agent, browser, operating_system):
+def microsoftEntraIDUserSyncTask(user_email, ip_address, user_agent, browser, operating_system, notification_id=None):
     """Run Microsoft Entra ID user sync in a background thread."""
-    obj = Notification.objects.create(
-		title="Microsoft Entra ID User Integration Sync",
-		status="In Progress",
-		created_at=timezone.now(),
-		updated_at=timezone.now(),
-	)
+    if notification_id:
+        obj = Notification.objects.get(id=notification_id)
+        obj.status = "In Progress"
+        obj.updated_at = timezone.now()
+        obj.save()
+    else:
+        obj = Notification.objects.create(
+            title="Microsoft Entra ID User Integration Sync",
+            status="In Progress",
+            created_at=timezone.now(),
+            updated_at=timezone.now(),
+        )
     try:
         print("Syncing Microsoft Entra ID users class started")
         syncMicrosoftEntraIDUser()

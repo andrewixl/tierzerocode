@@ -1,17 +1,17 @@
 from django.core.management.base import BaseCommand
 from django.utils import timezone
-from apps.main.tasks import microsoftEntraIDUserSyncTask
+from apps.main.tasks import deviceIntegrationSyncTask
 from apps.main.models import Notification
 import logging
 
 logger = logging.getLogger(__name__)
 
 class Command(BaseCommand):
-    help = 'Sync Microsoft Entra ID users automatically'
+    help = 'Sync Tailscale devices automatically'
 
     def handle(self, *args, **options):
-        """Enqueue the Microsoft Entra ID user sync task"""
-        self.stdout.write('Enqueueing Microsoft Entra ID user sync task...')
+        """Enqueue the Tailscale device sync task"""
+        self.stdout.write('Enqueueing Tailscale device sync task...')
         
         # System values for management command execution
         user_email = 'system@tierzerocode.com'
@@ -19,10 +19,12 @@ class Command(BaseCommand):
         user_agent = 'Django Management Command'
         browser = 'System'
         operating_system = 'System'
+        integration = 'tailscale'
+        integration_clean = 'Tailscale'
         
         # Create notification for tracking
         notification = Notification.objects.create(
-            title="Microsoft Entra ID User Integration Sync (Automated)",
+            title=f"{integration_clean} Device Integration Sync (Automated)",
             status="Queued",
             created_at=timezone.now(),
             updated_at=timezone.now(),
@@ -30,13 +32,13 @@ class Command(BaseCommand):
         
         try:
             # Enqueue the task with notification ID
-            result = microsoftEntraIDUserSyncTask.enqueue(
-                user_email, ip_address, user_agent, browser, operating_system, notification.id
+            result = deviceIntegrationSyncTask.enqueue(
+                user_email, ip_address, user_agent, browser, operating_system, integration, integration_clean, notification.id
             )
             
             self.stdout.write(
                 self.style.SUCCESS(
-                    f'Microsoft Entra ID user sync task enqueued successfully! Task ID: {result.id}'
+                    f'Tailscale device sync task enqueued successfully! Task ID: {result.id}'
                 )
             )
             
@@ -46,11 +48,11 @@ class Command(BaseCommand):
             notification.updated_at = timezone.now()
             notification.save()
             
-            error_msg = f'Failed to enqueue Microsoft Entra ID user sync task: {str(e)}'
+            error_msg = f'Failed to enqueue Tailscale device sync task: {str(e)}'
             self.stdout.write(
                 self.style.ERROR(error_msg)
             )
             logger.error(error_msg)
             
             # Re-raise the exception for proper error handling
-            raise 
+            raise
