@@ -55,6 +55,7 @@ def deviceIntegrationSyncTask(user_email, ip_address, user_agent, browser, opera
         obj.save()
     except Exception as e:
         createLog(None, "1505", "System Integration", "System Integration Event", "Superuser", True, "System Integration Sync", "Failure", f"{integration_clean} Device - {e}", user_email, ip_address, user_agent, browser, operating_system)
+        print(f"Error syncing {integration_clean} devices: {e}")
         obj.status = "Failure"
         obj.updated_at = timezone.now()
         obj.save()

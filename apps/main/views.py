@@ -941,7 +941,13 @@ def syncDevices(request, integration):
 	integration_clean = integration.replace("-", " ").title()	
 	print (f'Syncing {integration_clean} Devices')
 	messages.info(request, f'{integration_clean} Device Integration Sync in Progress')
-	result = deviceIntegrationSyncTask.enqueue(user_email, ip_address, user_agent, browser, operating_system, integration, integration_clean)
+	notification = Notification.objects.create(
+		title=f"{integration_clean} Device Integration Sync",
+		status="Queued",
+		created_at=timezone.now(),
+		updated_at=timezone.now(),
+	)
+	result = deviceIntegrationSyncTask.enqueue(user_email, ip_address, user_agent, browser, operating_system, integration, integration_clean, notification.id)
 	print(f'Task ID: {result.id}')
 	print("Redirecting to Integrations")
 	return redirect('/integrations')
