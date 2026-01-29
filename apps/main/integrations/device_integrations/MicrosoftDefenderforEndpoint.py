@@ -6,6 +6,7 @@ from apps.main.models import Integration, Device, MicrosoftDefenderforEndpointDe
 # Import Function Scripts
 from apps.main.integrations.device_integrations.ReusedFunctions import *
 from apps.code_packages.microsoft import getMicrosoftGraphAccessToken
+from apps.main.integrations.device_integrations.ReusedFunctions import complianceSettings
 
 def _truncate_string(value, max_length=200):
     """Truncate string to max_length if it exceeds the limit."""
@@ -45,22 +46,6 @@ def getMicrosoftDefenderforEndpointDevices(access_token):
 ######################################## End Get Microsoft Defender for Endpoint Devices ########################################
 
 ######################################## Start Update/Create Microsoft Defender for Endpoint Devices ########################################
-def complianceSettings(os_platform):
-    try:
-        settings = DeviceComplianceSettings.objects.get(os_platform=os_platform)
-        return {
-            'Cloudflare Zero Trust': settings.cloudflare_zero_trust,
-            'CrowdStrike Falcon': settings.crowdstrike_falcon,
-            'Microsoft Defender for Endpoint': settings.microsoft_defender_for_endpoint,
-            'Microsoft Entra ID': settings.microsoft_entra_id,
-            'Microsoft Intune': settings.microsoft_intune,
-            'Sophos Central': settings.sophos_central,
-            'Qualys': settings.qualys,
-            'Tailscale': settings.tailscale,
-        }
-    except DeviceComplianceSettings.DoesNotExist:
-        return {}
-    
 def updateMicrosoftDefenderforEndpointDeviceDatabase(json_data):
     for device_data in json_data:
         if device_data.get('onboardingStatus') == 'Onboarded' and not device_data.get('healthStatus') == 'Inactive':

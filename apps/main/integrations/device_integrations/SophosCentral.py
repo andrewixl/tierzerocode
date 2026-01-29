@@ -5,6 +5,7 @@ from datetime import datetime
 from ...models import Integration, Device, SophosCentralDeviceData, DeviceComplianceSettings
 # Import Functions Scripts
 from .ReusedFunctions import *
+from apps.main.integrations.device_integrations.ReusedFunctions import complianceSettings
 
 ######################################## Start Get Sophos Central Access Token ########################################
 def getSophosAccessToken(client_id, client_secret):
@@ -38,22 +39,6 @@ def getSophosDevices(access_token, tenant_id):
 ######################################## End Get Sophos Central Devices ########################################
 
 ######################################## Start Update/Create Sophos Central Devices ########################################
-def complianceSettings(os_platform):
-    try:
-        settings = DeviceComplianceSettings.objects.get(os_platform=os_platform)
-        return {
-            'Cloudflare Zero Trust': settings.cloudflare_zero_trust,
-            'CrowdStrike Falcon': settings.crowdstrike_falcon,
-            'Microsoft Defender for Endpoint': settings.microsoft_defender_for_endpoint,
-            'Microsoft Entra ID': settings.microsoft_entra_id,
-            'Microsoft Intune': settings.microsoft_intune,
-            'Sophos Central': settings.sophos_central,
-            'Qualys': settings.qualys,
-            'Tailscale': settings.tailscale,
-        }
-    except DeviceComplianceSettings.DoesNotExist:
-        return {}
-
 def updateSophosDeviceDatabase(json_data):
     for device_data in json_data['items']:
         hostname = device_data.get('hostname').lower()

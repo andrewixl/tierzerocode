@@ -5,6 +5,7 @@ from django.utils import timezone
 from apps.main.models import Integration, Device, TailscaleDeviceData, DeviceComplianceSettings
 # Import Function Scripts
 from apps.main.integrations.device_integrations.ReusedFunctions import *
+from apps.main.integrations.device_integrations.ReusedFunctions import complianceSettings
 
 ######################################## Start Get Tailscale Access Token ########################################
 def getTailscaleAccessToken(client_id, client_secret):
@@ -29,22 +30,6 @@ def getTailscaleDevices(access_token, tenant_domain):
 ######################################## End Get CrowdStrike Falcon Devices ########################################
 
 ######################################## Start Update/Create CrowdStrike Falcon Devices ########################################
-def complianceSettings(os_platform):
-    try:
-        settings = DeviceComplianceSettings.objects.get(os_platform=os_platform)
-        return {
-            'Cloudflare Zero Trust': settings.cloudflare_zero_trust,
-            'CrowdStrike Falcon': settings.crowdstrike_falcon,
-            'Microsoft Defender for Endpoint': settings.microsoft_defender_for_endpoint,
-            'Microsoft Entra ID': settings.microsoft_entra_id,
-            'Microsoft Intune': settings.microsoft_intune,
-            'Sophos Central': settings.sophos_central,
-            'Qualys': settings.qualys,
-            'Tailscale': settings.tailscale,
-        }
-    except DeviceComplianceSettings.DoesNotExist:
-        return {}
-
 def updateTailscaleDeviceDatabase(total_tailscale_results):
     for device_data in total_tailscale_results:
         hostname = device_data.get('hostname').lower()

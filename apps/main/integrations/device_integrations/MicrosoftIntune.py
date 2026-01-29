@@ -6,6 +6,7 @@ from apps.main.models import Integration, Device, MicrosoftIntuneDeviceData, Dev
 # Import Function Scripts
 from apps.main.integrations.device_integrations.ReusedFunctions import *
 from apps.code_packages.microsoft import getMicrosoftGraphAccessToken
+from apps.main.integrations.device_integrations.ReusedFunctions import complianceSettings
 
 def _fetch_paginated_data(url, headers, max_retries=5, retry_delay=1):
     """Generic function to fetch paginated data with retry logic."""
@@ -37,21 +38,6 @@ def getMicrosoftIntuneDevices(access_token):
 ######################################## End Get Microsoft Intune Devices ########################################
 
 ######################################## Start Update/Create Microsoft Intune Devices ########################################
-def complianceSettings(os_platform):
-    try:
-        settings = DeviceComplianceSettings.objects.get(os_platform=os_platform)
-        return {
-            'Cloudflare Zero Trust': settings.cloudflare_zero_trust,
-            'CrowdStrike Falcon': settings.crowdstrike_falcon,
-            'Microsoft Defender for Endpoint': settings.microsoft_defender_for_endpoint,
-            'Microsoft Entra ID': settings.microsoft_entra_id,
-            'Microsoft Intune': settings.microsoft_intune,
-            'Sophos Central': settings.sophos_central,
-            'Qualys': settings.qualys,
-            'Tailscale': settings.tailscale,
-        }
-    except DeviceComplianceSettings.DoesNotExist:
-        return {}
 
 def updateMicrosoftIntuneDeviceDatabase(json_data):
     for device_data in json_data:
