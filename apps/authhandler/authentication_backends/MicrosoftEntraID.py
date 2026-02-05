@@ -15,7 +15,7 @@ class MicrosoftEntraIDBackend(BaseBackend):
             # Get Entra ID configuration
             sso_config = self._get_sso_config()
             if not sso_config or not sso_config.enabled:
-                createLog(request.session['session_id'],'1503', 'Claim ID', 'Authentication', "Unauthenticated", False, 'Microsoft Entra ID Login', 'Failure', "Microsoft Entra ID SSO is not enabled or configured", None, getattr(request, 'META', {}).get('REMOTE_ADDR'), getattr(request, 'META', {}).get('HTTP_USER_AGENT'), None, None)
+                createLog(request, '1503', 'Claim ID', 'Authentication', "Unauthenticated", False, 'Microsoft Entra ID Login', 'Failure', additional_data="Microsoft Entra ID SSO is not enabled or configured")
                 return None
             
             try:
@@ -32,7 +32,7 @@ class MicrosoftEntraIDBackend(BaseBackend):
             
             # Log authentication failure
             if hasattr(request, 'session') and 'session_id' in request.session:
-                createLog(request.session['session_id'],'1502', 'Claim ID', 'Authentication', "Unauthenticated", False, 'Microsoft Entra ID Login', 'Failure', f"Authentication failed: {str(e)}", None, getattr(request, 'META', {}).get('REMOTE_ADDR'), getattr(request, 'META', {}).get('HTTP_USER_AGENT'), None, None)
+                createLog(request, '1502', 'Claim ID', 'Authentication', "Unauthenticated", False, 'Microsoft Entra ID Login', 'Failure', additional_data=f"Authentication failed: {str(e)}")
             return None
     
     def get_user(self, user_id):
