@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'import_export',
     'django_tasks', # Django tasks
     'django_rq', # Django RQ
 ]
@@ -258,3 +259,45 @@ for host in ALLOWED_HOSTS:
 
 # Remove duplicates while preserving order
 CSRF_TRUSTED_ORIGINS = list(dict.fromkeys(CSRF_TRUSTED_ORIGINS))
+
+
+# Define the log path dynamically, just like in your script
+if os.environ.get("DJANGO_DEV"):
+    AUDIT_LOG_PATH = 'tierzerocode.log'
+else:
+    AUDIT_LOG_PATH = os.path.join('/app', 'tierzerocode.log')
+    
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        # We use a 'raw' formatter because you are building the key=value string yourself
+        'raw_message': {
+            'format': '{message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'raw_message',
+        },
+        'audit_file': {
+            'level': 'INFO',
+            # using WatchedFileHandler is better for Linux/Docker than standard FileHandler
+            'class': 'logging.handlers.WatchedFileHandler', 
+            'filename': AUDIT_LOG_PATH,
+            'formatter': 'raw_message',
+        },
+    },
+    'loggers': {
+        # This is the specific logger for your audit function
+        'tierzerocode_audit': {
+            'handlers': ['console', 'audit_file'],
+            'level': 'INFO',
+            'propagate': False, # Don't send this to the main django logs
+        },
+    },
+}
