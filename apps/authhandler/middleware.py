@@ -13,32 +13,12 @@ class AuthenticationMiddleware:
                 request.session.save()
                 
                 # Success Log (Code 1105)
-                createLog(
-                    request, 
-                    '1105', 
-                    'User Authentication Handler', 
-                    'User Session Event', 
-                    "System",    # Changed from "Admin" to "System" since the user isn't logged in yet
-                    True, 
-                    'User Session Creation', 
-                    'Success', 
-                    additional_data='Session Creation Success'
-                )
+                createLog(request, '1105', 'User Authentication Handler', 'User Session Event', "System", True, 'User Session Creation', 'Success', additional_data='Session Creation Success')
 
             except Exception as e:
                 # Failure Log (Code 1106)
                 # We catch the error so we can log it, then re-raise it or handle it gracefully
-                createLog(
-                    request, 
-                    '1106', 
-                    'User Authentication Handler', 
-                    'User Session Event', 
-                    "System", 
-                    True, 
-                    'User Session Creation', 
-                    'Failure', 
-                    additional_data='Session Creation Failed (' + str(e) + ')'
-                )
+                createLog(request, '1106', 'User Authentication Handler', 'User Session Event', "System", True, 'User Session Creation', 'Failure', additional_data='Session Creation Failed (' + str(e) + ')')
                 # Optional: You might want to return a 500 error page here if session creation is critical
 
         # --- 2. DEFINE EXEMPT PATHS ---

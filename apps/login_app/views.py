@@ -26,7 +26,6 @@ def unclaimed(request):
 def login_page(request):
     if request.user.is_authenticated:
         return redirect('index')
-    startSession(request)
     enabled_sso = getEnabledSSOIntegrations()
     context = {
         'sso': bool(enabled_sso),
