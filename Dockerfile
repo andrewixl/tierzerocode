@@ -1,5 +1,5 @@
 # Stage 1: Build dependencies
-FROM hub.awbtech.org/library/python:3-alpine3.23-dev AS builder
+FROM hub.awbtech.org/dhi-registry/python@sha256:b0a15e59dc843717d926924ce31c22e21968470cb8249a95b8e77bca71f45a3d AS builder
 
 WORKDIR /app
 
@@ -17,7 +17,7 @@ RUN pip install --upgrade pip && \
 
 
 # Stage 2: Production image
-FROM hub.awbtech.org/library/python:3-alpine3.23-dev
+FROM hub.awbtech.org/dhi-registry/python@sha256:b0a15e59dc843717d926924ce31c22e21968470cb8249a95b8e77bca71f45a3d
 
 # Create user and directories in one layer to keep image size down
 RUN adduser -D -s /bin/sh appuser && \
