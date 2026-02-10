@@ -1,56 +1,53 @@
-# Stage 1: Base build stage
+# Stage 1: Build dependencies
 FROM hub.awbtech.org/library/python:3-alpine3.23-dev AS builder
 
 WORKDIR /app
 
-# Set environment variables to optimize Python
+# Prevent Python from writing .pyc files and enable unbuffered logging
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
-# Upgrade pip and install dependencies
+# Install build dependencies (add gcc/musl-dev if your requirements need to compile C extensions)
+RUN apk add --no-cache gcc musl-dev libffi-dev
+
+# Upgrade pip and build wheels for all dependencies
 RUN pip install --upgrade pip
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip wheel --no-cache-dir --no-deps --wheel-dir /app/wheels -r requirements.txt
 
-# Copy site-packages to a known location for production stage
-RUN SITE_PKG=$(python3 -c "import site; print(site.getsitepackages()[0])") && \
-    cp -r "$SITE_PKG" /tmp/builder-packages
- 
-# Stage 2: Production stage
+
+# Stage 2: Production image
 FROM hub.awbtech.org/library/python:3-alpine3.23-dev
- 
+
+# Create a clean app directory and user
 RUN adduser -D -s /bin/sh appuser && \
-   mkdir /app && \
-   chown -R appuser /app
- 
-# Copy Python dependencies from builder stage
-COPY --from=builder /tmp/builder-packages /tmp/builder-packages
-RUN SITE_PKG=$(python3 -c "import site; print(site.getsitepackages()[0])") && \
-    mkdir -p "$(dirname "$SITE_PKG")" && \
-    cp -r /tmp/builder-packages/* "$SITE_PKG"/ && \
-    rm -rf /tmp/builder-packages
- 
+    mkdir -p /app/static && \
+    chown -R appuser:appuser /app
+
 WORKDIR /app
 
-# Set environment variables to optimize Python
+# Set production environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    PATH="/home/appuser/.local/bin:${PATH}"
 
-# Copy application code and startup script
+# Copy wheels from builder and install them
+COPY --from=builder /app/wheels /tmp/wheels
+RUN pip install --no-cache --user /tmp/wheels/* && \
+    rm -rf /tmp/wheels
+
+# Copy application code
 COPY --chown=appuser:appuser . .
-COPY --chown=appuser:appuser start.sh /app/start.sh
+
+# Ensure start script is executable
 RUN chmod +x /app/start.sh
 
-# Create static directory and collect static files
-RUN mkdir -p /app/static && \
-    chown -R appuser:appuser /app/static && \
-    python manage.py collectstatic --noinput || true
+# Collect static files (Running as root to ensure permissions, then switching)
+RUN python manage.py collectstatic --noinput || true
 
-# Switch to non-root user
+# Security: Switch to non-root user
 USER appuser
- 
-# Expose the application port
-EXPOSE 8000 
- 
-# Start both gunicorn and rqworker using the startup script
+
+EXPOSE 8000
+
 CMD ["/app/start.sh"]
