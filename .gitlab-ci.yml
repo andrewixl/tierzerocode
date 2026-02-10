@@ -12,14 +12,14 @@ include:
   - template: Security/SAST.gitlab-ci.yml
 
 variables:
-  DOCKER_IMAGE: andrewixl/tierzerocode
+  DOCKER_IMAGE: hub.awbtech.org/tierzerocode/tierzerocode
   DOCKER_TLS_CERTDIR: ""
 
 # Shared configuration for build jobs
 .build_template: &build_configuration
   stage: build
   before_script:
-    - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
+    - docker login hub.awbtech.org -u "$HARBOR_USERNAME" -p "$HARBOR_PASSWORD"
     # 1. Create a buildx builder (required for attestations)
     - docker buildx create --use --name gitlab-builder
     # 2. Boot the builder
