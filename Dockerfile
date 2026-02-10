@@ -1,5 +1,5 @@
 # Stage 1: Base build stage
-FROM dhi.io/python:3-alpine3.23-dev AS builder
+FROM hub.awbtech.org/library/python:3-alpine3.23-dev AS builder
 
 WORKDIR /app
 
@@ -17,7 +17,7 @@ RUN SITE_PKG=$(python3 -c "import site; print(site.getsitepackages()[0])") && \
     cp -r "$SITE_PKG" /tmp/builder-packages
  
 # Stage 2: Production stage
-FROM dhi.io/python:3-alpine3.23-dev
+FROM hub.awbtech.org/library/python:3-alpine3.23-dev
  
 RUN adduser -D -s /bin/sh appuser && \
    mkdir /app && \
