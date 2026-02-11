@@ -1,54 +1,56 @@
-# Stage 1: Build dependencies
-FROM hub.awbtech.org/dhi-registry/python@sha256:b0a15e59dc843717d926924ce31c22e21968470cb8249a95b8e77bca71f45a3d AS builder
+# Stage 1: Base build stage
+FROM hub.awbtech.org/dhi-registry/python:3-alpine3.23-dev AS builder
 
 WORKDIR /app
 
-# Prevent Python from writing .pyc files and enable unbuffered logging
+# Set environment variables to optimize Python
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
-# Install build dependencies
-RUN apk add --no-cache gcc musl-dev libffi-dev
-
-# Upgrade pip and build wheels
+# Upgrade pip and install dependencies
+RUN pip install --upgrade pip
 COPY requirements.txt .
-RUN pip install --upgrade pip && \
-    pip wheel --no-cache-dir --no-deps --wheel-dir /app/wheels -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-
-# Stage 2: Production image
-FROM hub.awbtech.org/dhi-registry/python@sha256:b0a15e59dc843717d926924ce31c22e21968470cb8249a95b8e77bca71f45a3d
-
-# Create user and directories in one layer to keep image size down
+# Copy site-packages to a known location for production stage
+RUN SITE_PKG=$(python3 -c "import site; print(site.getsitepackages()[0])") && \
+    cp -r "$SITE_PKG" /tmp/builder-packages
+ 
+# Stage 2: Production stage
+FROM hub.awbtech.org/dhi-registry/python:3-alpine3.23-dev
+ 
 RUN adduser -D -s /bin/sh appuser && \
-    mkdir -p /app/static && \
-    chown -R appuser:appuser /app
-
+   mkdir /app && \
+   chown -R appuser /app
+ 
+# Copy Python dependencies from builder stage
+COPY --from=builder /tmp/builder-packages /tmp/builder-packages
+RUN SITE_PKG=$(python3 -c "import site; print(site.getsitepackages()[0])") && \
+    mkdir -p "$(dirname "$SITE_PKG")" && \
+    cp -r /tmp/builder-packages/* "$SITE_PKG"/ && \
+    rm -rf /tmp/builder-packages
+ 
 WORKDIR /app
 
-# Set production environment variables
+# Set environment variables to optimize Python
 ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    PATH="/home/appuser/.local/bin:${PATH}"
+    PYTHONUNBUFFERED=1
 
-# Copy wheels and install
-COPY --from=builder /app/wheels /tmp/wheels
-RUN pip install --no-cache --user /tmp/wheels/* && \
-    rm -rf /tmp/wheels
-
-# Copy application code
+# Copy application code and startup script
 COPY --chown=appuser:appuser . .
-
-# Ensure start script is executable
+COPY --chown=appuser:appuser start.sh /app/start.sh
 RUN chmod +x /app/start.sh
 
-# Collect static files
-# Use the --no-input and ensure it doesn't crash the build if settings aren't fully loaded
-RUN python manage.py collectstatic --noinput || true
+# Create static directory and collect static files
+RUN mkdir -p /app/static && \
+    chown -R appuser:appuser /app/static && \
+    python manage.py collectstatic --noinput || true
 
-# Security: Switch to non-root user
+# Switch to non-root user
 USER appuser
-
-EXPOSE 8000
-
+ 
+# Expose the application port
+EXPOSE 8000 
+ 
+# Start both gunicorn and rqworker using the startup script
 CMD ["/app/start.sh"]

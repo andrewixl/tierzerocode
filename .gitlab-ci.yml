@@ -20,11 +20,20 @@ variables:
   stage: build
   before_script:
     - docker login hub.awbtech.org -u "$HARBOR_USERNAME" -p "$HARBOR_PASSWORD"
-    - docker system prune -a -f
+    # 1. Create a buildx builder (required for attestations)
+    - docker buildx create --use --name gitlab-builder
+    # 2. Boot the builder
+    - docker buildx inspect --bootstrap
   script:
-    # --pull ensures we check for a fresh base image to avoid metadata corruption
-    - docker build --pull --platform linux/amd64 -t $DOCKER_IMAGE:$TAG .
-    - docker push $DOCKER_IMAGE:$TAG
+    # We use buildx build here to match your build.sh logic
+    - |
+      docker buildx build \
+        --platform linux/amd64 \
+        --attest type=sbom \
+        --attest type=provenance \
+        --tag $DOCKER_IMAGE:$TAG \
+        --push \
+        .
 
 # Job 1: Runs when you push to 'dev'
 build_dev:
